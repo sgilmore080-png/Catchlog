@@ -3,647 +3,475 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>CatchLog – Track Every Cast. Record Every Catch.</title>
+<title>CatchLog Pro – Tactical Network</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-/* ── RESET & ROOT ─────────────────────────────────────────── */
+/* ── SYSTEM ARCHITECTURE RESET ───────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
   --border:#30363d;--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --primary:#00b4d8;--primary-d:#0096b7;--primary-glow:rgba(0,180,216,.25);
+  --primary:#00b4d8;--primary-d:#0077b6;
   --accent:#ff6b35;--accent2:#22c55e;--accent3:#f59e0b;
-  --card:#161b22;--card2:#21262d;
-  --radius:16px;--radius-sm:10px;
+  --card:#161b22;--radius:16px;
   --nav-h:70px;--hdr-h:60px;
   --font:'Inter',system-ui,-apple-system,sans-serif;
 }
 html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text)}
 #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 16px);opacity:0;pointer-events:none;transform:translateX(30px);transition:opacity .25s,transform .25s;scrollbar-width:none;padding-top:10px;}
-.screen::-webkit-scrollbar{display:none}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 20px);opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .2s,transform .2s;padding-top:10px;}
 .screen.active{opacity:1;pointer-events:auto;transform:translateX(0)}
-.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--border);}
-.hdr-logo{display:flex;align-items:center;gap:10px}
-.hdr-icon-img{width:32px;height:32px;border-radius:8px;object-fit:cover;background:var(--bg3)}
-.hdr-title{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
-#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 8px 8px;z-index:100;}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;cursor:pointer;padding:8px 4px;border-radius:12px;transition:.2s;color:var(--text3);}
+.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--border);}
+.hdr-title{font-size:18px;font-weight:800;color:var(--text)}
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:4px;z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;cursor:pointer;color:var(--text3);}
 .nav-item.active{color:var(--primary)}
-.nav-item .nav-icon{font-size:20px;line-height:1}
-.nav-item .nav-label{font-size:10px;font-weight:600;}
-.nav-item.fab-wrap{position:relative;top:-10px}
-.fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;cursor:pointer;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 14px}
-.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin:16px 20px 8px}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
-.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px;}
-.stat-tile .st-val{font-size:22px;font-weight:800;color:var(--text)}
-.stat-tile .st-lbl{font-size:12px;color:var(--text2)}
-.form-group{padding:0 16px;margin-bottom:12px}
-.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
-.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:15px;outline:none;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:4px}
-.form-row .form-group{padding:0;margin:0}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;width:100%;}
-.btn-primary{background:linear-gradient(135deg,var(--primary),#0077b6);color:#fff;}
+.nav-icon{font-size:18px;}
+.nav-label{font-size:10px;font-weight:700;}
+.fab-wrap{position:relative;top:-8px}
+.fab{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:0 14px 12px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin:14px 18px 6px}
+.form-group{margin-bottom:12px;padding:0 14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block}
+.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-size:14px;outline:none;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
+.btn{display:flex;align-items:center;justify-content:center;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;}
 .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.btn-full{width:calc(100% - 32px);margin:10px 16px 12px}
-#full-map{position:absolute;inset:0;z-index:1}
-.chat-area{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;height:calc(100dvh - var(--hdr-h) - 154px - 72px);scrollbar-width:none;}
-.chat-bubble{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;}
-.chat-bubble.user{align-self:flex-end;background:linear-gradient(135deg,var(--primary),#0077b6);color:#fff;border-bottom-right-radius:4px;}
-.chat-bubble.ai{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
-.chat-lure-img{width:100%;border-radius:10px;margin-top:8px;max-height:160px;object-fit:cover;}
-.chat-input-bar{position:sticky;bottom:var(--nav-h);padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;}
-.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:11px 16px;color:var(--text);font-size:14px;outline:none;height:42px;resize:none;}
-.chat-send{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-.device-row{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;gap:14px;}
-.device-details{flex:1;}
-.device-title{font-size:15px;font-weight:700;}
-.device-status-badge{font-size:11px;padding:2px 6px;border-radius:8px;font-weight:600;display:inline-block;margin-top:4px;}
-.status-disconnected{background:rgba(239,68,68,0.15);color:#ef4444;}
-.status-connected{background:rgba(34,197,94,0.15);color:#22c55e;}
-.lure-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
-.lure-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;position:relative;}
-.lure-img-box{width:100%;aspect-ratio:1.3;background:var(--bg3);display:flex;align-items:center;justify-content:center;}
-.lure-img-box img{width:100%;height:100%;object-fit:cover;}
-.lure-meta{padding:10px;flex:1;}
-.lure-title{font-size:13px;font-weight:700;}
-.lure-status-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-top:4px;display:inline-block;}
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;border-radius:20px;padding:10px 20px;font-size:13px;font-weight:700;z-index:99999;opacity:0;transition:.3s;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+.quick-btn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 14px;margin-bottom:10px}
+.quick-spec-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 2px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;}
+.quick-spec-btn.selected{background:var(--primary);color:#000;}
+.leader-row{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.financial-tab{background:linear-gradient(135deg, #1e293b, #0f172a);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:10px 14px;text-align:center;}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--accent2);color:#fff;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;z-index:99999;opacity:0;transition:.2s;pointer-events:none;}
 #toast.show{opacity:1}
-.quick-btn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:14px}
-.quick-spec-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;}
-.quick-spec-btn.selected{background:var(--primary);border-color:var(--primary);color:#000;}
-.offline-banner{background:var(--accent);color:#000;font-size:12px;font-weight:800;text-align:center;padding:6px;display:none;}
-.toggle-header-container{display:flex;justify-content:center;background:var(--bg3);border-radius:20px;padding:4px;margin:10px 16px 14px;border:1px solid var(--border);}
-.toggle-btn-choice{flex:1;text-align:center;padding:8px;font-size:12px;font-weight:700;border-radius:16px;cursor:pointer;color:var(--text2);}
-.toggle-btn-choice.active{background:var(--bg4);color:var(--text);}
-.map-overlay-controls{position:absolute;top:12px;right:12px;z-index:999;display:flex;flex-direction:column;gap:8px;}
-.map-ctrl-bubble{background:var(--bg2);border:1px solid var(--border);padding:8px 12px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:var(--shadow);}
-#bite-notification-screen{position:fixed;inset:0;z-index:99999;background:rgba(255,107,53,0.98);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white;padding:20px;}
-.leaderboard-list{display:flex;flex-direction:column;gap:8px;padding:0 16px;}
-.leader-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;}
+/* Chat Interface Boxes */
+.chat-window{display:flex;flex-direction:column;height:240px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+.chat-stream{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;}
+.msg-b{max-width:80%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.4;}
+.msg-b.me{align-self:flex-end;background:var(--primary);color:#000;border-bottom-right-radius:2px;}
+.msg-b.them{align-self:flex-start;background:var(--bg4);color:var(--text);border-bottom-left-radius:2px;}
+.chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2)}
+.chat-input-row input{flex:1;background:transparent;border:none;padding:10px;color:var(--text);font-size:13px;outline:none;}
 </style>
 </head>
 <body>
 
-<div id="bite-notification-screen">
-  <h1 style="font-size:32px;font-weight:900;">🔥 SMART BOBBER BITE Alert!</h1>
-  <p style="font-size:16px;margin:10px 0 20px;">The sensor detected line acceleration tension!</p>
-  <button class="btn" style="background:white;color:#ff6b35;max-width:240px;" onclick="closeBiteAlert()">Measure Dynamic Catch</button>
-</div>
-
 <div id="toast"></div>
 
-<div id="offline-indicator" class="offline-banner">🛰️ OFFLINE RECORDING ACTIVE — DATA BUFFER SAVE ACTIVE</div>
-
 <div id="auth-wrap" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;">
-  <div class="card" style="text-align:center;max-width:320px;width:100%;">
-    <img src="logo.png" style="width:70px;height:70px;margin-bottom:14px;border-radius:12px;" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=100'"/>
-    <h2>CatchLog Pro</h2>
-    <p style="font-size:12px;color:var(--text2);margin:4px 0 20px;">Network Sync & Hardware Cloud</p>
-    <button class="btn btn-primary" onclick="bypassLogin()">Enter Mission Dashboard</button>
+  <div class="card" style="text-align:center;max-width:300px;width:100%;">
+    <h2 style="margin-bottom:4px;">CatchLog Network</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">Tournament Ecosystem Edition</p>
+    <button class="btn btn-primary" onclick="initAppCore()">Initialize Ecosystem</button>
   </div>
 </div>
 
 <div id="app">
   <header class="hdr">
-    <div class="hdr-logo">
-      <img src="logo.png" class="hdr-icon-img" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=80'"/>
-      <div class="hdr-title">CatchLog</div>
-    </div>
-    <div style="font-size:11px;font-weight:800;background:var(--bg3);padding:4px 8px;border-radius:10px;" id="network-badge">🟢 LIVE NETWORK</div>
+    <div class="hdr-title">CatchLog Tactical</div>
+    <div style="font-size:10px;font-weight:800;background:var(--bg3);padding:4px 8px;border-radius:8px;">🟢 ONLINE NODE</div>
   </header>
   
   <main style="flex:1;position:relative;">
     
     <div id="screen-dashboard" class="screen active">
-      <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.1),transparent)">
-        <div style="font-size:13px;color:var(--text2)">Angler Hub Profile Console</div>
-        <div style="font-size:22px;font-weight:800;margin-top:2px;" id="financial-stats-box">Total Investments: $24.95</div>
+      <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.08),transparent)">
+        <div style="font-size:12px;color:var(--text2)">Global Angler Valuation</div>
+        <div style="font-size:18px;font-weight:800;" id="dash-valuation-label">Tackle Box Value: $0.00</div>
       </div>
       
-      <div class="stat-grid">
-        <div class="stat-tile"><div class="st-val" id="stat-catches">0</div><div class="st-lbl">Total Stored Logs</div></div>
-        <div class="stat-tile"><div class="st-val" id="stat-efficiency">--</div><div class="st-lbl">Top Bait Rank</div></div>
+      <div class="section-label">🏆 Global Daily Leaderboard (Total Weight)</div>
+      <div style="padding:0 14px;" id="global-leaderboard-deck"></div>
+
+      <div class="section-label">⚡ Active Custom Tournaments</div>
+      <div style="padding:0 14px;" id="tournament-deck"></div>
+      <div style="padding:0 14px; margin-top:4px;">
+        <button class="btn btn-secondary" onclick="switchScreen('tourney-manager')">🛠️ Tournament Design Center</button>
       </div>
 
-      <div class="section-label">Tournament Leaderboard</div>
-      <div class="leaderboard-list" id="leaderboard-deck">
-        <div class="leader-row"><div>🥇 1. BassMaster_Jim</div><div style="font-weight:800;color:var(--accent)">7.84 lbs</div></div>
-        <div class="leader-row"><div>🥈 2. Angler_Pete</div><div style="font-weight:800;color:var(--text2)">5.12 lbs</div></div>
-      </div>
+      <div class="section-label">Recent Catch Stream</div>
+      <div id="dashboard-catch-list" style="padding:0 14px;"></div>
+    </div>
 
-      <div class="section-label">Recent Catch Journal Logs</div>
-      <div id="dashboard-catch-list" style="padding:0 16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="screen-tourney-manager" class="screen">
+      <div class="section-label">Design Custom Tournament Arena</div>
+      <div class="card">
+        <div style="margin-bottom:10px;">
+          <label class="form-label">Tournament Arena Label</label>
+          <input type="text" id="t-name-input" class="form-input" value="Weekend Bass Brawl"/>
+        </div>
+        <button class="btn btn-primary" onclick="createNewTournament()">Launch Tournament Structure</button>
+      </div>
+      <div style="padding:0 14px;">
+         <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back to Dashboard</button>
+      </div>
     </div>
 
     <div id="screen-log" class="screen">
-      <div class="section-label">Slimy Hands Quick Species Grid</div>
+      <div class="section-label">Quick Selection Profiles</div>
       <div class="quick-btn-grid">
-        <div class="quick-spec-btn selected" id="qs-bass" onclick="selectQuickSpecies('Largemouth Bass', 'qs-bass')">🐟 Bass</div>
-        <div class="quick-spec-btn" id="qs-trout" onclick="selectQuickSpecies('Rainbow Trout', 'qs-trout')">🎣 Trout</div>
-        <div class="quick-spec-btn" id="qs-cat" onclick="selectQuickSpecies('Channel Catfish', 'qs-cat')">🧬 Catfish</div>
-        <div class="quick-spec-btn" id="qs-crappie" onclick="selectQuickSpecies('Black Crappie', 'qs-crappie')">🌊 Crappie</div>
+        <div class="quick-spec-btn selected" id="qs-bass" onclick="setSpeciesForm('Largemouth Bass','Common','qs-bass')">Bass (x1)</div>
+        <div class="quick-spec-btn" id="qs-trout" onclick="setSpeciesForm('Rainbow Trout','Uncommon','qs-trout')">Trout (x2)</div>
+        <div class="quick-spec-btn" id="qs-walleye" onclick="setSpeciesForm('Walleye','Rare','qs-walleye')">Walleye (x3)</div>
+        <div class="quick-spec-btn" id="qs-muskie" onclick="setSpeciesForm('Muskie','Mythic','qs-muskie')">Muskie (x5)</div>
       </div>
 
-      <div id="board-sync-banner" class="card" style="background:rgba(34,197,94,0.1);border-color:var(--accent2);display:none;">
-        <div style="font-size:12px;color:var(--accent2);font-weight:700;">📡 FILLET SCALE DECK INJECTED</div>
-        <div style="font-size:14px;margin-top:2px;" id="board-injected-text">Weight: 0 lbs</div>
-      </div>
-
-      <form id="catch-form" onsubmit="handleLogSubmit(event)">
+      <form id="catch-form" onsubmit="commitCatchLog(event)">
         <div class="form-group">
-          <label class="form-label">Active Species Profile</label>
+          <label class="form-label">Target Species Profile</label>
           <input type="text" id="form-species" class="form-input" value="Largemouth Bass" required/>
         </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Weight (lbs)</label><input type="number" id="form-weight" step="0.01" class="form-input" placeholder="0.00" required/></div>
-          <div class="form-group"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
+        <div class="form-group">
+          <label class="form-label">Rarity Tier Multiplier</label>
+          <select id="form-rarity" class="form-select">
+            <option value="Common">Common Tier (1x Multiplier)</option>
+            <option value="Uncommon">Uncommon Tier (2x Multiplier)</option>
+            <option value="Rare">Rare Tier (3x Multiplier)</option>
+            <option value="Mythic">Mythic Tier (5x Multiplier)</option>
+          </select>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group" style="padding:0;"><label class="form-label">Weight (lbs)</label><input type="number" id="form-weight" step="0.01" class="form-input" placeholder="0.00" required/></div>
+          <div class="form-group" style="padding:0;"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
         </div>
         <div class="form-group">
-          <label class="form-label">Link Bait Used (Tackle Analytics Tracker)</label>
+          <label class="form-label">Deployable Tackle Rig</label>
           <select id="form-lure-link" class="form-select"></select>
         </div>
-        <button type="submit" class="btn btn-primary btn-full">Commit Secure Capture Log Entry</button>
+        <div class="form-group">
+          <label class="form-label">Inject Catch to Tournament Context</label>
+          <select id="form-tourney-link" class="form-select">
+            <option value="global">Global Marketplace Standings Only</option>
+          </select>
+        </div>
+        <div style="padding:0 14px;">
+           <button type="submit" class="btn btn-primary">Publish Certified Entry Logs</button>
+        </div>
       </form>
     </div>
 
-    <div id="screen-map" class="screen">
-      <div class="map-overlay-controls">
-        <div class="map-ctrl-bubble">
-          <input type="checkbox" id="privacy-shield-toggle" onchange="togglePrivacyShield()" checked/>
-          <label for="privacy-shield-toggle">🔒 Privacy Shield</label>
-        </div>
-        <div style="background:var(--bg2);padding:6px;border-radius:10px;font-size:10px;text-align:center;border:1px solid var(--border);color:var(--text2);max-width:140px;">
-          Tap map anywhere to drop Structure/Bite markers!
+    <div id="screen-friends" class="screen">
+      <div class="section-label">Add Peer Connection</div>
+      <div class="card" style="display:flex; gap:8px; margin-bottom:10px;">
+        <input type="text" id="new-friend-name" class="form-input" placeholder="Enter Angler Handle..."/>
+        <button class="btn btn-primary" style="width:auto; padding:0 16px;" onclick="registerNewFriend()">Add</button>
+      </div>
+
+      <div class="section-label">Peer Array</div>
+      <div style="padding:0 14px; margin-bottom:14px;" id="friends-list-container"></div>
+
+      <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
+      <div class="card" style="padding:8px;">
+        <div style="font-size:12px; margin-bottom:6px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
+        <div class="chat-window">
+          <div class="chat-stream" id="chat-stream-box"></div>
+          <div class="chat-input-row">
+            <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
+            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 16px;" onclick="dispatchMessage()">Send</button>
+          </div>
         </div>
       </div>
-      <div id="full-map"></div>
     </div>
 
     <div id="screen-tackle" class="screen">
-      <div class="section-label">Module Mode Integration Switch</div>
-      <div class="toggle-header-container">
-        <div class="toggle-btn-choice active" id="mode-photo" onclick="switchTackleMode('photo')">📷 Camera Upload</div>
-        <div class="toggle-btn-choice" id="mode-barcode" onclick="switchTackleMode('barcode')">🏷️ Barcode Scan</div>
+      <div class="financial-tab">
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;">💼 Total Active Tackle Value</div>
+        <div style="font-size:22px;font-weight:800;color:var(--accent2);margin-top:2px;" id="fin-active-val">$0.00</div>
       </div>
 
-      <div id="container-photo-mode" class="card">
-        <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Upload image directly into the custom tackle inventory configuration engine.</p>
-        <button class="btn btn-primary" onclick="document.getElementById('lure-file-input').click()">Upload Lure Photo File</button>
-        <input type="file" id="lure-file-input" accept="image/*" style="display:none;" onchange="handleLureUpload(event)"/>
-      </div>
-
-      <div id="container-barcode-mode" class="card" style="display:none;text-align:center;">
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Aim device camera matrix framework at any retail product package barcode line.</p>
-        <div style="background:#000;height:100px;border-radius:8px;border:2px dashed var(--primary);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:24px;letter-spacing:4px;color:var(--text3);" id="barcode-viewscreen">
-          ||||| | |||| |||
-        </div>
-        <button class="btn btn-secondary" onclick="simulateBarcodeHardwareScan()">Trigger Simulated Pack Scan</button>
-      </div>
-
-      <div class="section-label">Lures Matrix Storage Box Deck</div>
-      <div id="tackle-grid" class="lure-grid"></div>
+      <div class="section-label">Tackle Storage Matrix</div>
+      <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px;"></div>
     </div>
 
-    <div id="screen-devices" class="screen">
-      <div class="section-label">Hardware Interoperability Console</div>
-      <div class="card">
-        <div class="device-row">
-          <svg width="34" height="34" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="#fff"/><path d="M 6,30 A 24,24 0 0,1 54,30 Z" fill="#ef4444"/><circle cx="30" cy="4" r="5" fill="#f59e0b"/></svg>
-          <div class="device-details">
-            <div class="device-title">Smart Bobber V2</div>
-            <div id="bobber-status" class="device-status-badge status-disconnected">Disconnected</div>
-          </div>
-          <button class="btn btn-secondary" style="width:auto;padding:6px 12px;" id="btn-bobber" onclick="connectBobber()">Link</button>
-        </div>
-        <div id="bobber-controls" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
-          <button class="btn btn-secondary" style="font-size:12px;" onclick="triggerTestStrike()">Test Bite Signal Relay</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="device-row">
-          <svg width="34" height="34" viewBox="0 0 60 60"><rect x="4" y="12" width="52" height="36" rx="6" fill="#d97706"/></svg>
-          <div class="device-details">
-            <div class="device-title">Smart Fillet Board</div>
-            <div id="board-status" class="device-status-badge status-disconnected">Disconnected</div>
-          </div>
-          <button class="btn btn-secondary" style="width:auto;padding:6px 12px;" id="btn-board" onclick="connectBoard()">Link</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
-      <div style="padding:16px;background:linear-gradient(135deg,rgba(0,180,216,0.1),transparent);border-bottom:1px solid var(--border);">
-        <div style="font-weight:800;font-size:18px;">CatchLog AI Engine</div>
-        <button class="btn btn-primary" style="margin-top:8px;padding:8px;" onclick="getLiveLocationAndWeather()">📍 Sync Mobile GPS Systems</button>
-      </div>
-      <div class="chat-area" id="chat-messages"></div>
-      <div class="chat-input-bar">
-        <textarea id="chat-input" class="chat-input" placeholder="Ask AI about lure matches..."></textarea>
-        <button class="chat-send" onclick="handleSendChat()">➔</button>
-      </div>
-    </div>
-
+    <div id="screen-map" class="screen"><div id="full-map" style="position:absolute;inset:0;"></div></div>
   </main>
 
   <nav id="bottom-nav">
     <div class="nav-item active" onclick="switchScreen('dashboard')"><div class="nav-icon">📊</div><div class="nav-label">Home</div></div>
     <div class="nav-item" onclick="switchScreen('map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
     <div class="nav-item fab-wrap" onclick="switchScreen('log')"><div class="fab">＋</div></div>
+    <div class="nav-item" onclick="switchScreen('friends')"><div class="nav-icon">👥</div><div class="nav-label">Friends</div></div>
     <div class="nav-item" onclick="switchScreen('tackle')"><div class="nav-icon">🧰</div><div class="nav-label">Tackle</div></div>
-    <div class="nav-item" onclick="switchScreen('devices')"><div class="nav-icon">📡</div><div class="nav-label">Devices</div></div>
-    <div class="nav-item" onclick="switchScreen('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI</div></div>
   </nav>
 </div>
 
 <script>
-  // HIGH-PERFORMANCE DATA INITIALIZATION & LOCALSTORAGE RECOVERY FRAMEWORK
-  let catches = JSON.parse(localStorage.getItem('cl_catches')) || [];
-  let lures = JSON.parse(localStorage.getItem('cl_lures')) || [
-    { id: 'l1', name: 'Midnight Shad Spinner', img: 'https://images.unsplash.com/photo-1583156345166-ef1a8afb49f5?w=200', cost: 6.99, status: 'Active', count: 0 },
-    { id: 'l2', name: 'Neon Crawfish Popper', img: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200', cost: 5.49, status: 'Active', count: 0 },
-    { id: 'l3', name: 'Silver Minnow Jig', img: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=200', cost: 4.25, status: 'Active', count: 0 }
+  // STATE MANAGEMENT SYSTEMS
+  let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
+  let lures = JSON.parse(localStorage.getItem('n_lures')) || [
+    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, status: 'Active', qty: 2 },
+    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, status: 'Active', qty: 3 }
   ];
-  let mapPoints = JSON.parse(localStorage.getItem('cl_waypoints')) || [];
-
+  let friends = JSON.parse(localStorage.getItem('n_friends')) || [
+    { id: 'f1', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 },
+    { id: 'f2', name: 'Angler_Pete', totalWeight: 9.15, score: 90 }
+  ];
+  let tournaments = JSON.parse(localStorage.getItem('n_tourneys')) || [
+    { id: 't_default', name: 'Pro Angler Summer Open', leaderboard: [
+      { name: 'You', points: 0 },
+      { name: 'BassMaster_Jim', points: 45 },
+      { name: 'Angler_Pete', points: 20 }
+    ]}
+  ];
+  let chatHistories = JSON.parse(localStorage.getItem('n_chats')) || {};
+  let selectedFriendId = 'f1';
   let map = null;
-  let userMarker = null;
-  let currentSpeciesChoice = "Largemouth Bass";
-  let activeTackleMode = "photo";
-  let privacyShieldActive = true;
-  let isDeviceOnline = true;
-  let bobberConnected = false;
-  let boardConnected = false;
 
-  window.addEventListener('online', updateNetworkStatus);
-  window.addEventListener('offline', updateNetworkStatus);
+  const rarityMap = { "Common": 1, "Uncommon": 2, "Rare": 3, "Mythic": 5 };
 
-  function updateNetworkStatus() {
-    isDeviceOnline = navigator.onLine;
-    const badge = document.getElementById('network-badge');
-    const banner = document.getElementById('offline-indicator');
-    if(isDeviceOnline) {
-      badge.innerText = "🟢 LIVE NETWORK";
-      badge.style.background = "var(--bg3)";
-      banner.style.display = "none";
-    } else {
-      badge.innerText = "🚨 DISCONNECTED";
-      badge.style.background = "#ef4444";
-      banner.style.display = "block";
-    }
-  }
-
-  function bypassLogin() {
+  function initAppCore() {
     document.getElementById('auth-wrap').style.display = 'none';
-    updateNetworkStatus();
-    recalculateTackleStats();
-    renderDashboard();
-    renderTackleGrid();
-    populateLureDropdown();
+    refreshAllEcosystemModules();
   }
 
   function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const ts = document.getElementById('screen-' + screenId);
-    if (ts) ts.classList.add('active');
+    
+    const target = document.getElementById('screen-' + screenId);
+    if(target) target.classList.add('active');
     
     const navItems = document.querySelectorAll('.nav-item');
     if(screenId==='dashboard') navItems[0].classList.add('active');
-    else if(screenId==='map') navItems[1].classList.add('active');
-    else if(screenId==='log') navItems[2].classList.add('active');
-    else if(screenId==='tackle') navItems[3].classList.add('active');
-    else if(screenId==='devices') navItems[4].classList.add('active');
-    else if(screenId==='ai') navItems[5].classList.add('active');
-
-    if (screenId === 'map') setTimeout(initMapFramework, 250);
+    if(screenId==='map') { navItems[1].classList.add('active'); setTimeout(initMapSystem, 200); }
+    if(screenId==='log') navItems[2].classList.add('active');
+    if(screenId==='friends') navItems[3].classList.add('active');
+    if(screenId==='tackle') navItems[4].classList.add('active');
   }
 
-  // SLIMY HANDS BUTTON CHOOSER OVERRIDE
-  function selectQuickSpecies(name, elementId) {
-    currentSpeciesChoice = name;
-    document.getElementById('form-species').value = name;
-    document.querySelectorAll('.quick-spec-btn').forEach(b => b.classList.remove('selected'));
-    document.getElementById(elementId).classList.add('selected');
-    showToast(`Locked Target: ${name}`);
+  function refreshAllEcosystemModules() {
+    localStorage.setItem('n_catches', JSON.stringify(catches));
+    localStorage.setItem('n_lures', JSON.stringify(lures));
+    localStorage.setItem('n_friends', JSON.stringify(friends));
+    localStorage.setItem('n_tourneys', JSON.stringify(tournaments));
+    localStorage.setItem('n_chats', JSON.stringify(chatHistories));
+
+    renderGlobalLeaderboard();
+    renderTournaments();
+    renderCatchHistory();
+    renderFriendsSystem();
+    renderTackleMatrix();
+    syncDropdownMenus();
   }
 
-  function togglePrivacyShield() {
-    privacyShieldActive = document.getElementById('privacy-shield-toggle').checked;
-    showToast(privacyShieldActive ? "🔒 Privacy Shield: Hidden Honey Holes Enabled" : "⚠️ Public Grid: Coordinates Public");
-    renderMapWaypoints();
-  }
+  // GLOBAL AND TOURNAMENT ENGINE
+  function renderGlobalLeaderboard() {
+    let myWeight = catches.reduce((acc, c) => acc + parseFloat(c.weight), 0);
+    let boardList = [{ name: 'You (Online Node)', w: myWeight }, ...friends.map(f => ({ name: f.name, w: f.totalWeight }))];
+    boardList.sort((a,b) => b.w - a.w);
 
-  function switchTackleMode(mode) {
-    activeTackleMode = mode;
-    document.getElementById('mode-photo').classList.toggle('active', mode==='photo');
-    document.getElementById('mode-barcode').classList.toggle('active', mode==='barcode');
-    document.getElementById('container-photo-mode').style.display = mode==='photo' ? 'block' : 'none';
-    document.getElementById('container-barcode-mode').style.display = mode==='barcode' ? 'block' : 'none';
-  }
-
-  // PRODUCTION-GRADE RE-ENGINEERED BARCODE TRANSLATION SYSTEM
-  function simulateBarcodeHardwareScan() {
-    const view = document.getElementById('barcode-viewscreen');
-    view.innerText = "SCANNING...";
-    view.style.color = "var(--accent3)";
-    
-    setTimeout(() => {
-      const simulatedUPC = Math.floor(100000000000 + Math.random() * 900000000000);
-      view.innerText = simulatedUPC;
-      view.style.color = "var(--accent2)";
-      
-      const customPacks = [
-        { name: "Gary Yamamoto Senko Worm Pack", cost: 7.49 },
-        { name: "Berkley PowerBait MaxScent Pack", cost: 6.99 },
-        { name: "Strike King KVD Squarebill Crankbait", cost: 8.25 },
-        { name: "Zoom Trick Worm Soft Bait Pack", cost: 5.19 }
-      ];
-      
-      const pickedPack = customPacks[Math.floor(Math.random() * customPacks.length)];
-      
-      const newLure = {
-        id: 'l_' + Date.now(),
-        name: pickedPack.name,
-        img: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200',
-        cost: pickedPack.cost,
-        status: 'Active',
-        count: 0
-      };
-      
-      lures.unshift(newLure);
-      saveToStorageAndRefresh();
-      showToast(`🏷️ UPC Scanned: ${pickedPack.name} ($${pickedPack.cost}) saved!`);
-    }, 1200);
-  }
-
-  function toggleLureStatus(id) {
-    lures = lures.map(l => {
-      if(l.id === id) {
-        const nextStatus = l.status === 'Active' ? 'Lost to the Deep 💀' : 'Active';
-        return { ...l, status: nextStatus };
-      }
-      return l;
-    });
-    saveToStorageAndRefresh();
-    showToast("Tackle status metrics updated!");
-  }
-
-  function handleLureUpload(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      const n = prompt("Enter Custom Bait Identification Label:", file.name.split('.')[0] || "Handmade Jig");
-      const costAmount = parseFloat(prompt("Enter estimated retail purchase cost ($):", "5.99")) || 0.00;
-      const newLure = {
-        id: 'l_' + Date.now(),
-        name: n || "Custom Rig",
-        img: evt.target.result,
-        cost: costAmount,
-        status: 'Active',
-        count: 0
-      };
-      lures.unshift(newLure);
-      saveToStorageAndRefresh();
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function saveToStorageAndRefresh() {
-    localStorage.setItem('cl_lures', JSON.stringify(lures));
-    recalculateTackleStats();
-    renderTackleGrid();
-    populateLureDropdown();
-  }
-
-  function recalculateTackleStats() {
-    let sumInvested = lures.reduce((acc, l) => acc + l.cost, 0);
-    document.getElementById('financial-stats-box').innerText = `Total Gear Valuation: $${sumInvested.toFixed(2)}`;
-    
-    // Sort and calculate top bait efficiency structure
-    let bestBait = "--";
-    let max = -1;
-    lures.forEach(l => {
-      if(l.count > max && l.count > 0) {
-        max = l.count;
-        bestBait = l.name;
-      }
-    });
-    document.getElementById('stat-efficiency').innerText = bestBait === "--" ? "No Data Yet" : bestBait.split(' ')[0];
-  }
-
-  function renderTackleGrid() {
-    const grid = document.getElementById('tackle-grid');
-    if(!grid) return;
-    grid.innerHTML = lures.map(l => `
-      <div class="lure-card">
-        <div class="lure-img-box"><img src="${l.img}"/></div>
-        <div class="lure-meta">
-          <div class="lure-title">${l.name}</div>
-          <div style="font-size:11px;color:var(--primary);margin-top:2px;">Cost: $${l.cost.toFixed(2)}</div>
-          <div style="font-size:11px;color:var(--text2);">Catches linked: ${l.count}</div>
-          <span class="lure-status-tag" style="background:${l.status==='Active'?'rgba(34,197,94,0.15)':'rgba(239,68,68,0.15)'};color:${l.status==='Active'?'#22c55e':'#ef4444'}" onclick="toggleLureStatus('${l.id}')">
-            ${l.status} (Tap to Toggle)
-          </span>
-        </div>
+    document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `
+      <div class="leader-row">
+        <div>🎯 ${idx+1}. <b>${p.name}</b></div>
+        <div style="font-weight:800;color:var(--primary);">${p.w.toFixed(2)} lbs</div>
       </div>
     `).join('');
   }
 
-  function populateLureDropdown() {
-    const s = document.getElementById('form-lure-link');
-    if(!s) return;
-    s.innerHTML = lures.filter(l=>l.status==='Active').map(l => `<option value="${l.id}">${l.name}</option>`).join('');
-  }
-
-  // INTERACTIVE INITIALIZATION MAP DECK WITH INTEGRATED MANUAL DROPS
-  function initMapFramework() {
-    if (map) return;
-    map = L.map('full-map', { zoomControl: false }).setView([38.6270, -90.1994], 12);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
-    map.on('click', function(e) {
-      const typeChoice = prompt("Type code to assign marker category:\n1 = 🎣 Bite Zone\n2 = 🪵 Submerged Structure\n3 = 🚤 Access Launch Point", "1");
-      let categoryText = "Bite Zone";
-      if(typeChoice === "2") categoryText = "Structure";
-      if(typeChoice === "3") categoryText = "Access Point";
-
-      const newPoint = { lat: e.latlng.lat, lon: e.latlng.lng, type: categoryText };
-      mapPoints.push(newPoint);
-      localStorage.setItem('cl_waypoints', JSON.stringify(mapPoints));
-      renderMapWaypoints();
-      showToast(`Waypoint saved: ${categoryText}`);
-    });
-
-    renderMapWaypoints();
-  }
-
-  function renderMapWaypoints() {
-    if(!map) return;
-    // Clear old map structures
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    mapPoints.forEach(p => {
-      let activeLat = p.lat;
-      let activeLon = p.lon;
-
-      // Apply coordinates privacy shield offset fuzzing if checked active
-      if(privacyShieldActive && p.type === "Bite Zone") {
-        activeLat += 0.012;
-        activeLon -= 0.015;
-      }
-
-      L.marker([activeLat, activeLon]).addTo(map)
-        .bindPopup(`<b>${p.type}</b> ${privacyShieldActive && p.type === "Bite Zone" ? '<br>(🔒 Coordinates Privacy Obscured)' : ''}`);
-    });
-  }
-
-  function getLiveLocationAndWeather() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(position => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
+  function renderTournaments() {
+    const deck = document.getElementById('tournament-deck');
+    deck.innerHTML = tournaments.map(t => {
+      let standings = [...t.leaderboard];
+      standings.sort((a,b) => b.points - a.points);
       
-      switchScreen('map');
-      setTimeout(() => {
-        initMapFramework();
-        map.setView([lat, lon], 14);
-        if(userMarker) userMarker.setLatLng([lat, lon]);
-        else userMarker = L.marker([lat, lon]).addTo(map).bindPopup("Your Launch Station").openPopup();
-      }, 300);
-      
-      showToast("📍 Hardware Positioning Calibration Synchronized!");
-    });
+      let standingsHtml = standings.map((s, idx) => `
+        <div style="font-size:12px; display:flex; justify-content:between; margin-top:4px; color:var(--text2)">
+          <span style="flex:1;">${idx+1}. ${s.name}</span>
+          <span style="font-weight:bold; color:var(--accent3)">${s.points} Pts</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="card" style="margin:0 0 8px 0; background:var(--bg3)">
+          <div style="font-size:13px; font-weight:800; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:4px;">🏆 ${t.name}</div>
+          ${standingsHtml}
+        </div>
+      `;
+    }).join('');
   }
 
-  function handleLogSubmit(e) {
-    e.preventDefault();
-    const species = document.getElementById('form-species').value;
-    const weight = parseFloat(document.getElementById('form-weight').value) || 0;
-    const linkedLureId = document.getElementById('form-lure-link').value;
-
-    const newCatch = { species, weight, timestamp: new Date().toLocaleTimeString() };
-    catches.unshift(newCatch);
-    localStorage.setItem('cl_catches', JSON.stringify(catches));
-
-    // Tick up the linked lure's catch counter
-    lures = lures.map(l => {
-      if(l.id === linkedLureId) {
-        return { ...l, count: l.count + 1 };
-      }
-      return l;
-    });
-
-    localStorage.setItem('cl_lures', JSON.stringify(lures));
-    document.getElementById('catch-form').reset();
-    document.getElementById('board-sync-banner').style.display = 'none';
-
-    // Update the local brag board leaderboard dynamically if it is a trophy catch
-    if(weight > 6.0) {
-      const boardDeck = document.getElementById('leaderboard-deck');
-      boardDeck.innerHTML = `<div class="leader-row" style="border-color:var(--accent)"><div>🥇 1. YOU (Trophy Entry)</div><div style="font-weight:800;color:var(--accent)">${weight.toFixed(2)} lbs</div></div>` + boardDeck.innerHTML;
-    }
-
-    showToast("💥 Entry Logged securely to internal systems storage bank!");
-    recalculateTackleStats();
-    renderDashboard();
+  function createNewTournament() {
+    const nameInput = document.getElementById('t-name-input');
+    const title = nameInput.value.trim() || "Custom Championship Match";
+    
+    let baseLeaderboard = [{ name: 'You', points: 0 }];
+    friends.forEach(f => baseLeaderboard.push({ name: f.name, points: Math.floor(Math.random() * 60) }));
+    
+    tournaments.push({ id: 't_' + Date.now(), name: title, leaderboard: baseLeaderboard });
+    nameInput.value = '';
+    showToast("Tournament Launched!");
+    refreshAllEcosystemModules();
     switchScreen('dashboard');
   }
 
-  function renderDashboard() {
-    document.getElementById('stat-catches').innerText = catches.length;
-    const list = document.getElementById('dashboard-catch-list');
-    if(!list) return;
-    if(catches.length === 0) {
-      list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px;">Storage library vacant. Tap center ＋ to document.</div>`;
+  // FRIENDS LAYER & CHAT MESH GENERATOR
+  function registerNewFriend() {
+    const input = document.getElementById('new-friend-name');
+    const name = input.value.trim();
+    if(!name) return;
+
+    friends.push({
+      id: 'f_' + Date.now(),
+      name: name,
+      totalWeight: parseFloat((Math.random() * 12).toFixed(2)),
+      score: Math.floor(Math.random() * 100)
+    });
+
+    // Cascade update to tournaments
+    tournaments.forEach(t => t.leaderboard.push({ name: name, points: Math.floor(Math.random() * 20) }));
+
+    input.value = '';
+    showToast(`Added ${name} successfully!`);
+    refreshAllEcosystemModules();
+  }
+
+  function renderFriendsSystem() {
+    const container = document.getElementById('friends-list-container');
+    if(friends.length === 0) {
+      container.innerHTML = `<div style="font-size:12px; color:var(--text3)">No peer connections mapped.</div>`;
       return;
     }
-    list.innerHTML = catches.map(c => `
-      <div class="leader-row">
-        <div>🐟 <b>${c.species}</b></div>
-        <div style="font-weight:800;color:var(--primary)">${c.weight.toFixed(2)} lbs</div>
+
+    container.innerHTML = friends.map(f => `
+      <div class="leader-row" style="cursor:pointer; border-color:${f.id===selectedFriendId ? 'var(--primary)': 'var(--border)'}" onclick="selectFriendForChat('${f.id}')">
+        <div>🟢 <b>${f.name}</b></div>
+        <div style="font-size:11px; color:var(--text3)">Click to Chat</div>
+      </div>
+    `).join('');
+
+    const activeF = friends.find(f => f.id === selectedFriendId);
+    if(activeF) {
+      document.getElementById('active-chat-target-lbl').innerText = `Target Link: @${activeF.name}`;
+      renderChatMessages();
+    }
+  }
+
+  function selectFriendForChat(id) {
+    selectedFriendId = id;
+    renderFriendsSystem();
+  }
+
+  function renderChatMessages() {
+    const box = document.getElementById('chat-stream-box');
+    const history = chatHistories[selectedFriendId] || [
+      { sender: 'them', text: 'Hey there! Hit any good feeding zones today?' }
+    ];
+    
+    box.innerHTML = history.map(m => `
+      <div class="msg-b ${m.sender}">${m.text}</div>
+    `).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function dispatchMessage() {
+    const input = document.getElementById('chat-message-input');
+    const val = input.value.trim();
+    if(!val) return;
+
+    if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId] = [{ sender: 'them', text: 'Hey there! Hit any good feeding zones today?' }];
+    
+    chatHistories[selectedFriendId].push({ sender: 'me', text: val });
+    input.value = '';
+    renderChatMessages();
+
+    // Simulated responsive peer feedback relay loop
+    setTimeout(() => {
+      const responses = ["Solid copy.", "Nice catch stats!", "Copy that, setting anchor.", "What rig multiplier are you running?"];
+      chatHistories[selectedFriendId].push({ sender: 'them', text: responses[Math.floor(Math.random() * responses.length)] });
+      renderChatMessages();
+      localStorage.setItem('n_chats', JSON.stringify(chatHistories));
+    }, 800);
+  }
+
+  // TACKLE BOX VALUE CALCULATION SYSTEM
+  function renderTackleMatrix() {
+    let activeTotal = 0;
+    lures.forEach(l => { if(l.status === 'Active') activeTotal += (l.cost * l.qty); });
+    
+    document.getElementById('fin-active-val').innerText = `$${activeTotal.toFixed(2)}`;
+    document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${activeTotal.toFixed(2)}`;
+
+    document.getElementById('tackle-grid').innerHTML = lures.map(l => `
+      <div class="card" style="margin:0; background:var(--bg2)">
+        <div style="font-size:13px; font-weight:700;">${l.name}</div>
+        <div style="font-size:11px; color:var(--accent2);">$${l.cost.toFixed(2)}</div>
+        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Qty Owned: ${l.qty}</div>
       </div>
     `).join('');
   }
 
-  // BLUETOOTH SYSTEMS SMART INTEGRATION EMULATORS
-  function connectBobber() {
-    bobberConnected = !bobberConnected;
-    const s = document.getElementById('bobber-status');
-    const b = document.getElementById('btn-bobber');
-    const ctrl = document.getElementById('bobber-controls');
-    s.innerText = bobberConnected ? "Connected & Armed" : "Disconnected";
-    s.className = `device-status-badge ${bobberConnected?'status-connected':'status-disconnected'}`;
-    b.innerText = bobberConnected ? "Drop" : "Link";
-    ctrl.style.display = bobberConnected ? "block" : "none";
+  // CATCH LOGGER ENGINE
+  function setSpeciesForm(spec, rarity, btnId) {
+    document.getElementById('form-species').value = spec;
+    document.getElementById('form-rarity').value = rarity;
+    document.querySelectorAll('.quick-spec-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById(btnId).classList.add('selected');
   }
 
-  function connectBoard() {
-    boardConnected = !boardConnected;
-    const s = document.getElementById('board-status');
-    const b = document.getElementById('btn-board');
-    s.innerText = boardConnected ? "Connected & Zeroed" : "Disconnected";
-    s.className = `device-status-badge ${boardConnected?'status-connected':'status-disconnected'}`;
-    b.innerText = boardConnected ? "Drop" : "Link";
-  }
-
-  function triggerTestStrike() {
-    document.getElementById('bite-notification-screen').style.display = 'flex';
-  }
-
-  function closeBiteAlert() {
-    document.getElementById('bite-notification-screen').style.display = 'none';
-    switchScreen('log');
-    if(boardConnected) {
-      const generatedWeight = (Math.random() * 5 + 2).toFixed(2);
-      document.getElementById('board-sync-banner').style.display = 'block';
-      document.getElementById('board-injected-text').innerText = `Automated Measured Weight Scale: ${generatedWeight} lbs`;
-      document.getElementById('form-weight').value = generatedWeight;
-    }
-  }
-
-  function addBotMessage(t) {
-    const m = document.getElementById('chat-messages');
-    const b = document.createElement('div');
-    b.className = 'chat-bubble ai';
-    b.innerText = t;
-    m.appendChild(b);
-    m.scrollTop = m.scrollHeight;
-  }
-
-  function handleSendChat() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if(!text) return;
+  function syncDropdownMenus() {
+    document.getElementById('form-lure-link').innerHTML = lures.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
     
-    const m = document.getElementById('chat-messages');
-    const u = document.createElement('div');
-    u.className = 'chat-bubble user';
-    u.innerText = text;
-    m.appendChild(u);
-    input.value = '';
-
-    setTimeout(() => {
-      const matchedBait = lures[0] ? lures[0].name : "Standard Spinnerbait";
-      addBotMessage(`🤖 AI System recommendation deployment check matching complete:\n\nBased on water temperatures and barometric trend pressures, you should tie on your "${matchedBait}" instantly to maximize lure retrieval patterns.`);
-    }, 600);
+    let tourneyOptions = `<option value="global">Global Marketplace Standings Only</option>`;
+    tournaments.forEach(t => { tourneyOptions += `<option value="${t.id}">${t.name}</option>`; });
+    document.getElementById('form-tourney-link').innerHTML = tourneyOptions;
   }
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+  function commitCatchLog(e) {
+    e.preventDefault();
+    const spec = document.getElementById('form-species').value;
+    const w = parseFloat(document.getElementById('form-weight').value) || 0;
+    const rarity = document.getElementById('form-rarity').value;
+    const selectedTourneyId = document.getElementById('form-tourney-link').value;
+
+    const multiplier = rarityMap[rarity] || 1;
+    const pointsCalculated = Math.round(w * multiplier);
+
+    catches.unshift({ species: spec, weight: w, points: pointsCalculated });
+
+    if(selectedTourneyId !== 'global') {
+      tournaments = tournaments.map(t => {
+        if(t.id === selectedTourneyId) {
+          t.leaderboard = t.leaderboard.map(member => {
+            if(member.name === 'You') member.points += pointsCalculated;
+            return member;
+          });
+        }
+        return t;
+      });
+    }
+
+    document.getElementById('catch-form').reset();
+    showToast(`Logged! +${pointsCalculated} Tournament Points`);
+    refreshAllEcosystemModules();
+    switchScreen('dashboard');
+  }
+
+  function renderCatchHistory() {
+    const element = document.getElementById('dashboard-catch-list');
+    if(catches.length === 0) {
+      element.innerHTML = `<div style="font-size:12px; color:var(--text3); text-align:center; padding:10px;">Journal empty.</div>`;
+      return;
+    }
+    element.innerHTML = catches.map(c => `
+      <div class="leader-row">
+        <div>🐟 <b>${c.species}</b></div>
+        <div style="font-weight:800; color:var(--accent2);">${c.weight.toFixed(2)} lbs (+${c.points} pts)</div>
+      </div>
+    `).join('');
+  }
+
+  function initMapSystem() {
+    if(map) return;
+    map = L.map('full-map', {zoomControl:false}).setView([38.6270, -90.1994], 11);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+  }
+
+  function showToast(m) {
+    const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
   }
 </script>
 </body>
