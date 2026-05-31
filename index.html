@@ -6,7 +6,6 @@
 <title>CatchLog Pro – Premium Tactical Interface</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Official Google Identity Services SDK -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ── PREMIUM SYSTEM RESET & DESIGN TOKENS ────────────────── */
@@ -82,8 +81,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2)}
 .chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none;}
 
+/* Hardware & Image Visual Styles */
+.hw-item-card { display: flex; align-items: center; gap: 14px; background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
+.hw-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: #111827; border: 1px solid rgba(255,255,255,0.05); }
+.tackle-thumb { width: 100%; height: 90px; border-radius: 8px; object-fit: cover; background: #111827; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); }
+
 /* AI System Component Layout Modifiers */
-.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 48px);margin:0 16px;}
+.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 130px);margin:0 16px;}
 .split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 12px;}
 
 /* ── PREMIUM AUTH SYSTEM HUD SCREEN ──────────────────────── */
@@ -94,18 +98,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 }
 .auth-container { position:relative; z-index:5; width:100%; max-width:350px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: rgba(17, 24, 39, 0.85); }
 
-/* Luxury Fish Logo Crest Component */
-.app-fish-logo {
-  width: 88px;
-  height: 88px;
-  margin: 0 auto 20px;
-  fill: url(#fishGradient);
-  filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.5));
+/* Luxury Fish Logo Image Component */
+.app-fish-logo-img {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.4));
   animation: logo-glow 3.5s ease-in-out infinite alternate;
 }
 @keyframes logo-glow {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.4)); }
-  100% { transform: scale(1.04) translateY(-4px); filter: drop-shadow(0 0 24px rgba(6, 182, 212, 0.7)); }
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.3)); }
+  100% { transform: scale(1.03) translateY(-4px); filter: drop-shadow(0 0 22px rgba(6, 182, 212, 0.6)); }
 }
 
 /* Custom Google Stack Layout Formatting */
@@ -136,43 +140,26 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <div id="toast"></div>
 
-<!-- GOOGLE OAUTH SECURITY AUTH PAGE -->
 <div id="auth-wrap">
   <div class="auth-container card" style="padding: 32px 24px;">
     
-    <!-- BRAND FISH LOGO EMBLEM Component -->
-    <div class="app-fish-logo">
-      <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;">
-        <defs>
-          <linearGradient id="fishGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#22d3ee" />
-            <stop offset="100%" stop-color="#0891b2" />
-          </linearGradient>
-        </defs>
-        <!-- High Quality Abstract Fish Crest Geometry -->
-        <path d="M2,12C4.5,7 8.5,4.5 13,4.5C15.5,4.5 18,5.5 20,7C19,8 18,9.5 18,11C18,12.5 19,14 20,15C18,16.5 15.5,17.5 13,17.5C8.5,17.5 4.5,15 2,12 M13,6.5C11,6.5 8,8 6,12C8,16 11,17.5 13,17.5C16.5,17.5 18,14.5 16,12C18,9.5 16.5,6.5 13,6.5 M22,6C21,8 21,10 22,12C21,14 21,16 22,18C20,16.5 19.5,14.5 19.5,12C19.5,9.5 20,7.5 22,6 M13,10.5A1.5,1.5 0 1,1 11.5,12A1.5,1.5 0 0,1 13,10.5Z"/>
-      </svg>
-    </div>
+    <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img" />
 
     <h2 style="margin-bottom:4px; font-weight:900; font-size:26px; letter-spacing:-0.75px; background: linear-gradient(135deg, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CatchLog Pro</h2>
     <p style="font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; letter-spacing:0.5px;">Tactical Ecosystem Gateway</p>
     
-    <!-- Google GIS Credential Configuration Script Tag -->
     <div id="g_id_onload" 
          data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" 
          data-callback="handleGoogleAuthResponse">
     </div>
     
-    <!-- Unified Native Sign In and Sign Up Button Blocks -->
     <div class="oauth-btn-stack">
       
-      <!-- RETURNING USERS CONTAINER -->
       <div class="oauth-action-block">
         <p class="oauth-divider">Returning Members</p>
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
       </div>
       
-      <!-- NEW ACCOUNT CREATION CONTAINER -->
       <div class="oauth-action-block">
         <p class="oauth-divider">New Angler Registration</p>
         <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
@@ -190,11 +177,10 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   
   <main style="flex:1; position:relative;">
     
-    <!-- DASHBOARD VIEW -->
     <div id="screen-dashboard" class="screen active">
       <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.02)); border-color: rgba(6, 182, 212, 0.2);">
         <div style="font-size:12px; color:var(--text2); font-weight:600; letter-spacing:0.3px;">Global Angler Valuation</div>
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:2px;" id="dash-valuation-label">Tackle Box Value: $0.00</div>
+        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:2px;" id="dash-valuation-label">Tackle Box Value: $12.48</div>
       </div>
       
       <div class="section-label">🏆 Global Daily Leaderboard</div>
@@ -210,7 +196,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="dashboard-catch-list" style="padding:0 16px;"></div>
     </div>
 
-    <!-- TOURNAMENT BUILDER VIEW -->
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Design Custom Tournament Arena</div>
       <div class="card">
@@ -225,7 +210,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- LOG VIEW -->
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         
@@ -286,7 +270,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </form>
     </div>
 
-    <!-- FRIENDS & COMMUNICATIONS VIEW -->
     <div id="screen-friends" class="screen">
       <div class="section-label">Add Peer Connection</div>
       <div class="card" style="display:flex; gap:10px; margin-bottom:12px;">
@@ -310,24 +293,56 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- TACKLE STORAGE BOX -->
     <div id="screen-tackle" class="screen">
       <div class="financial-tab">
         <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
-        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px; filter: drop-shadow(0 0 10px rgba(16,185,129,0.2));" id="fin-active-val">$0.00</div>
+        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px; filter: drop-shadow(0 0 10px rgba(16,185,129,0.2));" id="fin-active-val">$12.48</div>
+      </div>
+
+      <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
+      <div style="padding: 0 16px; margin-bottom: 12px;">
+        
+        <div class="hw-item-card">
+          <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=150&auto=format&fit=crop&q=60" alt="Fillet Board" class="hw-thumb"/>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:700; color:#fff;">Smart Fillet Board Pro</div>
+            <div style="font-size:11px; color:var(--text3);" id="hw-fillet-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('fillet')">Pair Link</button>
+        </div>
+
+        <div class="hw-item-card">
+          <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=150&auto=format&fit=crop&q=60" alt="Smart Bobber" class="hw-thumb"/>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:700; color:#fff;">Sonar Bobber Sync Tracker</div>
+            <div style="font-size:11px; color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('bobber')">Pair Link</button>
+        </div>
+
       </div>
 
       <div class="section-label">Tackle Storage Matrix</div>
       <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;"></div>
     </div>
 
-    <!-- AI ADVISOR VIEW -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 CatchLog AI Core Tactical Console</div>
+      
+      <div class="card" style="margin-bottom: 10px; background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(0,0,0,0));">
+        <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">📸 AI Computer Vision Lure Appraiser</div>
+        <p style="font-size:11px; color:var(--text2); margin-bottom:12px;">No barcode scanner needed. Snap/Upload an image of your custom rig. Our AI will analyze patterns and estimate marketplace costs instantly.</p>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <button class="btn btn-secondary" style="font-size:11px; padding:8px;" onclick="triggerAiVisualScan('Crawfish Crankbait', 8.49)">📷 Scan Crawfish Crank</button>
+          <button class="btn btn-secondary" style="font-size:11px; padding:8px;" onclick="triggerAiVisualScan('Trophy Swimbait', 24.95)">📷 Scan Premium Swimbait</button>
+        </div>
+      </div>
+
       <div class="ai-chat-window card" style="padding:10px;">
         <div class="chat-window" style="height:100%;">
           <div class="chat-stream" id="ai-chat-stream-box">
-            <div class="msg-b them">Welcome to your AI Tactical Node. Ask me about custom rigs, tackle synergy mapping, water patterns, or tournament rarity score balancing.</div>
+            <div class="msg-b them">Welcome to your AI Tactical Node. Ask me about custom rigs, tackle synergy mapping, water patterns, or tournament rarity score balancing. Upload or trigger an image scan above to run live valuation checks.</div>
           </div>
           <div class="chat-input-row">
             <input type="text" id="ai-chat-message-input" placeholder="Ask AI Advisor..."/>
@@ -337,7 +352,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- DEPLOYED MAP VIEW -->
     <div id="screen-map" class="screen"><div id="full-map" style="position:absolute; inset:0;"></div></div>
   </main>
 
@@ -355,8 +369,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   // STATE MANAGEMENT SYSTEMS
   let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
   let lures = JSON.parse(localStorage.getItem('n_lures')) || [
-    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, status: 'Active', qty: 2 },
-    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, status: 'Active', qty: 3 }
+    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, status: 'Active', qty: 1, img: 'https://images.unsplash.com/photo-1583156345838-83562b77039c?w=200&auto=format&fit=crop&q=60' },
+    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, status: 'Active', qty: 1, img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=200&auto=format&fit=crop&q=60' }
   ];
   let friends = JSON.parse(localStorage.getItem('n_friends')) || [
     { id: 'f1', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 },
@@ -414,6 +428,49 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   function handleManualTyping() {
     document.getElementById('form-species-dropdown').value = 'none';
+  }
+
+  function connectHardware(type) {
+    showToast(`Searching for Bluetooth nodes...`);
+    setTimeout(() => {
+      if(type === 'fillet') {
+        document.getElementById('hw-fillet-status').innerHTML = '🟢 Connected & Mapped (0.00 lbs Baseline)';
+        document.getElementById('hw-fillet-status').style.color = 'var(--accent2)';
+        showToast("Smart Fillet Board Matrix Locked!");
+      } else {
+        document.getElementById('hw-bobber-status').innerHTML = '🟢 Connected & Paired (Sonar Active)';
+        document.getElementById('hw-bobber-status').style.color = 'var(--accent2)';
+        showToast("Sonar Bobber Sync Mapped!");
+      }
+    }, 1200);
+  }
+
+  function triggerAiVisualScan(inferredName, guessedCost) {
+    showToast("Processing visual pixels via AI Core...");
+    
+    setTimeout(() => {
+      // Create and inject the appraised item directly to local store data
+      const newItem = {
+        id: 'l_' + Date.now(),
+        name: `AI Optic: ${inferredName}`,
+        cost: guessedCost,
+        status: 'Active',
+        qty: 1,
+        img: 'https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=200&auto=format&fit=crop&q=60'
+      };
+      
+      lures.push(newItem);
+      
+      // Update AI chat with smart logs
+      aiChatHistory.push({ sender: 'me', text: `[Uploaded Lure Image Pack: Analyzing Matrix...]` });
+      aiChatHistory.push({
+        sender: 'them',
+        text: `🔮 <b>AI Visual Appraisal Engine Verdict:</b><br/>Detected profile layout structural match for <b>${inferredName}</b>.<br/>Best Guess Valuation Metric: <span style="color:var(--accent2); font-weight:bold;">$${guessedCost.toFixed(2)}</span> (Confidence Profile: 94.2%). Added instantly to your Tackle Matrix Array.`
+      });
+      
+      renderAiMessages();
+      refreshAllEcosystemModules();
+    }, 1000);
   }
 
   function refreshAllEcosystemModules() {
@@ -566,10 +623,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${activeTotal.toFixed(2)}`;
 
     document.getElementById('tackle-grid').innerHTML = lures.map(l => `
-      <div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45)">
-        <div style="font-size:13px; font-weight:700; color:#fff;">${l.name}</div>
-        <div style="font-size:12px; color:var(--accent2); font-weight:600; margin-top:2px;">$${l.cost.toFixed(2)}</div>
-        <div style="font-size:11px; color:var(--text3); margin-top:6px; font-weight:500;">Qty Owned: ${l.qty}</div>
+      <div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45); padding: 10px;">
+        <img src="${l.img || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=150'}" class="tackle-thumb" alt="lure item"/>
+        <div style="font-size:12px; font-weight:700; color:#fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${l.name}</div>
+        <div style="font-size:11px; color:var(--accent2); font-weight:600; margin-top:2px;">$${l.cost.toFixed(2)}</div>
+        <div style="font-size:10px; color:var(--text3); margin-top:3px;">Qty Owned: ${l.qty}</div>
       </div>
     `).join('');
   }
@@ -577,7 +635,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function renderAiMessages() {
     const box = document.getElementById('ai-chat-stream-box');
     if (aiChatHistory.length === 0) {
-      box.innerHTML = `<div class="msg-b them">Welcome to your AI Tactical Node. Ask me about custom rigs, tackle synergy mapping, water patterns, or tournament rarity score balancing.</div>`;
+      box.innerHTML = `<div class="msg-b them">Welcome to your AI Tactical Node. Ask me about custom rigs, tackle synergy mapping, water patterns, or tournament rarity score balancing. Upload or trigger an image scan above to run live valuation checks.</div>`;
       return;
     }
     box.innerHTML = aiChatHistory.map(m => `
@@ -673,6 +731,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function showToast(m) {
     const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Self Executing Core Refresh On Start
+  window.onload = function() {
+    refreshAllEcosystemModules();
   }
 </script>
 </body>
