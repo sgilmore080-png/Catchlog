@@ -6,6 +6,7 @@
 <title>CatchLog Pro – Tactical Network</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ── SYSTEM ARCHITECTURE RESET ───────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -72,22 +73,22 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 }
 .auth-bg-logo svg { width:100%; height:100%; fill:var(--primary); }
 .auth-container { position:relative; z-index:5; width:100%; max-width:320px; text-align:center; }
-.google-oauth-btn {
-  background:#ffffff; color:#1f2937; font-weight:600; display:flex; align-items:center;
-  justify-content:center; gap:12px; border-radius:12px; padding:12px; font-size:14px;
-  cursor:pointer; border:1px solid #e5e7eb; transition: background 0.2s; margin-top:20px; width:100%;
+
+/* Custom Google Container Positioning Layout */
+.oauth-btn-stack {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
 }
-.google-oauth-btn:hover { background:#f9fafb; }
-.google-icon { width:18px; height:18px; }
 </style>
 </head>
 <body>
 
 <div id="toast"></div>
 
-<!-- GOOGLE OAUTH SECURITY AUTH PAGE -->
 <div id="auth-wrap">
-  <!-- Glowing Background Ecosystem Brand Component -->
   <div class="auth-bg-logo">
     <svg viewBox="0 0 24 24">
       <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
@@ -98,14 +99,22 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <h2 style="margin-bottom:4px; font-weight:800; font-size:22px; letter-spacing:-0.5px;">CatchLog Pro</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Ecosystem Gateway</p>
     
-    <button class="google-oauth-btn" onclick="initAppCore('Sign In')">
-      <img class="google-icon" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/copy_of_24dp.png" alt="G"/>
-      Sign in with Google
-    </button>
-    <button class="google-oauth-btn" style="margin-top:8px;" onclick="initAppCore('Sign Up')">
-      <img class="google-icon" src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/copy_of_24dp.png" alt="G"/>
-      Sign up with Google
-    </button>
+    <div id="g_id_onload" 
+         data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" 
+         data-callback="handleGoogleAuthResponse">
+    </div>
+    
+    <div class="oauth-btn-stack">
+      <div>
+        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3);">RETURNING USER</p>
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+      </div>
+      
+      <div style="margin-top: 4px;">
+        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3);">NEW ANGLER REGISTRATION</p>
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -117,7 +126,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   
   <main style="flex:1;position:relative;">
     
-    <!-- DASHBOARD VIEW -->
     <div id="screen-dashboard" class="screen active">
       <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.08),transparent)">
         <div style="font-size:12px;color:var(--text2)">Global Angler Valuation</div>
@@ -137,7 +145,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="dashboard-catch-list" style="padding:0 14px;"></div>
     </div>
 
-    <!-- TOURNAMENT BUILDER VIEW -->
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Design Custom Tournament Arena</div>
       <div class="card">
@@ -152,17 +159,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- LOG VIEW -->
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         
         <div class="form-group">
           <label class="form-label">Target Species Profile</label>
           <div class="split-species-row">
-            <!-- Left Side: Manual Text Typing Box -->
             <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" oninput="handleManualTyping()" required/>
             
-            <!-- Right Side: Dropdown Menu (No Emblems, Includes [ None ]) -->
             <select id="form-species-dropdown" class="form-select" onchange="syncSelectedDropdownToInput(this.value)">
               <option value="none">None</option>
               <option value="Largemouth Bass" selected>Largemouth Bass</option>
@@ -216,7 +220,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </form>
     </div>
 
-    <!-- FRIENDS & COMMUNICATIONS VIEW -->
     <div id="screen-friends" class="screen">
       <div class="section-label">Add Peer Connection</div>
       <div class="card" style="display:flex; gap:8px; margin-bottom:10px;">
@@ -240,7 +243,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- TACKLE STORAGE BOX -->
     <div id="screen-tackle" class="screen">
       <div class="financial-tab">
         <div style="font-size:11px;color:var(--text2);text-transform:uppercase;">💼 Total Active Tackle Value</div>
@@ -251,7 +253,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px;"></div>
     </div>
 
-    <!-- AI ADVISOR VIEW -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 CatchLog AI Core Tactical Console</div>
       <div class="ai-chat-window card" style="padding:8px;">
@@ -267,7 +268,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- DEPLOYED MAP VIEW -->
     <div id="screen-map" class="screen"><div id="full-map" style="position:absolute;inset:0;"></div></div>
   </main>
 
@@ -306,9 +306,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   const rarityMap = { "Common": 1, "Uncommon": 2, "Rare": 3, "Mythic": 5 };
 
+  // This handles Google Credentials and feeds directly into your App Core initializer
+  function handleGoogleAuthResponse(response) {
+    if (response.credential) {
+      initAppCore('Sign In');
+    } else {
+      showToast("Authentication handshaking failed.");
+    }
+  }
+
   function initAppCore(mode) {
     document.getElementById('auth-wrap').style.display = 'none';
-    showToast(`Google ${mode} Successful!`);
+    showToast(`Google Auth Successful!`);
     refreshAllEcosystemModules();
   }
 
@@ -428,6 +437,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   function renderFriendsSystem() {
     const container = document.getElementById('friends-list-container');
+    if(!container) return;
     if(friends.length === 0) {
       container.innerHTML = `<div style="font-size:12px; color:var(--text3)">No peer connections mapped.</div>`;
       return;
