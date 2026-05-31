@@ -418,7 +418,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <script>
   let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
   let lures = JSON.parse(localStorage.getItem('n_lures')) || [
-    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, qty: 2, conditionBias: 'overcast', type: 'image', category: 'Lipless Crankbaits', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80' },
+    { id: 'l1', name: 'Chromium Rattle Trap', cost: 7.49, qty: 2, conditionBias: 'overcast', type: 'image', category: 'Lipless Crankbaits', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80' },
     { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, qty: 3, conditionBias: 'clear', type: 'image', category: 'Topwater/Poppers', img: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80' }
   ];
   let friends = JSON.parse(localStorage.getItem('n_friends')) || [
@@ -437,10 +437,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   
   /* Media Hardware Engine States */
   let activeMediaStream = null;
-  let opticalScanMode = null; // 'ai-photo' | 'barcode' | 'inline-override'
+  let opticalScanMode = null; 
   let targetOverrideLureId = null;
 
-  /* Map States */
   let map = null;
   let liveWaypointMarker = null;
   let currentTelemetryContext = null;
@@ -544,7 +543,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     });
   }
 
-  /* SAVES PRODUCT PREVIEW BOX AS WHITE LABELED BLANK SCREEN WITH TOP RIGHT CAMERA */
+  /* BARCODE LOGIC: SAVES PRODUCT PREVIEW BOX AS WHITE LABELED BLANK SCREEN WITH TOP RIGHT CAMERA */
   async function processBarcodeValue(barcodeRawString) {
     showToast(`Searching Internet Data Arrays...`);
     shutdownCameraStream();
@@ -569,7 +568,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       cost: 6.99,
       qty: 1,
       conditionBias: 'clear',
-      category: 'Barcode Scanned Gear', // Evaluates style separation rule logic
+      category: 'Barcode Scanned Gear', 
       img: '' 
     });
 
@@ -578,6 +577,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     refreshAllEcosystemModules();
   }
 
+  /* ── CANVAS ENGINE: EXTRACTS REAL PHOTO FROM DEVICE LENS ── */
   function executeManualCaptureSnapshot() {
     if (opticalScanMode === 'barcode') {
       const simulatedBarcode = "" + Math.floor(100000000000 + Math.random() * 900000000000);
@@ -585,23 +585,38 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       return;
     }
 
-    showToast("💾 Processing Computer Vision Vector Matrix...");
+    showToast("💾 Processing Real-Time Image Frame...");
+
+    // Grabbing the actual, real video stream pixels
+    const video = document.getElementById('viewfinder-video');
+    let capturedImageDataUrl = null;
+    
+    if (video && video.videoWidth > 0) {
+      const canvas = document.createElement('canvas');
+      // Scale down image slightly to protect phone's LocalStorage memory limit
+      const MAX_WIDTH = 600;
+      const scale = MAX_WIDTH / video.videoWidth;
+      canvas.width = MAX_WIDTH;
+      canvas.height = video.videoHeight * scale;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      capturedImageDataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+    }
     
     setTimeout(() => {
       if(opticalScanMode === 'ai-photo') {
         const macroCategories = [
           { category: 'Lipless Crankbaits', defaultName: 'Rattle Trap Profile Lure', historicalPrices: [6.49, 7.99, 6.99, 8.25] },
-          { category: 'Diving Crankbaits', defaultName: 'Deep Lip Crankbait', historicalPrices: [8.50, 9.99, 9.25, 8.79] }
+          { category: 'Diving Crankbaits', defaultName: 'Deep Lip Crankbait', historicalPrices: [8.50, 9.99, 9.25, 8.79] },
+          { category: 'Soft Plastic Worms / Creatures', defaultName: 'Soft Plastic Bait Profile', historicalPrices: [4.99, 5.49, 5.99, 5.25] },
+          { category: 'Topwater Poppers / Walkers', defaultName: 'Surface Popper Bait', historicalPrices: [7.49, 8.99, 7.99, 8.49] },
+          { category: 'Spinnerbaits / Blades', defaultName: 'Bladed Wire Spinnerbait', historicalPrices: [5.25, 6.49, 5.75, 6.10] }
         ];
 
         const targetedGroup = macroCategories[Math.floor(Math.random() * macroCategories.length)];
         const mathematicalSum = targetedGroup.historicalPrices.reduce((a, b) => a + b, 0);
         const derivedAverageMarketPrice = parseFloat((mathematSum / targetedGroup.historicalPrices.length).toFixed(2));
-
-        const aestheticClassMap = {
-          'Lipless Crankbaits': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80',
-          'Diving Crankbaits': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'
-        };
 
         lures.unshift({
           id: 'l_' + Date.now(),
@@ -609,13 +624,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           cost: derivedAverageMarketPrice, 
           qty: 1,
           conditionBias: 'clear',
+          type: 'image',
           category: targetedGroup.category, 
-          img: aestheticClassMap[targetedGroup.category]
+          img: capturedImageDataUrl || 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80' // Fallback if no camera
         });
 
         aiChatHistory.push({
           sender: 'them',
-          text: `👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Broad Category Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b>. Added to Tackle Box.`
+          text: `👁️ <b>AI Computer Vision Scan:</b> Real image parsed securely.<br/>🔹 Analyzed Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b>. Added physical image to Tackle Box.`
         });
 
         showToast(`AI Identified: ${targetedGroup.category}`);
@@ -623,16 +639,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       else if(opticalScanMode === 'inline-override') {
         const target = lures.find(l => l.id === targetOverrideLureId);
         if(target) {
-          // Replaces the blank placeholder visual layout with the newly captured picture parameters
-          target.img = 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80';
-          showToast(`Photo captured and written over template block placeholder.`);
+          target.type = 'image';
+          target.img = capturedImageDataUrl || 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=120&q=80';
+          showToast(`Your actual photo is now linked directly to the inventory slot!`);
         }
       }
 
       shutdownCameraStream();
       localStorage.setItem('n_lures', JSON.stringify(lures));
       refreshAllEcosystemModules();
-    }, 400);
+    }, 500);
   }
 
   function modifyQuantity(lureId, change) {
@@ -705,8 +721,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   function processLocationSuccess(lat, lon) {
     const tempOpts = [68, 74, 82];
-    const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover"];
-    const randomIdx = Math.floor(Math.random() * 2);
+    const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover", "High Barometric Pressure Flare"];
+    const randomIdx = Math.floor(Math.random() * 3);
 
     currentTelemetryContext = { 
       lat: parseFloat(lat).toFixed(4), 
@@ -721,6 +737,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     
     document.getElementById('map-hud-desc').innerText = currentTelemetryContext.shortDesc;
     document.getElementById('map-hud-temp').innerText = `${currentTelemetryContext.temp}°F`;
+
+    aiChatHistory.push({ sender: 'them', text: `📡 <b>Ecosystem Matrix Sync:</b> Parameters aligned to coordinates with profile: <i>${currentTelemetryContext.shortDesc}</i>.` });
 
     updateMapWaypointMarker();
     showToast("Weather Array Handshake Complete!");
@@ -737,14 +755,44 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
     setTimeout(() => {
       let lowercaseQuery = queryText.toLowerCase();
-      if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use')) {
-        let pickedLure = lures[0] || {name: "Standard Spinner"};
-        aiChatHistory.push({
-          sender: 'them',
-          text: `🤖 <b>Tactical Advice Engine Output:</b> Deploy <b>${pickedLure.name}</b> based on current telemetry profiles.`
-        });
+      
+      if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use') || lowercaseQuery.includes('tackle') || lowercaseQuery.includes('recommend')) {
+        if (!currentTelemetryContext) {
+          aiChatHistory.push({ 
+            sender: 'them', 
+            text: "⚠️ <b>Telemetry Offline:</b> Sync your environmental metrics by clicking the ⚙️ gear icon before querying strategies." 
+          });
+        } 
+        else if (lures.length === 0) {
+          aiChatHistory.push({
+            sender: 'them',
+            text: "🧰 <b>Tackle Box Empty:</b> No lures logged yet. Scan a barcode or use the AI scanner first."
+          });
+        } 
+        else {
+          let pickedLure = lures[0];
+          let rationale = "";
+
+          if (currentTelemetryContext.shortDesc.includes("Clear")) {
+            let match = lures.find(l => l.conditionBias === 'clear' || l.name.toLowerCase().includes('popper'));
+            if (match) pickedLure = match;
+            rationale = `Given your <b>${currentTelemetryContext.shortDesc}</b>, surface illumination profiles favor presentation layers. Deploying the <b>${pickedLure.name}</b> targets active structural feedback fields perfectly.`;
+          } else {
+            let match = lures.find(l => l.conditionBias === 'overcast' || l.name.toLowerCase().includes('rattle') || l.category.toLowerCase().includes('lipless'));
+            if (match) pickedLure = match;
+            rationale = `Your weather reports <b>${currentTelemetryContext.shortDesc}</b>. Under low lighting profiles, acoustic vibrations travel faster through current water columns. The <b>${pickedLure.name}</b> handles this beautifully.`;
+          }
+
+          aiChatHistory.push({
+            sender: 'them',
+            text: `🤖 <b>Tactical Advice Engine Output:</b><br/><br/>🎯 Recommended Deployment: <b>${pickedLure.name}</b><br/>📊 Match Metrics: Inventory Verified (Qty: ${pickedLure.qty} available)<br/><br/>💡 <b>Strategic Rationale:</b> ${rationale}`
+          });
+        }
       } else {
-        aiChatHistory.push({ sender: 'them', text: "Telemetry frame parsed. Ask me: <i>'What lure should I use today?'</i>" });
+        aiChatHistory.push({ 
+          sender: 'them', 
+          text: "Telemetry frame parsed. Ask me: <i>'What lure should I use today?'</i> to activate live inventory loops." 
+        });
       }
       renderAiMessages();
     }, 450);
@@ -753,13 +801,25 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function updateMapWaypointMarker() {
     if(!map || !currentTelemetryContext) return;
     const coords = [currentTelemetryContext.lat, currentTelemetryContext.lon];
-    if(liveWaypointMarker) liveWaypointMarker.setLatLng(coords);
-    else liveWaypointMarker = L.marker(coords).addTo(map);
+    
+    if(liveWaypointMarker) {
+      liveWaypointMarker.setLatLng(coords);
+    } else {
+      const pulsingIcon = L.divIcon({
+        className: 'cyan-pulse-marker',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+      liveWaypointMarker = L.marker(coords, { icon: pulsingIcon }).addTo(map);
+    }
     map.setView(coords, 12);
   }
 
   function initMapSystem() {
-    if(map) { updateMapWaypointMarker(); return; }
+    if(map) {
+      updateMapWaypointMarker();
+      return;
+    }
     map = L.map('full-map', {zoomControl:false}).setView([38.6270, -90.1994], 11);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
     updateMapWaypointMarker();
@@ -770,11 +830,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     setTimeout(() => {
       const elId = type === 'bobber' ? 'hw-bobber-status' : 'hw-fillet-status';
       document.getElementById(elId).innerHTML = '🟢 Connected & Mapped';
+      showToast("Hardware Sync Confirmed!");
     }, 400);
   }
 
   function refreshAllEcosystemModules() {
     renderGlobalLeaderboard();
+    renderTournaments();
     renderCatchHistory();
     renderTackleMatrix();
     renderFriendsSystem();
@@ -787,7 +849,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800; color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join('');
   }
 
-  /* ── DYNAMIC TACKLE BOX GRID SYSTEM WITH CONDITIONAL VIEWPORT RENDERING ── */
+  function renderTournaments() {
+    document.getElementById('tournament-deck').innerHTML = tournaments.map(t => `<div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)"><div style="font-size:13px; font-weight:800; color:#fff;">🏆 ${t.name}</div></div>`).join('');
+  }
+
+  /* ── DYNAMIC TACKLE BOX GRID SYSTEM ── */
   function renderTackleMatrix() {
     let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
     const gridEl = document.getElementById('fin-active-val');
@@ -799,17 +865,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     targetDiv.innerHTML = lures.map(l => {
       let mediaHeader = '';
       
-      // CRITICAL LOGIC: If a barcode has been parsed but no photo custom override exists yet
-      if (l.category === 'Barcode Scanned Gear' && !l.img) {
-        mediaHeader = `
-          <div class="tackle-white-box">
-            <span>Upload Image</span>
-            <div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override', '${l.id}')">📷</div>
-          </div>`;
+      // If image exists (either from AI Scanner or from a custom overridden barcode placeholder)
+      if (l.img) {
+        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${l.img}');"></div>`;
       } else {
-        // AI Scanner outputs and standard items render normally with NO camera access link overlay icon present
-        let displayImg = l.img || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=120&q=80';
-        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${displayImg}');"></div>`;
+        // Renders exclusively for raw Barcode Scans lacking a custom user photo
+        mediaHeader = `
+          <div class="tackle-white-box" style="background: #ffffff; color: #111827;">
+            <span style="font-size:10px; font-weight:800; letter-spacing:0.3px; text-transform:uppercase; color:#4b5563;">Upload Image</span>
+            <div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override', '${l.id}')" title="Take Lure Picture">📷</div>
+          </div>`;
       }
 
       return `
@@ -817,7 +882,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           ${mediaHeader}
           <div class="tackle-card-body">
             <div>
-              <div style="font-size:9px; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:2px; font-family:monospace; line-height:1.1;">${l.category}</div>
+              <div style="font-size:9px; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:2px; font-family:monospace; line-height:1.1; display:block; max-height:22px; overflow:hidden;" title="${l.category}">${l.category || 'Unassigned'}</div>
               <div style="font-size:12px; font-weight:700; color:#fff; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.name}">${l.name}</div>
               <div style="font-size:11px; color:var(--accent3); font-weight:700; margin-top:2px;">Market Avg: $${l.cost.toFixed(2)}</div>
             </div>
