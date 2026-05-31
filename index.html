@@ -411,6 +411,40 @@ function switchScreen(screenId){
 
 function getBassProSearchUrl(query){ return `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(query)}`; }
 
+function normalizeBassProProductName(urlString){
+  try{
+    const url=new URL(urlString);
+    if(url.hostname.includes('basspro.com')){
+      if(url.searchParams.has('searchInput')) return url.searchParams.get('searchInput');
+      const segments=url.pathname.split('/').filter(Boolean);
+      const last=segments[segments.length-1]||'BassPro Product';
+      return last.replace(/[-_]/g,' ').replace(/\.html$/,'').replace(/\d+$/,'').trim()||'BassPro Product';
+    }
+  }catch(e){}
+  return '';
+}
+
+function resolveScannedProductMetadata(rawValue){
+  const trimmed=(rawValue||'').trim();
+  let productName='';
+  let purchaseUrl='';
+  const numericOnly=trimmed.replace(/\D/g,'');
+  if(trimmed.toLowerCase().includes('basspro.com')){
+    purchaseUrl=trimmed;
+    productName=normalizeBassProProductName(trimmed)||'BassPro Product';
+    return {productName,purchaseUrl};
+  }
+  if(/^https?:\/\//i.test(trimmed)){
+    purchaseUrl=trimmed;
+    productName=normalizeBassProProductName(trimmed)||trimmed;
+    return {productName,purchaseUrl};
+  }
+  if(numericOnly.length>=8 && numericOnly.length<=14){
+    return {productName:'UPC-'+numericOnly,purchaseUrl:getBassProSearchUrl('UPC '+numericOnly),upc:numericOnly};
+  }
+  return {productName:trimmed||'Scanned Tackle Item',purchaseUrl:getBassProSearchUrl(trimmed||'Fishing Lure')};
+}
+
 async function bootOpticalSystem(mode,optionalLureId=null){
   opticalScanMode=mode;
   targetOverrideLureId=optionalLureId;
@@ -421,9 +455,9 @@ async function bootOpticalSystem(mode,optionalLureId=null){
   const hint=document.getElementById('viewfinder-instructions-hint');
   const scanLabel=document.getElementById('viewfinder-scan-label');
   if(mode==='barcode'){
-    title.innerText="UPC Barcode Hardware Array";
-    hint.innerText="Align product barcode line inside the red laser framing zone.";
-    scanLabel.innerText="ALIGN BARCODE";
+    title.innerText="UPC + QR Scan Matrix";
+    hint.innerText="Align the barcode or QR code inside the red framing area.";
+    scanLabel.innerText="ALIGN SCAN TARGET";
     targetBox.style.display='block';
     laserLine.style.display='block';
     laserLine.classList.add('laser-active');
@@ -435,9 +469,9 @@ async function bootOpticalSystem(mode,optionalLureId=null){
     laserLine.style.display='none';
     laserLine.classList.remove('laser-active');
   } else {
-    title.innerText="AI Lens Object Classification";
-    hint.innerText="Center the lure item clearly in frame to classify its profile shape & check live market indices.";
-    scanLabel.innerText="AI VISION ANALYSIS ACTIVE";
+    title.innerText="AI Vision Scan";
+    hint.innerText="Center the item in frame and capture for classification.";
+    scanLabel.innerText="AI VISION ACTIVE";
     targetBox.style.display='block';
     laserLine.style.display='none';
     laserLine.classList.remove('laser-active');
@@ -448,7 +482,7 @@ async function bootOpticalSystem(mode,optionalLureId=null){
     const video=document.getElementById('viewfinder-video');
     video.srcObject=activeMediaStream;
     if(mode==='barcode' && 'BarcodeDetector' in window){
-      const detector=new BarcodeDetector({formats:['ean_13','code_128','upc_a']});
+      const detector=new BarcodeDetector({formats:['ean_13','code_128','upc_a','qr_code']});
       detectBarcodeNativeLoop(detector);
     }
   }catch(err){
@@ -466,26 +500,41 @@ function detectBarcodeNativeLoop(detector){
   if(!activeMediaStream || opticalScanMode!=='barcode') return;
   const video=document.getElementById('viewfinder-video');
   detector.detect(video).then(barcodes=>{
-    if(barcodes.length>0){ showToast("🎯 Barcode parsed successfully!"); processBarcodeValue(barcodes[0].rawValue); }
-    else requestAnimationFrame(()=>detectBarcodeNativeLoop(detector));
+    if(barcodes.length>0){
+      showToast("🎯 Scan complete.");
+      processBarcodeValue(barcodes[0].rawValue);
+    } else requestAnimationFrame(()=>detectBarcodeNativeLoop(detector));
   }).catch(()=>{ requestAnimationFrame(()=>detectBarcodeNativeLoop(detector)); });
 }
 
 async function processBarcodeValue(barcodeRawString){
-  showToast('Searching Internet Data Arrays...');
+  showToast('Resolving product metadata...');
+  const resolved=resolveScannedProductMetadata(barcodeRawString);
+  if(resolved.upc){
+    try{
+      const response=await fetch(`https://world.openfoodfacts.org/api/v2/product/${resolved.upc}.json`);
+      const data=await response.json();
+      if(data.status===1 && data.product && data.product.product_name){
+        resolved.productName=data.product.product_name;
+        resolved.purchaseUrl=getBassProSearchUrl(data.product.product_name);
+      }
+    }catch(e){ console.log("UPC lookup failed",e); }
+  }
   shutdownCameraStream();
-  let computedName=`StrikeKing Lure (UPC-${barcodeRawString?barcodeRawString.slice(-4):'4810'})`;
-  try{
-    const targetUrl=`https://world.openfoodfacts.org/api/v2/product/${barcodeRawString}.json`;
-    const response=await fetch(targetUrl);
-    const data=await response.json();
-    if(data.status===1 && data.product && data.product.product_name) computedName=data.product.product_name;
-  }catch(e){ console.log("Using fallback product name",e); }
-  const purchaseUrl=getBassProSearchUrl(computedName);
-  lures.unshift({ id:'l_'+Date.now(),name:computedName,cost:6.99,qty:1,conditionBias:'clear',type:'white-box',category:'Barcode Scanned Gear',img:'',purchaseUrl });
-  showToast('Lure Saved into Tackle Box Matrix!');
+  lures.unshift({
+    id:'l_'+Date.now(),
+    name:resolved.productName,
+    cost:6.99,
+    qty:1,
+    conditionBias:'clear',
+    type:'white-box',
+    category:'Barcode Scanned Gear',
+    img:'',
+    purchaseUrl:resolved.purchaseUrl
+  });
   localStorage.setItem('n_lures',JSON.stringify(lures));
   refreshAllEcosystemModules();
+  showToast('Tackle entry stored with BassPro metadata.');
 }
 
 function captureFrameFromVideo(video){
@@ -503,7 +552,7 @@ function executeManualCaptureSnapshot(){
     processBarcodeValue(simulatedBarcode);
     return;
   }
-  showToast('💾 Processing Computer Vision Vector Matrix...');
+  showToast('💾 Capturing camera frame...');
   setTimeout(()=>{
     if(opticalScanMode==='ai-photo'){
       const macroCategories=[
@@ -533,10 +582,7 @@ function executeManualCaptureSnapshot(){
         img:aestheticClassMap[targetedGroup.category],
         purchaseUrl:getBassProSearchUrl(targetedGroup.defaultName)
       });
-      aiChatHistory.push({
-        sender:'them',
-        text:`👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Broad Category Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b> (Cross-sampled via ${targetedGroup.historicalPrices.length} online dealers). Added to Tackle Box.`
-      });
+      aiChatHistory.push({sender:'them',text:`👁️ <b>AI Computer Vision Scan:</b> Shape profile processed. Category: <b>${targetedGroup.category}</b>. Added to Tackle Box.`});
       showToast(`AI Identified: ${targetedGroup.category}`);
     } else if(opticalScanMode==='inline-override'){
       const target=lures.find(l=>l.id===targetOverrideLureId);
@@ -547,7 +593,7 @@ function executeManualCaptureSnapshot(){
         target.img=snapshot;
         showToast('Photo linked directly to inventory slot.');
       } else {
-        showToast('Unable to capture image; no camera frame found.');
+        showToast('No camera frame available.');
       }
     }
     shutdownCameraStream();
@@ -784,7 +830,7 @@ function renderCatchHistory(){
 }
 
 function showToast(m){
-  const t=document.getElementById('toast'); t.innerText=m; t.classList.add('show');
+  const t=document.getElementById('toast'); t.innerHTML=m; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2000);
 }
 
