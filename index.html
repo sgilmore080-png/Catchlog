@@ -6,6 +6,7 @@
 <title>CatchLog Pro – Tactical Network</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Official Google Identity Services SDK -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ── SYSTEM ARCHITECTURE RESET ───────────────────────────── */
@@ -61,25 +62,39 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 /* Split Input Row Structure */
 .split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 10px;}
 
-/* AUTH SYSTEM HUB SCREEN WITH BACKGROUND LOGO GRAPHIC */
+/* AUTH SYSTEM HUB SCREEN */
 #auth-wrap {
   position:fixed;inset:0;z-index:1000;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
-.auth-bg-logo {
-  position:absolute; width:280px; height:280px; opacity:0.04; pointer-events:none; z-index:1;
-  background: radial-gradient(circle, var(--primary) 20%, transparent 60%);
-  display: flex; align-items: center; justify-content: center;
-}
-.auth-bg-logo svg { width:100%; height:100%; fill:var(--primary); }
-.auth-container { position:relative; z-index:5; width:100%; max-width:320px; text-align:center; }
+.auth-container { position:relative; z-index:5; width:100%; max-width:340px; text-align:center; }
 
-/* Custom Google Container Positioning Layout */
+/* Dedicated App Fish Logo Style Block */
+.app-fish-logo {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 16px;
+  fill: var(--primary);
+  filter: drop-shadow(0 0 12px rgba(0, 180, 216, 0.4));
+  animation: logo-glow 3s ease-in-out infinite alternate;
+}
+@keyframes logo-glow {
+  0% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(0, 180, 216, 0.3)); }
+  100% { transform: scale(1.03); filter: drop-shadow(0 0 18px rgba(0, 180, 216, 0.6)); }
+}
+
+/* Custom Google Stack Layout Formatting */
 .oauth-btn-stack {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  align-items: center;
+}
+.oauth-action-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 </style>
@@ -88,32 +103,41 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <div id="toast"></div>
 
+<!-- GOOGLE OAUTH SECURITY AUTH PAGE -->
 <div id="auth-wrap">
-  <div class="auth-bg-logo">
-    <svg viewBox="0 0 24 24">
-      <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
-    </svg>
-  </div>
-  
-  <div class="auth-container card">
-    <h2 style="margin-bottom:4px; font-weight:800; font-size:22px; letter-spacing:-0.5px;">CatchLog Pro</h2>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Ecosystem Gateway</p>
+  <div class="auth-container card" style="padding: 24px 16px;">
     
+    <!-- BRAND FISH LOGO EMBLEM Component -->
+    <div class="app-fish-logo">
+      <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;">
+        <path d="M12,2C11.38,2 10.74,2.15 10.14,2.45L2.45,6.3C1.16,6.94 0.5,8.43 1,9.83L2.4,13.75C2.14,14.65 2,15.6 2,16.5C2,17.84 2.3,19.13 2.87,20.3L3,20.5L3.2,20.35C4.83,19.12 6.83,18.5 8.85,18.6C10.37,18.68 11.84,19.15 13.15,19.94L18.42,23.1C19.7,23.87 21.36,23.5 22.2,22.25L23.75,20C24.4,19 24.1,17.6 23.12,16.92L21.36,15.7C21.78,14.2 21.87,12.63 21.6,11.08L22.9,9.3C23.73,8.17 23.5,6.6 22.37,5.77L18.64,3C17.7,2.3 16.5,2 15.34,2H12M12,4H15.34C16,4 16.63,4.18 17.18,4.58L20.9,7.35C21.23,7.6 21.3,8.06 21.05,8.4L19.47,10.55L17.74,9.25C17.14,8.8 16.33,8.9 15.86,9.5C15.4,10.1 15.5,10.9 16.1,11.37L18.25,13C18.12,14.4 17.76,15.77 17.18,17.04L12.1,14C11.5,13.64 10.72,13.73 10.2,14.23C9.7,14.74 9.6,15.5 10,16.1L11.83,18.8C10.93,18.15 9.9,17.74 8.8,17.67C7,17.5 5.23,18 3.73,19C4,17.3 4.4,15.64 5,14.07L9.34,16.67C9.94,17 10.72,16.9 11.2,16.3C11.66,15.7 11.56,14.9 11,14.56L7.1,12.22C7.86,10.63 8.84,9.18 10,7.9L12.35,9.65C12.65,9.87 13,10 13.34,10C13.84,10 14.33,9.75 14.6,9.3C15.07,8.7 14.97,7.9 14.37,7.43L11.6,5.35C12.2,5 12.87,4.82 13.56,4.82A1,1 0 0,0 14.56,3.82A1,1 0 0,0 13.56,2.82C12.4,2.82 11.26,3.15 10.27,3.77L11.08,4.3L10.5,5.1L9,4C8.16,4.56 7.42,5.26 6.8,6.07L8.6,7.42C9.2,7.88 9.3,8.7 8.84,9.3C8.38,9.9 7.56,10 7,9.5L5.6,8.45C5.23,9.33 4.96,10.24 4.8,11.18L6.87,12.42C7.47,12.8 7.63,13.6 7.25,14.2C6.9,14.7 6.35,14.9 5.8,14.9C5.5,14.9 5.2,14.8 4.93,14.64L3.23,13.62C3.1,12.5 3.14,11.37 3.37,10.28L2.24,9C2.06,8.5 2.25,7.9 2.7,7.66L10.38,3.82C10.88,3.57 11.44,3.45 12,3.45M19.5,6A1,1 0 0,1 20.5,7A1,1 0 0,1 19.5,8A1,1 0 0,1 18.5,7A1,1 0 0,1 19.5,6Z"/>
+      </svg>
+    </div>
+
+    <h2 style="margin-bottom:4px; font-weight:800; font-size:24px; letter-spacing:-0.5px;">CatchLog Pro</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:4px;">Tactical Ecosystem Gateway</p>
+    
+    <!-- Google GIS Credential Configuration Script Tag -->
     <div id="g_id_onload" 
          data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" 
          data-callback="handleGoogleAuthResponse">
     </div>
     
+    <!-- Unified Native Sign In and Sign Up Button Blocks -->
     <div class="oauth-btn-stack">
-      <div>
-        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3);">RETURNING USER</p>
-        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+      
+      <!-- RETURNING USERS CONTAINER -->
+      <div class="oauth-action-block">
+        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3); letter-spacing: 0.5px;">RETURNING MEMBERS</p>
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
       </div>
       
-      <div style="margin-top: 4px;">
-        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3);">NEW ANGLER REGISTRATION</p>
-        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left"></div>
+      <!-- NEW ACCOUNT CREATION CONTAINER -->
+      <div class="oauth-action-block">
+        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3); letter-spacing: 0.5px;">NEW ANGLER REGISTRATION</p>
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
       </div>
+
     </div>
   </div>
 </div>
@@ -126,6 +150,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   
   <main style="flex:1;position:relative;">
     
+    <!-- DASHBOARD VIEW -->
     <div id="screen-dashboard" class="screen active">
       <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.08),transparent)">
         <div style="font-size:12px;color:var(--text2)">Global Angler Valuation</div>
@@ -145,6 +170,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="dashboard-catch-list" style="padding:0 14px;"></div>
     </div>
 
+    <!-- TOURNAMENT BUILDER VIEW -->
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Design Custom Tournament Arena</div>
       <div class="card">
@@ -159,6 +185,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
+    <!-- LOG VIEW -->
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         
@@ -166,7 +193,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           <label class="form-label">Target Species Profile</label>
           <div class="split-species-row">
             <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" oninput="handleManualTyping()" required/>
-            
             <select id="form-species-dropdown" class="form-select" onchange="syncSelectedDropdownToInput(this.value)">
               <option value="none">None</option>
               <option value="Largemouth Bass" selected>Largemouth Bass</option>
@@ -220,6 +246,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </form>
     </div>
 
+    <!-- FRIENDS & COMMUNICATIONS VIEW -->
     <div id="screen-friends" class="screen">
       <div class="section-label">Add Peer Connection</div>
       <div class="card" style="display:flex; gap:8px; margin-bottom:10px;">
@@ -243,6 +270,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
+    <!-- TACKLE STORAGE BOX -->
     <div id="screen-tackle" class="screen">
       <div class="financial-tab">
         <div style="font-size:11px;color:var(--text2);text-transform:uppercase;">💼 Total Active Tackle Value</div>
@@ -253,6 +281,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px;"></div>
     </div>
 
+    <!-- AI ADVISOR VIEW -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 CatchLog AI Core Tactical Console</div>
       <div class="ai-chat-window card" style="padding:8px;">
@@ -268,6 +297,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
+    <!-- DEPLOYED MAP VIEW -->
     <div id="screen-map" class="screen"><div id="full-map" style="position:absolute;inset:0;"></div></div>
   </main>
 
@@ -306,16 +336,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   const rarityMap = { "Common": 1, "Uncommon": 2, "Rare": 3, "Mythic": 5 };
 
-  // This handles Google Credentials and feeds directly into your App Core initializer
+  // Verification callback handling for Google One Tap / Button Ecosystem Responses
   function handleGoogleAuthResponse(response) {
     if (response.credential) {
-      initAppCore('Sign In');
+      initAppCore();
     } else {
       showToast("Authentication handshaking failed.");
     }
   }
 
-  function initAppCore(mode) {
+  function initAppCore() {
     document.getElementById('auth-wrap').style.display = 'none';
     showToast(`Google Auth Successful!`);
     refreshAllEcosystemModules();
@@ -337,14 +367,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     if(screenId==='ai') { navItems[5].classList.add('active'); renderAiMessages(); }
   }
 
-  // Handle visual input matching dropdown updates
   function syncSelectedDropdownToInput(val) {
     if(val !== 'none') {
       document.getElementById('form-species').value = val;
     }
   }
 
-  // Detect key typing adjustments to target the None selector option instantly
+  // Detect manual keyboard adjustment to flip select node setting to none
   function handleManualTyping() {
     document.getElementById('form-species-dropdown').value = 'none';
   }
@@ -365,7 +394,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     syncDropdownMenus();
   }
 
-  // GLOBAL AND TOURNAMENT ENGINE
+  // LEADERBOARD STACK
   function renderGlobalLeaderboard() {
     let myWeight = catches.reduce((acc, c) => acc + parseFloat(c.weight), 0);
     let boardList = [{ name: 'You (Online Node)', w: myWeight }, ...friends.map(f => ({ name: f.name, w: f.totalWeight }))];
@@ -415,7 +444,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     switchScreen('dashboard');
   }
 
-  // FRIENDS LAYER & CHAT MESH GENERATOR
+  // COMMUNICATIONS MESH
   function registerNewFriend() {
     const input = document.getElementById('new-friend-name');
     const name = input.value.trim();
@@ -493,7 +522,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     }, 800);
   }
 
-  // TACKLE BOX VALUE CALCULATION SYSTEM
+  // FINANCIAL TACKLE BOX SYSTEMS
   function renderTackleMatrix() {
     let activeTotal = 0;
     lures.forEach(l => { if(l.status === 'Active') activeTotal += (l.cost * l.qty); });
@@ -510,7 +539,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     `).join('');
   }
 
-  // AI ADVISOR MODULE ARCHITECTURE
+  // TACTICAL AI CORES
   function renderAiMessages() {
     const box = document.getElementById('ai-chat-stream-box');
     if (aiChatHistory.length === 0) {
@@ -546,7 +575,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     }, 700);
   }
 
-  // CATCH LOGGER ENGINE
+  // DATA PERSISTENCE COMMIT CORES
   function syncDropdownMenus() {
     document.getElementById('form-lure-link').innerHTML = lures.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
     
@@ -581,7 +610,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
     document.getElementById('catch-form').reset();
     
-    // Reset defaults seamlessly
+    // Reset inputs and defaults
     document.getElementById('form-species-dropdown').value = 'Largemouth Bass';
     document.getElementById('form-species').value = "Largemouth Bass";
     
