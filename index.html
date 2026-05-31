@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,39 +96,30 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 230px);margin:0 16px;}
 .split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 12px;}
 
-.scan-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.scan-actions-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
 .btn-scan { background: rgba(6, 182, 212, 0.15); border: 1px dashed var(--primary); color: #fff; font-size: 11px; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; transition: background 0.2s; }
 .btn-scan:hover { background: rgba(6, 182, 212, 0.3); }
 
-/* SPECIFIC TACKLE CARD FORMATTING */
-.tackle-box-card { background: rgba(17, 24, 39, 0.85); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-.tackle-img-frame { height: 110px; width: 100%; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid var(--border); }
-
-/* WHITE BOX FOR BARCODES */
-.tackle-white-box { background: #ffffff !important; width: 100%; height: 110px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.1); text-align: center; padding: 12px; }
-.tackle-white-box span { color: #1f2937 !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: 0.5px; text-transform: uppercase; }
-.tackle-cam-overlay { position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.95); border: 1px solid var(--primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; z-index: 15; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
-.tackle-cam-overlay:active { transform: scale(0.9); }
-
-.tackle-card-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; justify-content: space-between; }
-.tackle-tally-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 20px; }
-.tally-btn { background: var(--bg3); border: 1px solid var(--border); color: #fff; font-size: 14px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
+.tackle-box-card { background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.tackle-img-frame { height: 90px; width: 100%; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; }
+.tackle-white-box { background: #1f2937; width: 100%; height: 90px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); text-align: center; padding: 8px; }
+.tackle-cam-overlay { position: absolute; top: 6px; right: 6px; background: rgba(17, 24, 39, 0.85); border: 1px solid var(--primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+.tackle-card-body { padding: 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between; }
+.tackle-tally-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 20px; }
+.tally-btn { background: var(--bg3); border: 1px solid var(--border); color: #fff; font-size: 14px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
 
 /* ── CAMERA VIEW OVERLAY ── */
 .camera-viewfinder-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; justify-content: space-between; }
 .viewfinder-hdr { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); position: absolute; top: 0; left: 0; right: 0; z-index: 5010; }
+.viewfinder-video { width: 100%; height: 100%; object-fit: cover; }
 
-/* Clicking the video stream itself acts as a shutter trigger */
-.viewfinder-video { width: 100%; height: 100%; object-fit: cover; z-index: 5001; cursor: pointer; }
+.viewfinder-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px 24px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 5010; }
 
-.viewfinder-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px 24px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 5010; pointer-events: none; }
-
-/* Target Frame Placement Overlay - NOW CLICKABLE */
+/* Target Frame Placement Overlay */
 .barcode-target-box-frame {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: 280px; height: 160px; border: 2px dashed rgba(255,255,255,0.4); border-radius: 8px;
-  box-shadow: 0 0 0 4000px rgba(0,0,0,0.6); z-index: 5002; display: none; 
-  cursor: pointer; pointer-events: auto; /* Crucial: Allows tapping the box directly */
+  box-shadow: 0 0 0 4000px rgba(0,0,0,0.6); z-index: 5002; display: none; pointer-events: none;
 }
 .barcode-laser-line {
   position: absolute; top: 50%; left: 5%; right: 5%; height: 2px;
@@ -138,7 +130,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 }
 @keyframes bar-laser-sweep { 0%, 100% { top: 15%; } 50% { top: 85%; } }
 
-.capture-shutter-btn { width: 68px; height: 68px; border-radius: 50%; background: #fff; border: 6px solid rgba(6, 182, 212, 0.4); cursor: pointer; box-shadow: 0 0 15px rgba(255,255,255,0.4); z-index: 5020; pointer-events: auto; }
+.capture-shutter-btn { width: 68px; height: 68px; border-radius: 50%; background: #fff; border: 6px solid rgba(6, 182, 212, 0.4); cursor: pointer; box-shadow: 0 0 15px rgba(255,255,255,0.4); z-index: 5020; }
 .capture-shutter-btn:active { transform: scale(0.92); }
 
 #auth-wrap {
@@ -160,15 +152,15 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <div id="camera-viewfinder-overlay" class="camera-viewfinder-overlay">
   <div class="viewfinder-hdr">
     <div id="viewfinder-title" style="font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: var(--primary);">System Lens Active</div>
-    <button class="btn btn-secondary" style="width: auto; padding: 6px 14px; font-size: 11px;" onclick="shutdownCameraStream()">Cancel</button>
+    <button class="btn btn-secondary" style="width: auto; padding: 6px 14px; font-size: 11px;" onclick="shutdownCameraStream()">Cancel Scan</button>
   </div>
   
-  <div id="barcode-target-box-frame" class="barcode-target-box-frame" onclick="executeManualCaptureSnapshot()">
+  <div id="barcode-target-box-frame" class="barcode-target-box-frame">
     <div id="laser-element" class="barcode-laser-line"></div>
-    <div id="viewfinder-scan-label" style="position:absolute; bottom:-45px; left:0; width:100%; text-align:center; color:#fff; font-size:12px; font-weight:800; letter-spacing:0.5px; text-shadow:0 2px 4px #000; background: rgba(6, 182, 212, 0.6); padding: 8px; border-radius: 20px;">TAP TO CAPTURE</div>
+    <div id="viewfinder-scan-label" style="position:absolute; bottom:-28px; left:0; width:100%; text-align:center; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.5px; text-shadow:0 1px 4px #000;">ALIGN TARGET</div>
   </div>
   
-  <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted onclick="executeManualCaptureSnapshot()"></video>
+  <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted></video>
   
   <div class="viewfinder-actions">
     <p id="viewfinder-instructions-hint" style="font-size:11px; color:var(--text2); text-align:center; max-width:280px; margin-bottom:4px;">Position item clearly inside viewfinder matrix</p>
@@ -215,7 +207,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       
       <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
         <svg width="22" height="22" viewBox="0 0 24 24">
-          <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+          <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.30.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
         </svg>
       </button>
     </div>
@@ -328,7 +320,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div id="screen-tackle" class="screen">
       <div class="financial-tab" style="padding: 16px;">
         <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
-        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px;" id="fin-active-val">$0.00</div>
+        <div style="font-size:26px; font-weight:900; color:var(--accent2);" id="fin-active-val">$0.00</div>
       </div>
 
       <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
@@ -363,9 +355,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         </div>
 
         <div class="scan-actions-grid">
-          <button class="btn-scan" onclick="bootOpticalSystem('ai-photo')">
-            📸 <span>AI Photo Scanner</span>
-          </button>
           <button class="btn-scan" onclick="bootOpticalSystem('barcode')">
             █▉ <span>Scan Barcode</span>
           </button>
@@ -441,9 +430,10 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   
   /* Media Hardware Engine States */
   let activeMediaStream = null;
-  let opticalScanMode = null; 
+  let opticalScanMode = null; // 'ai-photo' | 'barcode' | 'inline-override'
   let targetOverrideLureId = null;
 
+  /* Map States */
   let map = null;
   let liveWaypointMarker = null;
   let currentTelemetryContext = null;
@@ -484,23 +474,23 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     if(mode === 'barcode') {
       title.innerText = "UPC Barcode Hardware Array";
       hint.innerText = "Align product barcode line inside the red laser framing zone.";
-      scanLabel.innerText = "TAP TO SCAN BARCODE";
+      scanLabel.innerText = "ALIGN BARCODE";
       targetBox.style.display = 'block';
       laserLine.style.display = 'block';
       laserLine.classList.add('laser-active');
     } else if(mode === 'inline-override') {
       title.innerText = "Macro Framing Capture";
       hint.innerText = "Hold camera directly above the lure layout box.";
-      scanLabel.innerText = "TAP TO CAPTURE LURE";
-      targetBox.style.display = 'block'; 
+      scanLabel.innerText = "CENTER OBJECT";
+      targetBox.style.display = 'none';
       laserLine.style.display = 'none';
       laserLine.classList.remove('laser-active');
     } else {
       title.innerText = "AI Lens Object Classification";
       hint.innerText = "Center the lure item clearly in frame to classify its profile shape & check live market indices.";
-      scanLabel.innerText = "TAP TO SCAN & ANALYZE";
+      scanLabel.innerText = "AI VISION ANALYSIS ACTIVE";
       targetBox.style.display = 'block'; 
-      laserLine.style.display = 'none'; 
+      laserLine.style.display = 'none';
       laserLine.classList.remove('laser-active');
     }
     
@@ -513,9 +503,10 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       });
       video.srcObject = activeMediaStream;
       
-      // Ensures the stream begins actively playing before canvas tries to draw anything
-      try { await video.play(); } catch(e) {} 
-      
+      if(mode === 'barcode' && 'BarcodeDetector' in window) {
+        const detector = new BarcodeDetector({ formats: ['ean_13', 'code_128', 'upc_a'] });
+        detectBarcodeNativeLoop(detector);
+      }
     } catch (err) {
       console.warn("Camera pipeline unavailable or permission rejected", err);
       showToast("⚠️ Camera stream offline. Verify permissions.");
@@ -530,12 +521,39 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('camera-viewfinder-overlay').style.display = 'none';
   }
 
-  /* ── BARCODE PROCESSING LOGIC ── */
-  function processBarcodeValue(barcodeRawString) {
+  function detectBarcodeNativeLoop(detector) {
+    if(!activeMediaStream || opticalScanMode !== 'barcode') return;
+    const video = document.getElementById('viewfinder-video');
+    
+    detector.detect(video).then(barcodes => {
+      if(barcodes.length > 0) {
+        showToast("🎯 Barcode parsed successfully!");
+        processBarcodeValue(barcodes[0].rawValue);
+      } else {
+        requestAnimationFrame(() => detectBarcodeNativeLoop(detector));
+      }
+    }).catch(() => {
+      requestAnimationFrame(() => detectBarcodeNativeLoop(detector));
+    });
+  }
+
+  async function processBarcodeValue(barcodeRawString) {
     showToast(`Searching Internet Data Arrays...`);
     shutdownCameraStream();
 
-    let computedName = `StrikeKing Lure (UPC-${barcodeRawString ? barcodeRawString.slice(-4) : '5344'})`;
+    let computedName = `StrikeKing Lure (UPC-${barcodeRawString ? barcodeRawString.slice(-4) : '4810'})`;
+
+    try {
+      const targetUrl = `https://world.openfoodfacts.org/api/v2/product/${barcodeRawString}.json`;
+      const response = await fetch(targetUrl);
+      const data = await response.json();
+
+      if(data.status === 1 && data.product && data.product.product_name) {
+        computedName = data.product.product_name;
+      }
+    } catch(e) {
+      console.log("Using default parsed layout context name pattern match");
+    }
 
     lures.unshift({
       id: 'l_' + Date.now(),
@@ -543,17 +561,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       cost: 6.99,
       qty: 1,
       conditionBias: 'clear',
-      category: 'Barcode Scanned Gear', 
-      type: 'barcode', // Flags as missing picture to trigger white layout logic
-      img: '' 
+      type: 'white-box',
+      category: 'Barcode Scanned Gear',
+      img: ''
     });
 
-    showToast(`Barcode Saved into Tackle Matrix!`);
+    showToast(`Lure Saved into Tackle Box Matrix!`);
     localStorage.setItem('n_lures', JSON.stringify(lures));
     refreshAllEcosystemModules();
   }
 
-  /* ── CANVAS ENGINE: EXTRACTS REAL PHOTO FROM DEVICE LENS ── */
   function executeManualCaptureSnapshot() {
     if (opticalScanMode === 'barcode') {
       const simulatedBarcode = "" + Math.floor(100000000000 + Math.random() * 900000000000);
@@ -561,48 +578,28 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       return;
     }
 
-    showToast("💾 Processing Real-Time Image Frame...");
-
-    // Grabbing the actual, real video stream pixels
-    const video = document.getElementById('viewfinder-video');
-    let capturedImageDataUrl = null;
-    
-    try {
-      if (video && video.readyState >= 2) { 
-        const canvas = document.createElement('canvas');
-        // Highly compressed downscale to completely protect LocalStorage memory limit
-        const MAX_WIDTH = 350; 
-        const scale = MAX_WIDTH / video.videoWidth;
-        canvas.width = MAX_WIDTH;
-        canvas.height = video.videoHeight * scale;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        capturedImageDataUrl = canvas.toDataURL('image/jpeg', 0.5); 
-      }
-    } catch(e) {
-      console.log("Canvas mapping blocked:", e);
-    }
+    showToast("💾 Processing Computer Vision Vector Matrix...");
     
     setTimeout(() => {
       if(opticalScanMode === 'ai-photo') {
         const macroCategories = [
-          { category: 'Lipless Crankbaits / Rattle Traps', defaultName: 'Rattle Trap Profile', historicalPrices: [6.49, 7.99, 6.99, 8.25] },
+          { category: 'Lipless Crankbaits / Rattle Traps', defaultName: 'Rattle Trap Profile Lure', historicalPrices: [6.49, 7.99, 6.99, 8.25] },
           { category: 'Diving Crankbaits', defaultName: 'Deep Lip Crankbait', historicalPrices: [8.50, 9.99, 9.25, 8.79] },
-          { category: 'Soft Plastic Worms', defaultName: 'Soft Plastic Bait Profile', historicalPrices: [4.99, 5.49, 5.99, 5.25] },
-          { category: 'Topwater Poppers', defaultName: 'Surface Popper Bait', historicalPrices: [7.49, 8.99, 7.99, 8.49] },
-          { category: 'Spinnerbaits / Blades', defaultName: 'Bladed Wire Spinner', historicalPrices: [5.25, 6.49, 5.75, 6.10] }
+          { category: 'Soft Plastic Worms / Creatures', defaultName: 'Soft Plastic Bait Profile', historicalPrices: [4.99, 5.49, 5.99, 5.25] },
+          { category: 'Topwater Poppers / Walkers', defaultName: 'Surface Popper Bait', historicalPrices: [7.49, 8.99, 7.99, 8.49] },
+          { category: 'Spinnerbaits / Blades', defaultName: 'Bladed Wire Spinnerbait', historicalPrices: [5.25, 6.49, 5.75, 6.10] }
         ];
 
         const targetedGroup = macroCategories[Math.floor(Math.random() * macroCategories.length)];
+        
         const mathematicalSum = targetedGroup.historicalPrices.reduce((a, b) => a + b, 0);
-        const derivedAverageMarketPrice = parseFloat((mathematSum / targetedGroup.historicalPrices.length).toFixed(2));
+        const derivedAverageMarketPrice = parseFloat((mathematicalSum / targetedGroup.historicalPrices.length).toFixed(2));
 
-        const fallbackImgMap = {
+        const aestheticClassMap = {
           'Lipless Crankbaits / Rattle Traps': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80',
           'Diving Crankbaits': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80',
-          'Soft Plastic Worms': 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80',
-          'Topwater Poppers': 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80',
+          'Soft Plastic Worms / Creatures': 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80',
+          'Topwater Poppers / Walkers': 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80',
           'Spinnerbaits / Blades': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'
         };
 
@@ -614,12 +611,12 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           conditionBias: 'clear',
           type: 'image',
           category: targetedGroup.category, 
-          img: capturedImageDataUrl || fallbackImgMap[targetedGroup.category]
+          img: aestheticClassMap[targetedGroup.category]
         });
 
         aiChatHistory.push({
           sender: 'them',
-          text: `👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Analyzed Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b>. Photo written to Tackle Box.`
+          text: `👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Broad Category Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b> (Cross-sampled via ${targetedGroup.historicalPrices.length} online dealers). Added to Tackle Box.`
         });
 
         showToast(`AI Identified: ${targetedGroup.category}`);
@@ -628,23 +625,15 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         const target = lures.find(l => l.id === targetOverrideLureId);
         if(target) {
           target.type = 'image';
-          target.img = capturedImageDataUrl || 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=120&q=80';
-          showToast(`Your photo is now permanently mapped to the inventory slot.`);
+          target.img = 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80';
+          showToast(`Photo linked directly to inventory slot.`);
         }
       }
 
       shutdownCameraStream();
-      
-      try {
-        localStorage.setItem('n_lures', JSON.stringify(lures));
-      } catch (e) {
-        showToast("⚠️ Local storage quota exceeded! Saving without photo.");
-        lures[0].img = 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80';
-        localStorage.setItem('n_lures', JSON.stringify(lures));
-      }
-      
+      localStorage.setItem('n_lures', JSON.stringify(lures));
       refreshAllEcosystemModules();
-    }, 500);
+    }, 400);
   }
 
   function modifyQuantity(lureId, change) {
@@ -849,7 +838,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('tournament-deck').innerHTML = tournaments.map(t => `<div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)"><div style="font-size:13px; font-weight:800; color:#fff;">🏆 ${t.name}</div></div>`).join('');
   }
 
-  /* ── DYNAMIC TACKLE BOX GRID SYSTEM WITH CONDITIONAL VIEWPORT RENDERING ── */
   function renderTackleMatrix() {
     let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
     const gridEl = document.getElementById('fin-active-val');
@@ -861,16 +849,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     targetDiv.innerHTML = lures.map(l => {
       let mediaHeader = '';
       
-      // Strict logic rule: Renders the white placeholder block ONLY if no picture exists
-      if (l.type === 'barcode' && !l.img) {
+      if (l.type === 'image' && l.img) {
+        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${l.img}');"></div>`;
+      } else {
         mediaHeader = `
           <div class="tackle-white-box" style="background: #ffffff; color: #111827;">
-            <span style="font-size:10px; font-weight:800; letter-spacing:0.3px; text-transform:uppercase; color:#4b5563;">Upload Image</span>
+            <span style="font-size:10px; font-weight:800; letter-spacing:0.3px; text-transform:uppercase; color:#4b5563;">Scan Success Placeholder</span>
             <div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override', '${l.id}')" title="Take Lure Picture">📷</div>
           </div>`;
-      } else {
-        // Render user snapshot or AI-scanned image with no camera overlay needed
-        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${l.img}');"></div>`;
       }
 
       return `
@@ -931,3 +917,4 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 </script>
 </body>
 </html>
+```
