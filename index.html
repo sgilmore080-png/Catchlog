@@ -99,13 +99,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .btn-scan { background: rgba(6, 182, 212, 0.15); border: 1px dashed var(--primary); color: #fff; font-size: 11px; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; transition: background 0.2s; }
 .btn-scan:hover { background: rgba(6, 182, 212, 0.3); }
 
-.tackle-box-card { background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-.tackle-img-frame { height: 90px; width: 100%; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; }
-.tackle-white-box { background: #1f2937; width: 100%; height: 90px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); text-align: center; padding: 8px; }
-.tackle-cam-overlay { position: absolute; top: 6px; right: 6px; background: rgba(17, 24, 39, 0.85); border: 1px solid var(--primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-.tackle-card-body { padding: 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between; }
-.tackle-tally-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 20px; }
-.tally-btn { background: var(--bg3); border: 1px solid var(--border); color: #fff; font-size: 14px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
+.tackle-box-card { background: rgba(17, 24, 39, 0.85); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.tackle-img-frame { height: 110px; width: 100%; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid var(--border); }
+
+/* SPECIFIC WHITE CARD FORMATTING FOR THE BARCODE LOOPS */
+.tackle-white-box { background: #ffffff !important; width: 100%; height: 110px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.1); text-align: center; padding: 12px; }
+.tackle-white-box span { color: #1f2937 !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: 0.5px; text-transform: uppercase; }
+.tackle-cam-overlay { position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.95); border: 1px solid var(--primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; z-index: 15; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+.tackle-cam-overlay:active { transform: scale(0.9); }
+
+.tackle-card-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; justify-content: space-between; }
+.tackle-tally-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 20px; }
+.tally-btn { background: var(--bg3); border: 1px solid var(--border); color: #fff; font-size: 14px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
 
 /* ── CAMERA VIEW OVERLAY ── */
 .camera-viewfinder-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; justify-content: space-between; }
@@ -413,7 +418,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <script>
   let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
   let lures = JSON.parse(localStorage.getItem('n_lures')) || [
-    { id: 'l1', name: 'Chromium Rattle Trap', cost: 7.49, qty: 2, conditionBias: 'overcast', type: 'image', category: 'Lipless Crankbaits', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80' },
+    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, qty: 2, conditionBias: 'overcast', type: 'image', category: 'Lipless Crankbaits', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80' },
     { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, qty: 3, conditionBias: 'clear', type: 'image', category: 'Topwater/Poppers', img: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80' }
   ];
   let friends = JSON.parse(localStorage.getItem('n_friends')) || [
@@ -488,12 +493,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       laserLine.style.display = 'none';
       laserLine.classList.remove('laser-active');
     } else {
-      // AI PHOTO SCANNING - Standard Camera Pipeline (No active barcode detector overlays or sweeping laser lines)
       title.innerText = "AI Lens Object Classification";
       hint.innerText = "Center the lure item clearly in frame to classify its profile shape & check live market indices.";
       scanLabel.innerText = "AI VISION ANALYSIS ACTIVE";
       targetBox.style.display = 'block'; 
-      laserLine.style.display = 'none'; // No barcode laser lines
+      laserLine.style.display = 'none'; 
       laserLine.classList.remove('laser-active');
     }
     
@@ -506,7 +510,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       });
       video.srcObject = activeMediaStream;
       
-      // ONLY run barcode loops if strictly in barcode scan mode
       if(mode === 'barcode' && 'BarcodeDetector' in window) {
         const detector = new BarcodeDetector({ formats: ['ean_13', 'code_128', 'upc_a'] });
         detectBarcodeNativeLoop(detector);
@@ -541,12 +544,12 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     });
   }
 
-  /* FIXED: SAVES PRODUCT PREVIEW BOX AS WHITE FOR USER PHOTO CAPTURE INVENTORY */
+  /* SAVES PRODUCT PREVIEW BOX AS WHITE LABELED BLANK SCREEN WITH TOP RIGHT CAMERA */
   async function processBarcodeValue(barcodeRawString) {
     showToast(`Searching Internet Data Arrays...`);
     shutdownCameraStream();
 
-    let computedName = `StrikeKing Lure (UPC-${barcodeRawString ? barcodeRawString.slice(-4) : '4810'})`;
+    let computedName = `StrikeKing Lure (UPC-${barcodeRawString ? barcodeRawString.slice(-4) : '5344'})`;
 
     try {
       const targetUrl = `https://world.openfoodfacts.org/api/v2/product/${barcodeRawString}.json`;
@@ -557,27 +560,24 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         computedName = data.product.product_name;
       }
     } catch(e) {
-      console.log("Using default parsed layout context name pattern match");
+      console.log("Using default barcode matching pattern");
     }
 
-    // Fixed: Saved to local arrays as white placeholder box, camera overlay is always persistent in top right
     lures.unshift({
       id: 'l_' + Date.now(),
       name: computedName,
       cost: 6.99,
       qty: 1,
       conditionBias: 'clear',
-      type: 'white-box', // Flagged so grid renders custom snapshot targets
-      category: 'Barcode Scanned Gear',
-      img: ''
+      category: 'Barcode Scanned Gear', // Evaluates style separation rule logic
+      img: '' 
     });
 
-    showToast(`Lure Saved into Tackle Box Matrix!`);
+    showToast(`Barcode Saved into Tackle Matrix!`);
     localStorage.setItem('n_lures', JSON.stringify(lures));
     refreshAllEcosystemModules();
   }
 
-  /* FIXED: ALL MODES SUCCESSFULLY TAKE PICTURES AND WRITE TO FILE SYSTEMS */
   function executeManualCaptureSnapshot() {
     if (opticalScanMode === 'barcode') {
       const simulatedBarcode = "" + Math.floor(100000000000 + Math.random() * 900000000000);
@@ -589,29 +589,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     
     setTimeout(() => {
       if(opticalScanMode === 'ai-photo') {
-        /* Fixed Broad Structural Classes For High-Accuracy Match Indexes */
         const macroCategories = [
-          { category: 'Lipless Crankbaits / Rattle Traps', defaultName: 'Rattle Trap Profile Lure', historicalPrices: [6.49, 7.99, 6.99, 8.25] },
-          { category: 'Diving Crankbaits', defaultName: 'Deep Lip Crankbait', historicalPrices: [8.50, 9.99, 9.25, 8.79] },
-          { category: 'Soft Plastic Worms / Creatures', defaultName: 'Soft Plastic Bait Profile', historicalPrices: [4.99, 5.49, 5.99, 5.25] },
-          { category: 'Topwater Poppers / Walkers', defaultName: 'Surface Popper Bait', historicalPrices: [7.49, 8.99, 7.99, 8.49] },
-          { category: 'Spinnerbaits / Blades', defaultName: 'Bladed Wire Spinnerbait', historicalPrices: [5.25, 6.49, 5.75, 6.10] }
+          { category: 'Lipless Crankbaits', defaultName: 'Rattle Trap Profile Lure', historicalPrices: [6.49, 7.99, 6.99, 8.25] },
+          { category: 'Diving Crankbaits', defaultName: 'Deep Lip Crankbait', historicalPrices: [8.50, 9.99, 9.25, 8.79] }
         ];
 
-        // Core selects one of the broad, clean angling categories
         const targetedGroup = macroCategories[Math.floor(Math.random() * macroCategories.length)];
-        
-        // Exact mathematical averaging of the live industry index array
         const mathematicalSum = targetedGroup.historicalPrices.reduce((a, b) => a + b, 0);
         const derivedAverageMarketPrice = parseFloat((mathematSum / targetedGroup.historicalPrices.length).toFixed(2));
 
-        // Maps high-quality structural image to render neatly in inventory
         const aestheticClassMap = {
-          'Lipless Crankbaits / Rattle Traps': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80',
-          'Diving Crankbaits': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80',
-          'Soft Plastic Worms / Creatures': 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80',
-          'Topwater Poppers / Walkers': 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80',
-          'Spinnerbaits / Blades': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'
+          'Lipless Crankbaits': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80',
+          'Diving Crankbaits': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'
         };
 
         lures.unshift({
@@ -620,15 +609,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           cost: derivedAverageMarketPrice, 
           qty: 1,
           conditionBias: 'clear',
-          type: 'image',
           category: targetedGroup.category, 
           img: aestheticClassMap[targetedGroup.category]
         });
 
-        // Appends telemetry data packet directly to the user's AI Chat Command Center
         aiChatHistory.push({
           sender: 'them',
-          text: `👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Broad Category Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b> (Cross-sampled via ${targetedGroup.historicalPrices.length} online dealers). Added to Tackle Box.`
+          text: `👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Broad Category Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b>. Added to Tackle Box.`
         });
 
         showToast(`AI Identified: ${targetedGroup.category}`);
@@ -636,9 +623,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       else if(opticalScanMode === 'inline-override') {
         const target = lures.find(l => l.id === targetOverrideLureId);
         if(target) {
-          target.type = 'image';
+          // Replaces the blank placeholder visual layout with the newly captured picture parameters
           target.img = 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80';
-          showToast(`Photo linked directly to inventory slot.`);
+          showToast(`Photo captured and written over template block placeholder.`);
         }
       }
 
@@ -718,8 +705,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   function processLocationSuccess(lat, lon) {
     const tempOpts = [68, 74, 82];
-    const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover", "High Barometric Pressure Flare"];
-    const randomIdx = Math.floor(Math.random() * 3);
+    const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover"];
+    const randomIdx = Math.floor(Math.random() * 2);
 
     currentTelemetryContext = { 
       lat: parseFloat(lat).toFixed(4), 
@@ -734,8 +721,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     
     document.getElementById('map-hud-desc').innerText = currentTelemetryContext.shortDesc;
     document.getElementById('map-hud-temp').innerText = `${currentTelemetryContext.temp}°F`;
-
-    aiChatHistory.push({ sender: 'them', text: `📡 <b>Ecosystem Matrix Sync:</b> Parameters aligned to coordinates with profile: <i>${currentTelemetryContext.shortDesc}</i>.` });
 
     updateMapWaypointMarker();
     showToast("Weather Array Handshake Complete!");
@@ -752,44 +737,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
     setTimeout(() => {
       let lowercaseQuery = queryText.toLowerCase();
-      
-      if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use') || lowercaseQuery.includes('tackle') || lowercaseQuery.includes('recommend')) {
-        if (!currentTelemetryContext) {
-          aiChatHistory.push({ 
-            sender: 'them', 
-            text: "⚠️ <b>Telemetry Offline:</b> Sync your environmental metrics by clicking the ⚙️ gear icon before querying strategies." 
-          });
-        } 
-        else if (lures.length === 0) {
-          aiChatHistory.push({
-            sender: 'them',
-            text: "🧰 <b>Tackle Box Empty:</b> No lures logged yet. Scan a barcode or use the AI scanner first."
-          });
-        } 
-        else {
-          let pickedLure = lures[0];
-          let rationale = "";
-
-          if (currentTelemetryContext.shortDesc.includes("Clear")) {
-            let match = lures.find(l => l.conditionBias === 'clear' || l.name.toLowerCase().includes('popper'));
-            if (match) pickedLure = match;
-            rationale = `Given your <b>${currentTelemetryContext.shortDesc}</b>, surface illumination profiles favor presentation layers. Deploying the <b>${pickedLure.name}</b> targets active structural feedback fields perfectly.`;
-          } else {
-            let match = lures.find(l => l.conditionBias === 'overcast' || l.name.toLowerCase().includes('rattle') || l.category.toLowerCase().includes('lipless'));
-            if (match) pickedLure = match;
-            rationale = `Your weather reports <b>${currentTelemetryContext.shortDesc}</b>. Under low lighting profiles, acoustic vibrations travel faster through current water columns. The <b>${pickedLure.name}</b> handles this beautifully.`;
-          }
-
-          aiChatHistory.push({
-            sender: 'them',
-            text: `🤖 <b>Tactical Advice Engine Output:</b><br/><br/>🎯 Recommended Deployment: <b>${pickedLure.name}</b><br/>📊 Match Metrics: Inventory Verified (Qty: ${pickedLure.qty} available)<br/><br/>💡 <b>Strategic Rationale:</b> ${rationale}`
-          });
-        }
-      } else {
-        aiChatHistory.push({ 
-          sender: 'them', 
-          text: "Telemetry frame parsed. Ask me: <i>'What lure should I use today?'</i> to activate live inventory loops." 
+      if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use')) {
+        let pickedLure = lures[0] || {name: "Standard Spinner"};
+        aiChatHistory.push({
+          sender: 'them',
+          text: `🤖 <b>Tactical Advice Engine Output:</b> Deploy <b>${pickedLure.name}</b> based on current telemetry profiles.`
         });
+      } else {
+        aiChatHistory.push({ sender: 'them', text: "Telemetry frame parsed. Ask me: <i>'What lure should I use today?'</i>" });
       }
       renderAiMessages();
     }, 450);
@@ -798,25 +753,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function updateMapWaypointMarker() {
     if(!map || !currentTelemetryContext) return;
     const coords = [currentTelemetryContext.lat, currentTelemetryContext.lon];
-    
-    if(liveWaypointMarker) {
-      liveWaypointMarker.setLatLng(coords);
-    } else {
-      const pulsingIcon = L.divIcon({
-        className: 'cyan-pulse-marker',
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      });
-      liveWaypointMarker = L.marker(coords, { icon: pulsingIcon }).addTo(map);
-    }
+    if(liveWaypointMarker) liveWaypointMarker.setLatLng(coords);
+    else liveWaypointMarker = L.marker(coords).addTo(map);
     map.setView(coords, 12);
   }
 
   function initMapSystem() {
-    if(map) {
-      updateMapWaypointMarker();
-      return;
-    }
+    if(map) { updateMapWaypointMarker(); return; }
     map = L.map('full-map', {zoomControl:false}).setView([38.6270, -90.1994], 11);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
     updateMapWaypointMarker();
@@ -827,13 +770,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     setTimeout(() => {
       const elId = type === 'bobber' ? 'hw-bobber-status' : 'hw-fillet-status';
       document.getElementById(elId).innerHTML = '🟢 Connected & Mapped';
-      showToast("Hardware Sync Confirmed!");
     }, 400);
   }
 
   function refreshAllEcosystemModules() {
     renderGlobalLeaderboard();
-    renderTournaments();
     renderCatchHistory();
     renderTackleMatrix();
     renderFriendsSystem();
@@ -846,11 +787,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800; color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join('');
   }
 
-  function renderTournaments() {
-    document.getElementById('tournament-deck').innerHTML = tournaments.map(t => `<div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)"><div style="font-size:13px; font-weight:800; color:#fff;">🏆 ${t.name}</div></div>`).join('');
-  }
-
-  /* ── DYNAMIC TACKLE BOX GRID SYSTEM ── */
+  /* ── DYNAMIC TACKLE BOX GRID SYSTEM WITH CONDITIONAL VIEWPORT RENDERING ── */
   function renderTackleMatrix() {
     let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
     const gridEl = document.getElementById('fin-active-val');
@@ -862,15 +799,17 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     targetDiv.innerHTML = lures.map(l => {
       let mediaHeader = '';
       
-      // FIXED: Checks if a photo has been taken yet. If barcode scanned, leaves white layout box with camera overlay active.
-      if (l.type === 'image' && l.img) {
-        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${l.img}');"></div>`;
-      } else {
+      // CRITICAL LOGIC: If a barcode has been parsed but no photo custom override exists yet
+      if (l.category === 'Barcode Scanned Gear' && !l.img) {
         mediaHeader = `
-          <div class="tackle-white-box" style="background: #ffffff; color: #111827;">
-            <span style="font-size:10px; font-weight:800; letter-spacing:0.3px; text-transform:uppercase; color:#4b5563;">Scan Success Placeholder</span>
-            <div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override', '${l.id}')" title="Take Lure Picture">📷</div>
+          <div class="tackle-white-box">
+            <span>Upload Image</span>
+            <div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override', '${l.id}')">📷</div>
           </div>`;
+      } else {
+        // AI Scanner outputs and standard items render normally with NO camera access link overlay icon present
+        let displayImg = l.img || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=120&q=80';
+        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${displayImg}');"></div>`;
       }
 
       return `
@@ -878,7 +817,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           ${mediaHeader}
           <div class="tackle-card-body">
             <div>
-              <div style="font-size:9px; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:2px; font-family:monospace; line-height:1.1; display:block; max-height:22px; overflow:hidden;" title="${l.category}">${l.category || 'Unassigned'}</div>
+              <div style="font-size:9px; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:2px; font-family:monospace; line-height:1.1;">${l.category}</div>
               <div style="font-size:12px; font-weight:700; color:#fff; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.name}">${l.name}</div>
               <div style="font-size:11px; color:var(--accent3); font-weight:700; margin-top:2px;">Market Avg: $${l.cost.toFixed(2)}</div>
             </div>
