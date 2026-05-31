@@ -1,195 +1,494 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatchLog - My Fishing Journal</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #1a5f7a;
-            text-align: center;
-            margin-top: 0;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            background-color: #1a5f7a;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #124559;
-        }
-        .log-section {
-            margin-top: 30px;
-        }
-        .catch-item {
-            background: #f9f9f9;
-            border-left: 5px solid #1a5f7a;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            position: relative;
-        }
-        .catch-item h3 {
-            margin: 0 0 5px 0;
-            color: #1a5f7a;
-        }
-        .catch-item p {
-            margin: 2px 0;
-            font-size: 14px;
-            color: #666;
-        }
-        .delete-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: auto;
-        }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>CatchLog – Track Every Cast. Record Every Catch.</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── RESET & ROOT ─────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
+  --border:#30363d;--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --primary:#00b4d8;--primary-d:#0096b7;--primary-glow:rgba(0,180,216,.25);
+  --accent:#ff6b35;--accent2:#22c55e;--accent3:#f59e0b;
+  --card:#161b22;--card2:#21262d;
+  --shadow:0 4px 24px rgba(0,0,0,.5);
+  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --nav-h:70px;--hdr-h:60px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+.light{
+  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8edf2;--bg4:#d1d9e0;
+  --border:#d1d9e0;--text:#1a2332;--text2:#5a6a7e;--text3:#8898aa;
+  --card:#ffffff;--card2:#f0f4f8;
+  --shadow:0 4px 24px rgba(0,0,0,.1);
+}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text)}
+#app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 16px);opacity:0;pointer-events:none;transform:translateX(30px);transition:opacity .25s,transform .25s;scrollbar-width:none;}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{opacity:1;pointer-events:auto;transform:translateX(0)}
+.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--primary),#0077b6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.hdr-title{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
+.hdr-actions{display:flex;gap:10px}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;color:var(--text);transition:.2s}
+.icon-btn:active{transform:scale(.93)}
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 8px 8px;z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;cursor:pointer;padding:8px 4px;border-radius:12px;transition:.2s;color:var(--text3);}
+.nav-item.active{color:var(--primary)}
+.nav-item .nav-icon{font-size:22px;line-height:1}
+.nav-item .nav-label{font-size:10px;font-weight:600;letter-spacing:.3px}
+.nav-item.fab-wrap{position:relative;top:-10px}
+.fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 4px 20px var(--primary-glow);cursor:pointer;transition:.2s;}
+.fab:active{transform:scale(.9)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:0 16px 14px}
+.card-sm{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin:20px 20px 10px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
+.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;display:flex;flex-direction:column;gap:4px;}
+.stat-tile .st-icon{font-size:22px;margin-bottom:4px}
+.stat-tile .st-val{font-size:24px;font-weight:800;color:var(--text)}
+.stat-tile .st-lbl{font-size:12px;color:var(--text2)}
+.stat-tile.accent .st-val{color:var(--primary)}
+.stat-tile.green .st-val{color:var(--accent2)}
+.stat-tile.orange .st-val{color:var(--accent)}
+.stat-tile.amber .st-val{color:var(--accent3)}
+.catch-list{display:flex;flex-direction:column;gap:10px;padding:0 16px}
+.catch-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s;}
+.catch-item:active{transform:scale(.98)}
+.catch-thumb{width:54px;height:54px;border-radius:10px;background:linear-gradient(135deg,var(--primary-glow),var(--bg3));display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;}
+.catch-info{flex:1;min-width:0}
+.catch-species{font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.catch-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.catch-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.badge.blue{background:rgba(0,180,216,.15);color:var(--primary);border-color:rgba(0,180,216,.3)}
+.badge.green{background:rgba(34,197,94,.12);color:var(--accent2);border-color:rgba(34,197,94,.3)}
+.badge.orange{background:rgba(255,107,53,.12);color:var(--accent);border-color:rgba(255,107,53,.3)}
+.form-group{padding:0 16px;margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;display:block}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 14px;color:var(--text);font-size:15px;font-family:var(--font);outline:none;transition:.2s;}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow)}
+.form-input::placeholder{color:var(--text3)}
+select.form-input option{background:var(--bg2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
+.form-row .form-group{padding:0;margin:0}
+textarea.form-input{resize:none;min-height:80px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:700;cursor:pointer;transition:.2s;border:none;font-family:var(--font);}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#0077b6);color:#fff;box-shadow:0 4px 16px var(--primary-glow)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3)}
+.btn-green{background:rgba(34,197,94,.12);color:var(--accent2);border:1px solid rgba(34,197,94,.3)}
+.btn-full{width:calc(100% - 32px);margin:0 16px 12px}
+.tab-bar{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;white-space:nowrap;transition:.2s;flex-shrink:0;}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+#catch-map{height:280px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border);margin:0 16px 14px}
+.chart-wrap{position:relative;height:200px;margin:4px 0}
+.device-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:0 16px 14px;display:flex;align-items:center;gap:16px;}
+.device-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.device-icon.board{background:linear-gradient(135deg,rgba(0,180,216,.2),rgba(0,180,216,.05));border:1px solid rgba(0,180,216,.3)}
+.device-icon.bobber{background:linear-gradient(135deg,rgba(255,107,53,.2),rgba(255,107,53,.05));border:1px solid rgba(255,107,53,.3)}
+.device-info{flex:1}
+.device-name{font-size:15px;font-weight:700}
+.device-status{font-size:12px;margin-top:2px}
+.device-status.connected{color:var(--accent2)}
+.device-status.disconnected{color:var(--text3)}
+.device-actions{display:flex;flex-direction:column;gap:6px}
+.live-reading{background:linear-gradient(135deg,rgba(0,180,216,.1),rgba(0,119,182,.05));border:1px solid rgba(0,180,216,.3);border-radius:var(--radius);padding:24px;margin:0 16px 14px;text-align:center;}
+.live-val{font-size:52px;font-weight:900;color:var(--primary);line-height:1}
+.live-unit{font-size:18px;font-weight:600;color:var(--text2);margin-left:4px}
+.live-label{font-size:13px;color:var(--text3);margin-top:6px}
+#bite-alert{position:fixed;inset:0;z-index:9999;background:rgba(255,107,53,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;opacity:0;pointer-events:none;transition:opacity .3s;}
+#bite-alert.show{opacity:1;pointer-events:auto}
+.bite-fish{font-size:120px;animation:jump 0.5s ease infinite alternate}
+@keyframes jump{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-20px) rotate(5deg)}}
+.bite-title{font-size:40px;font-weight:900;color:#fff;margin:20px 0 8px;letter-spacing:-1px}
+.bite-sub{font-size:18px;color:rgba(255,255,255,.85);margin-bottom:32px}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;padding:0 16px;margin-bottom:14px}
+.photo-cell{aspect-ratio:1;border-radius:8px;background:var(--bg3);overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;border:1px solid var(--border)}
+.photo-overlay{position:absolute;bottom:0;left:0;right:0;padding:4px 6px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-size:9px;color:#fff;font-weight:600}
+#full-map{position:absolute;inset:0;z-index:1}
+#map-overlay{position:absolute;top:70px;left:16px;right:16px;z-index:2;display:flex;gap:8px}
+.auth-screen{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+.auth-logo{font-size:64px;margin-bottom:20px}
+.auth-title{font-size:28px;font-weight:800;text-align:center;margin-bottom:6px}
+.auth-sub{font-size:14px;color:var(--text2);text-align:center;margin-bottom:32px}
+.auth-form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
+.auth-form .form-input{background:var(--bg2);border:1.5px solid var(--border)}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:6px 0}
+.auth-divider span{font-size:12px;color:var(--text3)}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.auth-link{text-align:center;font-size:13px;color:var(--text2);cursor:pointer;margin-top:12px}
+.auth-link b{color:var(--primary)}
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--text);box-shadow:var(--shadow);z-index:500;opacity:0;transition:.3s;white-space:nowrap;max-width:calc(100% - 40px);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.profile-hero{background:linear-gradient(180deg,rgba(0,180,216,.15) 0%,transparent 100%);padding:40px 20px 24px;text-align:center;}
+.avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(135deg,var(--primary),#0077b6);display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--border);}
+.profile-name{font-size:22px;font-weight:800}
+.profile-tag{font-size:13px;color:var(--text2);margin-top:2px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:15px;font-weight:500}
+.setting-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.toggle{width:44px;height:26px;border-radius:13px;background:var(--bg4);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
+.toggle.on{background:var(--primary)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;}
+.toggle.on::after{left:21px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:.25s;backdrop-filter:blur(4px)}
+.modal-bg.show{opacity:1;pointer-events:auto}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;padding:8px 0 40px;max-height:90dvh;overflow-y:auto;width:100%;transform:translateY(60px);transition:.3s;scrollbar-width:none}
+.modal-bg.show .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 20px}
+.modal-title{font-size:18px;font-weight:800;padding:0 20px;margin-bottom:20px}
+.record-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.record-row:last-child{border-bottom:none}
+.record-fish{display:flex;align-items:center;gap:10px}
+.record-emoji{font-size:24px}
+.record-name{font-size:14px;font-weight:600}
+.record-date{font-size:11px;color:var(--text3);margin-top:2px}
+.record-size{font-size:18px;font-weight:800;color:var(--primary)}
+.bite-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.bite-row:last-child{border-bottom:none}
+.bite-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0}
+.bite-time{font-size:13px;color:var(--text2)}
+.bite-loc{font-size:12px;color:var(--text3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.pulse{animation:pulse 2s infinite}
+.spin{animation:spin 1s linear infinite}
+.fade-up{animation:fadeUp .4s ease forwards}
+.hero-gradient{background:linear-gradient(180deg,rgba(0,180,216,.12) 0%,transparent 60%);padding:20px 20px 0;margin-bottom:4px;}
+.hero-greeting{font-size:13px;color:var(--text2)}
+.hero-name{font-size:26px;font-weight:800;line-height:1.2}
+.hero-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.fish-scroll{overflow:hidden;white-space:nowrap;padding:6px 0;margin-bottom:14px}
+.fish-scroll-inner{display:inline-block;animation:scroll 20s linear infinite}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.fish-scroll-inner span{font-size:24px;margin:0 12px;opacity:.3}
+.empty-state{text-align:center;padding:40px 20px}
+.empty-state .es-icon{font-size:56px;margin-bottom:16px;opacity:.6}
+.empty-state .es-title{font-size:17px;font-weight:700;margin-bottom:6px}
+.empty-state .es-sub{font-size:13px;color:var(--text2);line-height:1.5}
+.progress-bar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--primary),#0077b6);transition:.8s}
+.loc-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;transition:.2s;}
+.loc-chip:active{transform:scale(.97)}
+.loc-chip .lc-name{font-size:13px;font-weight:600}
+.loc-chip .lc-count{font-size:11px;color:var(--text2);margin-top:1px}
+.ble-ring{width:80px;height:80px;border-radius:50%;background:rgba(0,180,216,.1);border:2px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 16px;position:relative;}
+.ble-ring::before,.ble-ring::after{content:'';position:absolute;border-radius:50%;border:1.5px solid var(--primary);opacity:0;animation:ble-pulse 2s ease-out infinite;}
+.ble-ring::before{width:100px;height:100px;animation-delay:0s}
+.ble-ring::after{width:120px;height:120px;animation-delay:.5s}
+@keyframes ble-pulse{0%{opacity:.6;transform:scale(.8)}100%{opacity:0;transform:scale(1.2)}}
+.lure-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-bottom:14px}
+.lure-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;transition:.2s;}
+.lure-card:active{transform:scale(.97)}
+.lure-img{width:100%;aspect-ratio:1;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden;}
+.lure-info{padding:10px 12px}
+.lure-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lure-type{font-size:11px;color:var(--text2);margin-top:2px}
+.lure-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.lure-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.lure-tag.ai-pick{background:rgba(0,180,216,.15);color:var(--primary);border-color:rgba(0,180,216,.3)}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:28px 20px;text-align:center;cursor:pointer;transition:.2s;margin:0 16px 14px;background:var(--bg3);}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--primary);background:rgba(0,180,216,.05)}
+.upload-zone .uz-icon{font-size:36px;margin-bottom:8px}
+.upload-zone .uz-text{font-size:14px;font-weight:600;color:var(--text2)}
+.upload-zone .uz-sub{font-size:12px;color:var(--text3);margin-top:4px}
+#screen-ai{padding-bottom:0}
+.ai-header{background:linear-gradient(135deg,rgba(0,180,216,.15),rgba(120,0,220,.1));padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.ai-title{font-size:20px;font-weight:800;margin-bottom:2px}
+.ai-sub{font-size:12px;color:var(--text2)}
+.ai-status{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);}
+.ai-status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);flex-shrink:0}
+.ai-status-dot.warn{background:var(--accent3)}
+.ai-status-dot.off{background:var(--text3)}
+.ai-status-text{font-size:12px;color:var(--text2)}
+.chat-area{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;height:calc(100dvh - var(--hdr-h) - 154px - 72px);scrollbar-width:none;}
+.chat-area::-webkit-scrollbar{display:none}
+.chat-bubble{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;animation:fadeUp .25s ease;}
+.chat-bubble.user{align-self:flex-end;background:linear-gradient(135deg,var(--primary),#0077b6);color:#fff;border-bottom-right-radius:4px;}
+.chat-bubble.ai{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
+.chat-bubble.ai .ai-icon{font-size:18px;margin-bottom:4px}
+.lure-recommendation{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;}
+.lure-rec-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lure-rec-emoji{font-size:28px}
+.lure-rec-name{font-size:14px;font-weight:700}
+.lure-rec-type{font-size:11px;color:var(--primary)}
+.lure-rec-why{font-size:12px;color:var(--text2);line-height:1.5}
+.lure-rec-match{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;background:rgba(34,197,94,.15);color:var(--accent2);border-radius:20px;margin-top:6px;border:1px solid rgba(34,197,94,.3);}
+.typing-bubble{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-radius:18px 18px 18px 4px;padding:12px 16px;display:flex;gap:5px;align-items:center;}
+.typing-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);animation:typing .9s ease infinite;}
+.typing-dot:nth-child(2){animation-delay:.15s}
+.typing-dot:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+.chat-input-bar{position:sticky;bottom:var(--nav-h);left:0;right:0;padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:11px 16px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;resize:none;max-height:100px;line-height:1.4;transition:.2s;}
+.chat-input:focus{border-color:var(--primary)}
+.chat-send{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--primary),#0077b6);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;}
+.chat-send:active{transform:scale(.9)}
+.quick-prompts{display:flex;gap:8px;padding:10px 16px 4px;overflow-x:auto;scrollbar-width:none;}
+.quick-prompts::-webkit-scrollbar{display:none}
+.qp-chip{white-space:nowrap;padding:7px 14px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:.2s;flex-shrink:0;}
+.qp-chip:active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.weather-bar{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;scrollbar-width:none;margin-bottom:2px;}
+.weather-bar::-webkit-scrollbar{display:none}
+.weather-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;}
+@media(min-width:480px){body{display:flex;align-items:center;justify-content:center;background:#080c10;min-height:100vh}#app{border-radius:40px;box-shadow:0 0 80px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.05);overflow:hidden}#bottom-nav{border-radius:0 0 40px 40px}}
+</style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>CatchLog 🎣</h1>
-        <p style="text-align: center; color: #666;">Track your fishing adventures</p>
-        
-        <form id="catchForm">
-            <div class="form-group">
-                <label for="species">Fish Species:</label>
-                <input type="text" id="species" placeholder="e.g. Largemouth Bass, Rainbow Trout" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="weight">Weight (lbs/oz):</label>
-                <input type="text" id="weight" placeholder="e.g. 3 lbs 4 oz">
-            </div>
-            
-            <div class="form-group">
-                <label for="location">Location:</label>
-                <input type="text" id="location" placeholder="e.g. Pine Lake, Pier 4">
-            </div>
-            
-            <div class="form-group">
-                <label for="bait">Bait / Lure Used:</label>
-                <input type="text" id="bait" placeholder="e.g. Plastic Worm, Spinnerbait">
-            </div>
-            
-            <button type="submit">Log This Catch</button>
-        </form>
-
-        <div class="log-section">
-            <h2>Your Catches</h2>
-            <div id="catchList"></div>
-        </div>
+<div id="auth-wrap" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div class="auth-screen" style="padding-bottom:60px">
+    <div class="auth-logo">🎣</div>
+    <div class="auth-title">Welcome to CatchLog</div>
+    <div class="auth-sub">Track every cast. Record every catch.</div>
+    <div class="auth-form">
+      <input type="email" class="form-input" placeholder="Email address" value="angler@catchlog.ai"/>
+      <input type="password" class="form-input" placeholder="Password" value="••••••••"/>
+      <button class="btn btn-primary" onclick="document.getElementById('auth-wrap').style.display='none'">Sign In</button>
     </div>
+  </div>
+</div>
+<div id="app
+<div id="modal-records" class="modal-bg" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal"><div class="modal-handle"></div><div class="modal-title">Personal Records 🏆</div><div style="padding:0 20px" id="records-list"></div></div>
+  </div>
+  <div id="modal-bites" class="modal-bg" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal"><div class="modal-handle"></div><div class="modal-title">Recent Bite Alerts ⚡</div><div style="padding:0 20px" id="bites-list"></div></div>
+  </div>
+  <div id="modal-ble" class="modal-bg" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal"><div class="modal-handle"></div><div class="modal-title" style="text-align:center">Smart Rod Connection</div><div style="padding:0 20px;text-align:center;"><div class="ble-ring">🎣</div><div id="ble-status-msg" style="font-size:15px;font-weight:700;margin-bottom:4px">Searching for Smart Rod...</div><div style="font-size:12px;color:var(--text2);margin-bottom:24px">Keep your Bluetooth handle close to your device</div><button class="btn btn-secondary" style="width:100%" onclick="hideModal('modal-ble')">Cancel Search</button></div></div>
+  </div>
+  <div id="toast"></div>
+  <div id="bite-alert"><div class="bite-fish">🐟💥</div><div class="bite-title">FISH STRIKE DETECTED!</div><div class="bite-sub">Set the hook right now on Rod #1!</div><button class="btn btn-primary" onclick="dismissBiteAlert()" style="background:#fff;color:var(--accent);box-shadow:none;padding:16px 40px;font-size:17px">Hook Set! Log Catch</button></div>
 
-    <script>
-        // Grab elements from the page
-        const catchForm = document.getElementById('catchForm');
-        const catchList = document.getElementById('catchList');
+  <script>
+    let catches = [];
+    let lures = [];
+    let map = null;
+    let dashboardMap = null;
+    let activeScreen = 'dashboard';
+    
+    // Live weather memory space
+    window.currentLiveWeather = null;
 
-        // Load existing catches from Chromebook's memory when page opens
-        let savedCatches = JSON.parse(localStorage.getItem('catches')) || [];
+    const settings = { dark: true, units: 'imperial', stream: true, rodAlerts: true };
 
-        // Function to display the fish on the screen
-        function displayCatches() {
-            catchList.innerHTML = '';
-            if (savedCatches.length === 0) {
-                catchList.innerHTML = '<p style="color: #999; text-align: center;">No catches logged yet. Go catch some fish!</p>';
-                return;
-            }
-            
-            savedCatches.forEach((fish, index) => {
-                const catchDiv = document.createElement('div');
-                catchDiv.className = 'catch-item';
-                catchDiv.innerHTML = `
-                    <h3>${fish.species}</h3>
-                    <p><strong>Weight:</strong> ${fish.weight || 'Not recorded'}</p>
-                    <p><strong>Location:</strong> ${fish.location || 'Not recorded'}</p>
-                    <p><strong>Bait:</strong> ${fish.bait || 'Not recorded'}</p>
-                    <button class="delete-btn" onclick="deleteCatch(${index})">Delete</button>
-                `;
-                catchList.appendChild(catchDiv);
-            });
+    function toggleTheme() {
+      settings.dark = !settings.dark;
+      document.documentElement.classList.toggle('light', !settings.dark);
+      showToast(settings.dark ? 'Dark Mode Activated 🌙' : 'Light Mode Activated ☀️');
+    }
+
+    function switchScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      const targetScreen = document.getElementById('screen-' + screenId);
+      if (targetScreen) targetScreen.classList.add('active');
+      
+      // Highlight correct nav button
+      const navItems = document.querySelectorAll('.nav-item');
+      if(screenId==='dashboard') navItems[0].classList.add('active');
+      else if(screenId==='map') navItems[1].classList.add('active');
+      else if(screenId==='log') navItems[2].classList.add('active');
+      else if(screenId==='tackle') navItems[3].classList.add('active');
+      else if(screenId==='ai') navItems[4].classList.add('active');
+
+      activeScreen = screenId;
+      if (screenId === 'map') setTimeout(initMap, 200);
+      if (screenId === 'ai') {
+        const chatArea = document.getElementById('chat-messages');
+        if (chatArea && chatArea.children.length === 0) {
+          addBotMessage("Hi! I'm your CatchLog AI Guide. Click the blue location button above to automatically link your weather conditions so I can recommend the absolute best lure!");
         }
+      }
+    }
 
-        // Handle form submission (clicking "Log This Catch")
-        catchForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Stop page from refreshing
-            
-            // Get values from input boxes
-            const newCatch = {
-                species: document.getElementById('species').value,
-                weight: document.getElementById('weight').value,
-                location: document.getElementById('location').value,
-                bait: document.getElementById('bait').value
-            };
-            
-            // Add new fish to our array and save to memory
-            savedCatches.push(newCatch);
-            localStorage.setItem('catches', JSON.stringify(savedCatches));
-            
-            // Refresh the display and clear the form boxes
-            displayCatches();
-            catchForm.reset();
-        });
-
-        // Function to delete a catch
-        window.deleteCatch = function(index) {
-            savedCatches.splice(index, 1);
-            localStorage.setItem('catches', JSON.stringify(savedCatches));
-            displayCatches();
+    // CONNECT TO LIVE GPS & METEOROLOGY APP SERVICE
+    async function getLiveLocationAndWeather() {
+      const bar = document.getElementById('weatherDisplayBar');
+      if (!navigator.geolocation) {
+        bar.innerHTML = `<div class="weather-chip" style="color:#ef4444">❌ GPS Not Supported</div>`;
+        return;
+      }
+      
+      bar.innerHTML = `<div class="weather-chip pulse" style="color:var(--primary)">📍 Accessing Device GPS Sensors...</div>`;
+      
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        bar.innerHTML = `<div class="weather-chip pulse" style="color:var(--accent3)">🌤️ Opening Weather App Channels...</div>`;
+        
+        try {
+          const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+          const data = await res.json();
+          
+          const tempF = Math.round((data.current_weather.temperature * 9/5) + 32);
+          const conditionCode = data.current_weather.weathercode;
+          
+          let condition = "Sunny ☀️";
+          if (conditionCode > 0 && conditionCode <= 3) condition = "Cloudy ⛅";
+          if (conditionCode >= 45 && conditionCode <= 48) condition = "Foggy 10-4 🌫️";
+          if (conditionCode >= 51 && conditionCode <= 67) condition = "Raining 🌧️";
+          if (conditionCode >= 80) condition = "Stormy ⛈️";
+          
+          bar.innerHTML = `
+            <div class="weather-chip" style="background:rgba(34,197,94,0.15); color:var(--accent2)">📍 Location Linked</div>
+            <div class="weather-chip">🌡️ ${tempF}°F</div>
+            <div class="weather-chip">${condition}</div>
+          `;
+          
+          window.currentLiveWeather = { temp: tempF, cond: condition, lat: lat, lon: lon };
+          document.getElementById('ai-status-lbl').innerText = `Live Link Connected: ${condition} at ${tempF}°F`;
+          
+          addBotMessage(`📍 **Location Successfully Connected!**\n\nI see you are fishing in **${tempF}°F** conditions with **${condition}** skies. \n\nAsk me *"What lure should I use right now?"* and I will calculate the best tackle setup based on this environment!`);
+          
+        } catch (err) {
+          bar.innerHTML = `<div class="weather-chip" style="color:#ef4444">❌ Weather Sync Failed</div>`;
         }
+      }, () => {
+        bar.innerHTML = `<div class="weather-chip" style="color:#ef4444">❌ Location Access Denied</div>`;
+      });
+    }
 
-        // Run this right away when the page loads
-        displayCatches();
-    </script>
+    function initMap() {
+      if (map) return;
+      map = L.map('full-map', { zoomControl: false }).setView([37.7749, -122.4194], 11);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+    }
 
+    function seedLures() {
+      lures = [
+        { name: 'Midnight Shad Spinner', type: 'Spinnerbait', emoji: '🪱', aiPick: true },
+        { name: 'Neon Crawfish Popper', type: 'Topwater', emoji: '🪰', aiPick: false },
+        { name: 'Silver Minnow Jig', type: 'Jig', emoji: '🐟', aiPick: true }
+      ];
+      renderTackleBox();
+    }
+
+    function renderTackleBox() {
+      const grid = document.getElementById('tackle-grid');
+      if(!grid) return;
+      grid.innerHTML = lures.map(l => `
+        <div class="lure-card">
+          <div class="lure-img">${l.emoji}</div>
+          <div class="lure-info">
+            <div class="lure-name">${l.name}</div>
+            <div class="lure-type">${l.type}</div>
+            <div class="lure-tags">${l.aiPick ? '<span class="lure-tag ai-pick">✨ AI Favored</span>':''}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleLogSubmit(e) {
+      e.preventDefault();
+      const spec = document.getElementById('form-species').value;
+      const wt = parseFloat(document.getElementById('form-weight').value) || 0;
+      const loc = document.getElementById('form-locname').value;
+      
+      const newCatch = { species: spec, weight: wt, location: loc, date: 'Just now' };
+      catches.unshift(newCatch);
+      
+      document.getElementById('catch-form').reset();
+      showToast('💥 Catch Successfully Logged!');
+      
+      document.getElementById('stat-catches').innerText = catches.length;
+      let totalWt = catches.reduce((acc, c) => acc + c.weight, 0);
+      document.getElementById('stat-weight').innerText = totalWt.toFixed(1) + ' lbs';
+      
+      renderDashboard();
+      switchScreen('dashboard');
+    }
+
+    function renderDashboard() {
+      const list = document.getElementById('dashboard-catch-list');
+      if(!list) return;
+      if(catches.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="es-icon">🎣</div><div class="es-title">Your Logbook is Empty</div><div class="es-sub">Tap the central ＋ icon below to log your very first fish catch data!</div></div>`;
+        return;
+      }
+      list.innerHTML = catches.map(c => `
+        <div class="catch-item">
+          <div class="catch-thumb">🐟</div>
+          <div class="catch-info">
+            <div class="catch-species">${c.species}</div>
+            <div class="catch-meta">${c.location} • ${c.date}</div>
+          </div>
+          <div style="font-weight:800; color:var(--primary)">${c.weight} lbs</div>
+        </div>
+      `).join('');
+    }
+
+    function addBotMessage(text) {
+      const chat = document.getElementById('chat-messages');
+      const b = document.createElement('div');
+      b.className = 'chat-bubble ai';
+      b.innerHTML = text.replace(/\n/g, '<br>');
+      chat.appendChild(b);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function handleSendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if(!text) return;
+      
+      const chat = document.getElementById('chat-messages');
+      const u = document.createElement('div');
+      u.className = 'chat-bubble user';
+      u.innerText = text;
+      chat.appendChild(u);
+      input.value = '';
+      
+      // Simulated AI Assistant responses based on local weather app data
+      setTimeout(() => {
+        if (text.toLowerCase().includes('lure') || text.toLowerCase().includes('use')) {
+          if (window.currentLiveWeather) {
+            addBotMessage(`⚙️ **AI Analysis Engine:**\nGiven your linked weather of **${window.currentLiveWeather.temp}°F** and **${window.currentLiveWeather.cond}** skies, fish are slowing down. \n\nI highly recommend using the **Midnight Shad Spinner** 🪱 from your tackle box. Move it slow across structure!`);
+          } else {
+            addBotMessage("I can recommend a lure, but it will be a generic guess! Please tap the blue **📍 Link Mobile GPS** button at the top of the chat so I can see your real-time local weather app data first!");
+          }
+        } else {
+          addBotMessage("That sounds like a classic fishing scenario! Make sure to log any hits so your CatchLog tracking intelligence gets smarter over time.");
+        }
+      }, 1000);
+    }
+
+    function sendQuickPrompt(promptText) {
+      document.getElementById('chat-input').value = promptText;
+      handleSendChat();
+    }
+
+    function showToast(m) {
+      const t = document.getElementById('toast');
+      t.innerText = m; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function showModal(id) { document.getElementById(id).classList.add('show'); }
+    function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+    function dismissBiteAlert() { hideModal('bite-alert'); switchScreen('log'); }
+
+    // Bootstrap data fields
+    seedLures();
+    renderDashboard();
+    
+    // Fill option selection choices dynamically
+    document.getElementById('form-lure').innerHTML = lures.map(l => `<option>${l.name}</option>`).join('');
+  })();
+</script>
 </body>
 </html>
