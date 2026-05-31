@@ -40,10 +40,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17, 24, 39, 0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg, #fff, var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 
-/* Header Controls */
+/* Header Controls & Custom Tactical Cogwheel Button */
 .hdr-controls{display:flex;align-items:center;gap:12px;}
-.settings-gear-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);transition:transform 0.3s ease, color 0.2s;}
-.settings-gear-btn:hover{color:#fff;transform:rotate(45deg);}
+.settings-cog-btn{
+  background:none;border:none;cursor:pointer;padding:4px;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-cog-btn svg { fill: var(--text2); transition: fill 0.2s; }
+.settings-cog-btn:hover svg { fill: #fff; }
+.settings-cog-btn:hover { transform: rotate(60deg); }
 
 /* ── SETTINGS MODAL OVERLAY ────────────────────────────── */
 .modal-overlay{position:fixed;inset:0;background:rgba(5,7,14,0.85);backdrop-filter:blur(10px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
@@ -163,8 +169,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div class="hdr-title">CatchLog Tactical</div>
     <div class="hdr-controls">
       <div style="font-size:10px; font-weight:800; background:rgba(16, 185, 129, 0.15); color: var(--accent2); border: 1px solid rgba(16, 185, 129, 0.3); padding:4px 10px; border-radius:20px; letter-spacing:0.5px;">🟢 ONLINE</div>
-      <!-- SLEEK SETTINGS BUTTON -->
-      <button class="settings-gear-btn" onclick="openSettingsModal()">⚙️</button>
+      
+      <!-- ENGINE UPGRADE: SLEEK TACTICAL COGWHEEL BUTTON -->
+      <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
+        <svg width="22" height="22" viewBox="0 0 24 24">
+          <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+        </svg>
+      </button>
     </div>
   </header>
   
@@ -174,7 +185,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div id="screen-dashboard" class="screen active">
       <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.02)); border-color: rgba(6, 182, 212, 0.2);">
         <div style="font-size:12px; color:var(--text2); font-weight:600; letter-spacing:0.3px;">Global Angler Valuation</div>
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:2px;" id="dash-valuation-label">Tackle Box Value: $12.48</div>
+        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:2px;" id="dash-valuation-label">Tackle Box Value: $0.00</div>
       </div>
       
       <div class="section-label">🏆 Global Daily Leaderboard</div>
@@ -259,7 +270,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
       <div class="section-label">Link Angler ID Token</div>
       <div class="card">
-        <!-- CRITICAL BUG FIX: Intercept Enter key inside Friend lookup to completely prevent app freezing -->
         <div style="display:flex; gap:10px;" onkeydown="if(event.key === 'Enter') { event.preventDefault(); registerNewFriendById(); }">
           <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase; font-weight:700;"/>
           <button class="btn btn-primary" style="width:auto; padding:0 20px;" onclick="registerNewFriendById()">Sync</button>
@@ -274,7 +284,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <div style="font-size:12px; margin-bottom:8px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
         <div class="chat-window">
           <div class="chat-stream" id="chat-stream-box"></div>
-          <!-- CRITICAL BUG FIX: Intercept Enter key to process data without freezing -->
           <div class="chat-input-row" onkeydown="if(event.key === 'Enter') { event.preventDefault(); dispatchMessage(); }">
             <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
             <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchMessage()">Send</button>
@@ -285,9 +294,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
     <!-- TACKLE BOX & HARDWARE MODEM -->
     <div id="screen-tackle" class="screen">
-      <div class="financial-tab">
+      <div class="financial-tab" style="padding: 16px;">
         <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
-        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px;" id="fin-active-val">$12.48</div>
+        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px;" id="fin-active-val">$0.00</div>
       </div>
 
       <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
@@ -309,7 +318,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;"></div>
     </div>
 
-    <!-- AI ADVISOR VIEW -->
+    <!-- AI ADVISOR VIEW WITH ENVIRONMENT MATRIX -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 AI Core Weather Matrix Console</div>
       <div class="card" style="margin-bottom:10px;">
@@ -323,9 +332,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div class="ai-chat-window card" style="padding:10px;">
         <div class="chat-window" style="height:100%;">
           <div class="chat-stream" id="ai-chat-stream-box"></div>
-          <!-- CRITICAL BUG FIX: Intercept Enter key inside AI inputs -->
           <div class="chat-input-row" onkeydown="if(event.key === 'Enter') { event.preventDefault(); dispatchAiMessage(); }">
-            <input type="text" id="ai-chat-message-input" placeholder="Ask AI Advisor about water conditions..."/>
+            <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What lure should I use?'..."/>
             <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchAiMessage()">Query</button>
           </div>
         </div>
@@ -359,8 +367,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <script>
   let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
   let lures = JSON.parse(localStorage.getItem('n_lures')) || [
-    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, qty: 2 },
-    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, qty: 3 }
+    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, qty: 2, conditionBias: 'overcast' },
+    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, qty: 3, conditionBias: 'clear' }
   ];
   let friends = JSON.parse(localStorage.getItem('n_friends')) || [
     { id: 'CL-81042', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 }
@@ -373,10 +381,10 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   ];
   
   let chatHistories = {};
-  let aiChatHistory = [{ sender: 'them', text: "Welcome to your AI Tactical Node. Query environmental systems via the settings panel gear icon above." }];
+  let aiChatHistory = [{ sender: 'them', text: "Welcome to your AI Tactical Advisory Node. If you want a strategy setup recommendation, ask me: <b>'What lure should I use?'</b>" }];
   let selectedFriendId = 'CL-81042';
   
-  /* Map & Marker Storage Nodes */
+  /* Map & Telemetry States */
   let map = null;
   let liveWaypointMarker = null;
   let currentTelemetryContext = null;
@@ -384,7 +392,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function handleGoogleAuthResponse(response) { if (response.credential) initAppCore(); }
   function initAppCore() { document.getElementById('auth-wrap').style.display = 'none'; showToast(`Ecosystem Gateway Unlocked`); refreshAllEcosystemModules(); }
 
-  /* Settings Modal Engine UI handlers */
+  /* Settings Modal Controls */
   function openSettingsModal() { document.getElementById('settings-modal').classList.add('active'); }
   function closeSettingsModal(e) { document.getElementById('settings-modal').classList.remove('active'); }
 
@@ -450,41 +458,104 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     renderChatMessages();
   }
 
-  /* ── SYNC ENGINE & WEATHER HUD CONTROLS ── */
+  /* ── TELEMETRY HARDWARE CONFIGURATION ENGINE ── */
   function syncLocationAndWeather() {
     showToast("Pinging tracking arrays...");
     navigator.geolocation.getCurrentPosition((pos) => {
       processLocationSuccess(pos.coords.latitude, pos.coords.longitude);
     }, () => {
-      processLocationSuccess(38.6270, -90.1994); // High-precision tactical fallback
+      processLocationSuccess(38.6270, -90.1994); // Fallback coordinate matrix
     });
   }
 
   function processLocationSuccess(lat, lon) {
-    currentTelemetryContext = { lat: parseFloat(lat).toFixed(4), lon: parseFloat(lon).toFixed(4), temp: 74, shortDesc: "Clear Vector Condition" };
+    // Generate simulated tactical weather based on random matrix variables
+    const tempOpts = [68, 74, 82];
+    const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover", "High Barometric Pressure Flare"];
+    const randomIdx = Math.floor(Math.random() * 3);
+
+    currentTelemetryContext = { 
+      lat: parseFloat(lat).toFixed(4), 
+      lon: parseFloat(lon).toFixed(4), 
+      temp: tempOpts[randomIdx], 
+      shortDesc: descOpts[randomIdx] 
+    };
     
-    // Update AI tab telemetry diagnostics
     document.getElementById('weather-badge').innerText = "LIVE SYNCED";
     document.getElementById('weather-badge').style.background = "rgba(16,185,129,0.2)";
-    document.getElementById('weather-diagnostics').innerHTML = `📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: Good Vector Alignment`;
+    document.getElementById('weather-diagnostics').innerHTML = `📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: ${currentTelemetryContext.shortDesc}`;
     
-    // UPDATE PERMANENT MAP SCREEN WEATHER HUD ACCESSIBLE TO THE USER
     document.getElementById('map-hud-desc').innerText = currentTelemetryContext.shortDesc;
     document.getElementById('map-hud-temp').innerText = `${currentTelemetryContext.temp}°F`;
 
-    aiChatHistory.push({ sender: 'them', text: `📡 <b>System Calibration Matrix updated:</b> Lat: ${lat}, Lon: ${lon}. Atmospheric pressure baseline established.` });
+    aiChatHistory.push({ sender: 'them', text: `📡 <b>Ecosystem Matrix Sync:</b> Core parameters aligned to Location [${lat}, ${lon}] with condition profile: <i>${currentTelemetryContext.shortDesc}</i>.` });
 
-    // Instantly translate or spawn pulsing marker if map component initialized
     updateMapWaypointMarker();
     showToast("Weather Array Handshake Complete!");
   }
 
+  /* ── ADVANCED INVENTORY-BASED AI ADVISOR LOGIC ── */
   function dispatchAiMessage() {
     const input = document.getElementById('ai-chat-message-input');
-    if(!input.value.trim()) return;
-    aiChatHistory.push({ sender: 'me', text: input.value });
+    const queryText = input.value.trim();
+    if(!queryText) return;
+
+    aiChatHistory.push({ sender: 'me', text: queryText });
     input.value = '';
     renderAiMessages();
+
+    setTimeout(() => {
+      let lowercaseQuery = queryText.toLowerCase();
+      
+      // Look for contextual keywords asking for advice
+      if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use') || lowercaseQuery.includes('tackle') || lowercaseQuery.includes('recommend')) {
+        
+        // Safety Fallback: User hasn't hit sync button yet
+        if (!currentTelemetryContext) {
+          aiChatHistory.push({ 
+            sender: 'them', 
+            text: "⚠️ <b>Telemetry Offline:</b> I cannot safely look up your active tackle profile without knowing your location. Please press the ⚙️ <b>Settings Cogwheel</b> in the top right to sync your environmental sensor arrays first." 
+          });
+        } 
+        // Safety Fallback 2: Tackle Box is empty
+        else if (lures.length === 0) {
+          aiChatHistory.push({
+            sender: 'them',
+            text: "🧰 <b>Tackle Box Empty:</b> I see your telemetry coordinates, but you don't have any items registered in your hardware box. Add lures inside the Tackle tab so I can map your real inventory strategy."
+          });
+        } 
+        // SUCCESS: Weather sync is done AND items are in the inventory
+        else {
+          // Dynamic choice pattern matching against current weather status
+          let pickedLure = lures[0]; // default
+          let rationale = "";
+
+          if (currentTelemetryContext.shortDesc.includes("Clear")) {
+            // Prefer brighter color or surface setups if available
+            let match = lures.find(l => l.conditionBias === 'clear' || l.name.toLowerCase().includes('neon') || l.name.toLowerCase().includes('popper'));
+            if (match) pickedLure = match;
+            rationale = `Since your current GPS context reads <b>${currentTelemetryContext.shortDesc} (${currentTelemetryContext.temp}°F)</b>, visibility beneath the surface layer is maximized. The fish are targeting clean shadows. I selected your <b>${pickedLure.name}</b> from your tackle box because its bright color profiles trigger reflex action adjustments in high light.`;
+          } else {
+            // Overcast or high pressure
+            let match = lures.find(l => l.conditionBias === 'overcast' || l.name.toLowerCase().includes('shad') || l.name.toLowerCase().includes('spinner'));
+            if (match) pickedLure = match;
+            rationale = `Your local coordinates are reporting <b>${currentTelemetryContext.shortDesc}</b>. Under low-light or low barometric thresholds, underwater vibration signatures perform vastly better than static color profiles. I chosen your <b>${pickedLure.name}</b> because its vibration displacements perfectly cut through dense water density structures right now.`;
+          }
+
+          aiChatHistory.push({
+            sender: 'them',
+            text: `🤖 <b>Tactical Advice Engine Output:</b><br/><br/>🎯 Recommended Deployment: <b>${pickedLure.name}</b><br/>📊 Match Metrics: Inventory Verified (Qty: ${pickedLure.qty} available)<br/><br/>💡 <b>Strategic Rationale:</b> ${rationale}`
+          });
+        }
+      } else {
+        // Default catch-all responses for generic conversation items
+        aiChatHistory.push({ 
+          sender: 'them', 
+          text: "Telemetry frame parsed. For optimal results, ask me: <i>'What lure should I use today?'</i> to activate the live inventory array mapping." 
+        });
+      }
+      renderAiMessages();
+    }, 450);
   }
 
   function updateMapWaypointMarker() {
@@ -494,7 +565,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     if(liveWaypointMarker) {
       liveWaypointMarker.setLatLng(coords);
     } else {
-      // Custom pulsing cyan HTML tracking node
       const pulsingIcon = L.divIcon({
         className: 'cyan-pulse-marker',
         iconSize: [16, 16],
@@ -546,12 +616,15 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
     document.getElementById('fin-active-val').innerText = `$${val.toFixed(2)}`;
     document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${val.toFixed(2)}`;
-    document.getElementById('tackle-grid').innerHTML = lures.map(l => `<div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45); padding: 10px;"><div style="font-size:12px; font-weight:700; color:#fff;">${l.name}</div></div>`).join('');
+    document.getElementById('tackle-grid').innerHTML = lures.map(l => `<div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45); padding: 10px;"><div style="font-size:12px; font-weight:700; color:#fff;">${l.name}</div><div style="font-size:11px; color:var(--primary)">Qty: ${l.qty}</div></div>`).join('');
   }
 
   function renderAiMessages() {
     const box = document.getElementById('ai-chat-stream-box');
-    if(box) box.innerHTML = aiChatHistory.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
+    if(box) {
+      box.innerHTML = aiChatHistory.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
+      box.scrollTop = box.scrollHeight;
+    }
   }
 
   function commitCatchLog(e) {
