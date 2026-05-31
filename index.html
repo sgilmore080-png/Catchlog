@@ -1,3 +1,5 @@
+I updated the scan logic so QR codes are no longer forced into UPC mode when they return numeric-only values. If the QR contains a BassPro URL it uses that, otherwise it uses the raw QR text as the search query.
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +37,7 @@
 }
 html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);background-image:radial-gradient(circle at top right,rgba(6,182,212,0.08),transparent 40%),radial-gradient(circle at bottom left,rgba(16,185,129,0.04),transparent 35%);}
 #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:rgba(10,15,29,0.95);box-shadow:0 0 40px rgba(0,0,0,0.6);border-left:1px solid var(--border);border-right:1px solid var(--border);}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav_h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
 .screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
 .hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17,24,39,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#fff,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -424,7 +426,7 @@ function normalizeBassProProductName(urlString){
   return '';
 }
 
-function resolveScannedProductMetadata(rawValue){
+function resolveScannedProductMetadata(rawValue, scanFormat=''){
   const trimmed=(rawValue||'').trim();
   let productName='';
   let purchaseUrl='';
@@ -439,10 +441,19 @@ function resolveScannedProductMetadata(rawValue){
     productName=normalizeBassProProductName(trimmed)||trimmed;
     return {productName,purchaseUrl};
   }
-  if(numericOnly.length>=8 && numericOnly.length<=14){
-    return {productName:'UPC-'+numericOnly,purchaseUrl:getBassProSearchUrl('UPC '+numericOnly),upc:numericOnly};
+  if(scanFormat==='qr_code'){
+    productName=trimmed||'Scanned Tackle Item';
+    purchaseUrl=getBassProSearchUrl(trimmed||'Fishing Lure');
+    return {productName,purchaseUrl};
   }
-  return {productName:trimmed||'Scanned Tackle Item',purchaseUrl:getBassProSearchUrl(trimmed||'Fishing Lure')};
+  if(numericOnly.length>=8 && numericOnly.length<=14){
+    productName='UPC-'+numericOnly;
+    purchaseUrl=getBassProSearchUrl('UPC '+numericOnly);
+    return {productName,purchaseUrl,upc:numericOnly};
+  }
+  productName=trimmed||'Scanned Tackle Item';
+  purchaseUrl=getBassProSearchUrl(trimmed||'Fishing Lure');
+  return {productName,purchaseUrl};
 }
 
 async function bootOpticalSystem(mode,optionalLureId=null){
@@ -456,7 +467,7 @@ async function bootOpticalSystem(mode,optionalLureId=null){
   const scanLabel=document.getElementById('viewfinder-scan-label');
   if(mode==='barcode'){
     title.innerText="UPC + QR Scan Matrix";
-    hint.innerText="Align the barcode or QR code inside the red framing area.";
+    hint.innerText="Align barcode or QR inside the red framing area.";
     scanLabel.innerText="ALIGN SCAN TARGET";
     targetBox.style.display='block';
     laserLine.style.display='block';
@@ -501,15 +512,16 @@ function detectBarcodeNativeLoop(detector){
   const video=document.getElementById('viewfinder-video');
   detector.detect(video).then(barcodes=>{
     if(barcodes.length>0){
+      const code=barcodes[0];
       showToast("🎯 Scan complete.");
-      processBarcodeValue(barcodes[0].rawValue);
+      processBarcodeValue(code.rawValue, code.format);
     } else requestAnimationFrame(()=>detectBarcodeNativeLoop(detector));
   }).catch(()=>{ requestAnimationFrame(()=>detectBarcodeNativeLoop(detector)); });
 }
 
-async function processBarcodeValue(barcodeRawString){
+async function processBarcodeValue(barcodeRawString, scanFormat=''){
   showToast('Resolving product metadata...');
-  const resolved=resolveScannedProductMetadata(barcodeRawString);
+  const resolved=resolveScannedProductMetadata(barcodeRawString, scanFormat);
   if(resolved.upc){
     try{
       const response=await fetch(`https://world.openfoodfacts.org/api/v2/product/${resolved.upc}.json`);
