@@ -3,32 +3,31 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>CatchLog Pro – Full Network</title>
+<title>CatchLog Pro – Tactical Network</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{--bg:#0d1117;--bg2:#161b22;--text:#e6edf3;--primary:#00b4d8;}
   body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
 
-  /* PERSISTENT BACKGROUND LOGO */
-  #persistent-bg-logo {
+  /* Persistent Background Logo (Fixed) */
+  .bg-logo {
     position:fixed; top:0; left:0; width:100%; height:100%;
     z-index:-1; display:flex; align-items:center; justify-content:center;
     opacity:0.05; pointer-events:none;
   }
-  #persistent-bg-logo svg { width:60vw; height:60vw; fill:var(--primary); }
+  .bg-logo svg { width:60vw; height:60vw; fill:var(--primary); }
 
-  #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-  .screen{position:absolute;width:100%;padding:20px;box-sizing:border-box;display:none;}
+  #app{max-width:430px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .screen{width:100%; padding:20px; box-sizing:border-box; display:none;}
   .screen.active{display:block;}
 
-  .card{background:var(--bg2);border:1px solid #30363d;border-radius:16px;padding:24px;text-align:center;}
-  .form-input{width:100%;background:var(--bg2);border:1px solid #30363d;border-radius:10px;padding:12px;color:white;margin-top:8px;box-sizing:border-box;}
-  .split-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+  .card{background:var(--bg2); border:1px solid #30363d; border-radius:16px; padding:24px; text-align:center;}
+  .form-input{width:100%; background:#21262d; border:1px solid #30363d; border-radius:10px; padding:12px; color:white; margin-top:8px; box-sizing:border-box;}
 </style>
 </head>
 <body>
 
-<div id="persistent-bg-logo">
+<div class="bg-logo">
   <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/></svg>
 </div>
 
@@ -36,69 +35,49 @@
   <div id="auth-screen" class="screen active">
     <div class="card">
       <h2>CatchLog Pro</h2>
-      <p>Use your account to continue</p>
-      <div id="g_id_onload" data-client_id="YOUR_CLIENT_ID.apps.googleusercontent.com" data-callback="handleLogin"></div>
+      <p style="color:#8b949e;">Authenticate to continue</p>
       
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <div class="g_id_signin" data-type="standard" data-text="signin_with"></div>
-        <div class="g_id_signin" data-type="standard" data-text="signup_with"></div>
+      <div id="g_id_onload" 
+           data-client_id="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" 
+           data-callback="handleLogin">
       </div>
+      <div class="g_id_signin" data-type="standard"></div>
     </div>
   </div>
 
   <div id="log-screen" class="screen">
     <div class="card">
-      <label style="font-weight:600;display:block;text-align:left;">Target Species Profile</label>
-      <div class="split-row">
-        <input type="text" id="species-input" class="form-input" placeholder="Type or select..." oninput="checkManualInput()"/>
-        <select id="species-select" class="form-input" onchange="commitSpecies(this.value)">
-          <option value="none">None</option>
-          <option value="Largemouth Bass">Largemouth Bass</option>
-          <option value="Smallmouth Bass">Smallmouth Bass</option>
-          <option value="Spotted Bass">Spotted Bass</option>
-          <option value="Bluegill">Bluegill</option>
-          <option value="Crappie">Crappie</option>
-          <option value="Channel Catfish">Channel Catfish</option>
-          <option value="Flathead Catfish">Flathead Catfish</option>
-          <option value="Blue Catfish">Blue Catfish</option>
-          <option value="Walleye">Walleye</option>
-          <option value="Sauger">Sauger</option>
-          <option value="Northern Pike">Northern Pike</option>
-          <option value="Muskellunge">Muskellunge</option>
-          <option value="Rainbow Trout">Rainbow Trout</option>
-          <option value="Brown Trout">Brown Trout</option>
-          <option value="Brook Trout">Brook Trout</option>
-          <option value="Common Carp">Common Carp</option>
-          <option value="White Bass">White Bass</option>
-          <option value="Yellow Perch">Yellow Perch</option>
-        </select>
-      </div>
+      <label style="font-weight:600; display:block; text-align:left;">Target Species</label>
+      <input list="fish-list" class="form-input" placeholder="Type or select fish...">
+      <datalist id="fish-list">
+        <option value="Largemouth Bass">
+        <option value="Smallmouth Bass">
+        <option value="Spotted Bass">
+        <option value="Bluegill">
+        <option value="Crappie">
+        <option value="Channel Catfish">
+        <option value="Flathead Catfish">
+        <option value="Blue Catfish">
+        <option value="Walleye">
+        <option value="Sauger">
+        <option value="Northern Pike">
+        <option value="Muskellunge">
+        <option value="Rainbow Trout">
+        <option value="Brown Trout">
+        <option value="Brook Trout">
+        <option value="Common Carp">
+        <option value="White Bass">
+        <option value="Yellow Perch">
+      </datalist>
     </div>
   </div>
 </div>
 
 <script>
   function handleLogin(response) {
+    // Hide Auth, Show Log
     document.getElementById('auth-screen').classList.remove('active');
     document.getElementById('log-screen').classList.add('active');
-  }
-
-  // Interaction Logic
-  const select = document.getElementById('species-select');
-  const input = document.getElementById('species-input');
-
-  select.addEventListener('mouseover', (e) => {
-    if(e.target.value !== 'none') input.placeholder = e.target.value;
-  });
-
-  select.addEventListener('mouseout', () => input.placeholder = "Type or select...");
-
-  function commitSpecies(val) {
-    if(val !== 'none') input.value = val;
-  }
-
-  function checkManualInput() {
-    if(input.value.length > 0) select.value = 'none';
   }
 </script>
 </body>
