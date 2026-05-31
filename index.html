@@ -373,8 +373,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <script>
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
 let lures=JSON.parse(localStorage.getItem('n_lures'))||[
-  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Lipless Crankbaits',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/shop/en/search/Chromium%20Rattle%20Trap'},
-  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater/Poppers',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/shop/en/search/Neon%20Crawfish%20Popper'}
+  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Lipless Crankbaits',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/search/results.html?searchInput=Chromium%20Rattle%20Trap'},
+  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater/Poppers',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/search/results.html?searchInput=Neon%20Crawfish%20Popper'}
 ];
 let friends=JSON.parse(localStorage.getItem('n_friends'))||[{id:'CL-81042',name:'BassMaster_Jim',totalWeight:14.82,score:150}];
 let myUniqueTacticalId=localStorage.getItem('my_unique_id')||('CL-'+Math.floor(10000+Math.random()*90000));
@@ -409,6 +409,8 @@ function switchScreen(screenId){
   if(screenId==='ai'){ navItems[5].classList.add('active'); renderAiMessages(); }
 }
 
+function getBassProSearchUrl(query){ return `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(query)}`; }
+
 async function bootOpticalSystem(mode,optionalLureId=null){
   opticalScanMode=mode;
   targetOverrideLureId=optionalLureId;
@@ -417,7 +419,6 @@ async function bootOpticalSystem(mode,optionalLureId=null){
   const targetBox=document.getElementById('barcode-target-box-frame');
   const laserLine=document.getElementById('laser-element');
   const hint=document.getElementById('viewfinder-instructions-hint');
-  const video=document.getElementById('viewfinder-video');
   const scanLabel=document.getElementById('viewfinder-scan-label');
   if(mode==='barcode'){
     title.innerText="UPC Barcode Hardware Array";
@@ -444,6 +445,7 @@ async function bootOpticalSystem(mode,optionalLureId=null){
   viewfinder.style.display='flex';
   try{
     activeMediaStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
+    const video=document.getElementById('viewfinder-video');
     video.srcObject=activeMediaStream;
     if(mode==='barcode' && 'BarcodeDetector' in window){
       const detector=new BarcodeDetector({formats:['ean_13','code_128','upc_a']});
@@ -478,16 +480,29 @@ async function processBarcodeValue(barcodeRawString){
     const response=await fetch(targetUrl);
     const data=await response.json();
     if(data.status===1 && data.product && data.product.product_name) computedName=data.product.product_name;
-  }catch(e){ console.log("Using default parsed layout context name pattern match"); }
-  const purchaseUrl=`https://www.basspro.com/shop/en/search/${encodeURIComponent(computedName)}`;
+  }catch(e){ console.log("Using fallback product name",e); }
+  const purchaseUrl=getBassProSearchUrl(computedName);
   lures.unshift({ id:'l_'+Date.now(),name:computedName,cost:6.99,qty:1,conditionBias:'clear',type:'white-box',category:'Barcode Scanned Gear',img:'',purchaseUrl });
   showToast('Lure Saved into Tackle Box Matrix!');
   localStorage.setItem('n_lures',JSON.stringify(lures));
   refreshAllEcosystemModules();
 }
 
+function captureFrameFromVideo(video){
+  const canvas=document.createElement('canvas');
+  canvas.width=video.videoWidth||640;
+  canvas.height=video.videoHeight||480;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  return canvas.toDataURL('image/jpeg',0.85);
+}
+
 function executeManualCaptureSnapshot(){
-  if(opticalScanMode==='barcode'){ const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000); processBarcodeValue(simulatedBarcode); return; }
+  if(opticalScanMode==='barcode'){
+    const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
+    processBarcodeValue(simulatedBarcode);
+    return;
+  }
   showToast('💾 Processing Computer Vision Vector Matrix...');
   setTimeout(()=>{
     if(opticalScanMode==='ai-photo'){
@@ -495,7 +510,7 @@ function executeManualCaptureSnapshot(){
         {category:'Lipless Crankbaits / Rattle Traps',defaultName:'Rattle Trap Profile Lure',historicalPrices:[6.49,7.99,6.99,8.25]},
         {category:'Diving Crankbaits',defaultName:'Deep Lip Crankbait',historicalPrices:[8.5,9.99,9.25,8.79]},
         {category:'Soft Plastic Worms / Creatures',defaultName:'Soft Plastic Bait Profile',historicalPrices:[4.99,5.49,5.99,5.25]},
-        {category:'Topwater Poppers / Walkers',defaultName:'Surface Popper Bait',historicalPrices:[7.49,8.99,7.99,8.49]},
+        {category:'Topwater Poppers / Walkers',defaultName:'Surface Popper Bait Profile',historicalPrices:[7.49,8.99,7.99,8.49]},
         {category:'Spinnerbaits / Blades',defaultName:'Bladed Wire Spinnerbait',historicalPrices:[5.25,6.49,5.75,6.1]}
       ];
       const targetedGroup=macroCategories[Math.floor(Math.random()*macroCategories.length)];
@@ -516,7 +531,7 @@ function executeManualCaptureSnapshot(){
         type:'image',
         category:targetedGroup.category,
         img:aestheticClassMap[targetedGroup.category],
-        purchaseUrl:`https://www.basspro.com/shop/en/search/${encodeURIComponent(targetedGroup.defaultName)}`
+        purchaseUrl:getBassProSearchUrl(targetedGroup.defaultName)
       });
       aiChatHistory.push({
         sender:'them',
@@ -525,7 +540,15 @@ function executeManualCaptureSnapshot(){
       showToast(`AI Identified: ${targetedGroup.category}`);
     } else if(opticalScanMode==='inline-override'){
       const target=lures.find(l=>l.id===targetOverrideLureId);
-      if(target){ target.type='image'; target.img='https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80'; showToast('Photo linked directly to inventory slot.'); }
+      const video=document.getElementById('viewfinder-video');
+      if(target && video){
+        const snapshot=captureFrameFromVideo(video);
+        target.type='image';
+        target.img=snapshot;
+        showToast('Photo linked directly to inventory slot.');
+      } else {
+        showToast('Unable to capture image; no camera frame found.');
+      }
     }
     shutdownCameraStream();
     localStorage.setItem('n_lures',JSON.stringify(lures));
@@ -566,7 +589,7 @@ function repurchaseLure(){
   if(!pendingTrashLureId) return;
   const lure=lures.find(l=>l.id===pendingTrashLureId);
   if(!lure) return;
-  const url=lure.purchaseUrl||`https://www.basspro.com/shop/en/search/${encodeURIComponent(lure.name)}`;
+  const url=lure.purchaseUrl||getBassProSearchUrl(lure.name);
   window.open(url,'_blank');
   pendingTrashLureId=null;
   document.getElementById('trash-modal').classList.remove('active');
