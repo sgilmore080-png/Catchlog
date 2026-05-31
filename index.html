@@ -85,7 +85,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 /* Hardware SVG Container Styles */
 .hw-item-card { display: flex; align-items: center; gap: 14px; background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
 .hw-svg-thumb { width: 56px; height: 56px; border-radius: 8px; background: #151e2e; border: 1px solid rgba(255,255,255,0.1); padding: 4px; display: flex; align-items: center; justify-content: center; }
-.tackle-thumb { width: 100%; height: 90px; border-radius: 8px; object-fit: cover; background: #111827; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); }
 
 /* AI System Component Layout Modifiers */
 .ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 230px);margin:0 16px;}
@@ -99,7 +98,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 }
 .auth-container { position:relative; z-index:5; width:100%; max-width:350px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: rgba(17, 24, 39, 0.85); }
 
-/* Luxury Fish Logo Image Component */
+/* Luxury Fish Logo Image Component Restore */
 .app-fish-logo-img {
   width: 120px;
   height: 120px;
@@ -124,17 +123,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <div id="auth-wrap">
   <div class="auth-container card" style="padding: 32px 24px;">
-    <svg class="app-fish-logo-img" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20 50C35 30 70 35 85 50C70 65 35 70 20 50Z" fill="url(#logoGlow)" stroke="#06b6d4" stroke-width="2"/>
-      <path d="M20 50C12 42 12 58 20 50Z" fill="#0891b2"/>
-      <circle cx="70" cy="46" r="3" fill="#fff"/>
-      <defs>
-        <linearGradient id="logoGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/>
-          <stop offset="100%" stop-color="#10b981" stop-opacity="0.1"/>
-        </linearGradient>
-      </defs>
-    </svg>
+    <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img" />
 
     <h2 style="margin-bottom:4px; font-weight:900; font-size:26px; letter-spacing:-0.75px; background: linear-gradient(135deg, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CatchLog Pro</h2>
     <p style="font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; letter-spacing:0.5px;">Tactical Ecosystem Gateway</p>
@@ -240,13 +229,23 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
 
     <div id="screen-friends" class="screen">
-      <div class="section-label">Add Peer Connection</div>
-      <div class="card" style="display:flex; gap:10px; margin-bottom:12px;">
-        <input type="text" id="new-friend-name" class="form-input" placeholder="Enter Angler Handle..."/>
-        <button class="btn btn-primary" style="width:auto; padding:0 20px;" onclick="registerNewFriend()">Add</button>
+      <div class="card" style="background:linear-gradient(135deg, rgba(6,182,212,0.1), transparent); border-color:var(--primary-glow); margin-bottom:12px; text-align:center;">
+        <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Your Unique Tactical ID</div>
+        <div id="my-unique-id-badge" style="font-size:22px; font-weight:900; color:var(--primary); letter-spacing:1px; margin:4px 0 2px;">CL-XXXXX</div>
+        <div style="font-size:10px; color:var(--text3);">Provide this token code to other anglers to sync peer meshes.</div>
       </div>
+
+      <div class="section-label">Link Angler ID Token</div>
+      <div class="card" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase; font-weight:700; letter-spacing:0.5px;"/>
+          <button class="btn btn-primary" style="width:auto; padding:0 20px;" onclick="registerNewFriendById()">Sync</button>
+        </div>
+      </div>
+
       <div class="section-label">Peer Array</div>
       <div style="padding:0 16px; margin-bottom:16px;" id="friends-list-container"></div>
+
       <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
       <div class="card" style="padding:10px;">
         <div style="font-size:12px; margin-bottom:8px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
@@ -349,18 +348,30 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <script>
   let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
   let lures = JSON.parse(localStorage.getItem('n_lures')) || [
-    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, status: 'Active', qty: 2, img: 'https://images.unsplash.com/photo-1484318571209-661cf29a69c3?w=200&auto=format&fit=crop&q=60' },
-    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, status: 'Active', qty: 3, img: 'https://images.unsplash.com/photo-1518116518317-91a520f92f25?w=200&auto=format&fit=crop&q=60' }
+    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, status: 'Active', qty: 2 },
+    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, status: 'Active', qty: 3 }
   ];
+  
+  // Dynamic Peer Registry System mapping Unique IDs to handles
   let friends = JSON.parse(localStorage.getItem('n_friends')) || [
-    { id: 'f1', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 }
+    { id: 'CL-81042', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 },
+    { id: 'CL-19284', name: 'Angler_Pete', totalWeight: 9.15, score: 90 }
   ];
+  
+  // Generating your personal unique ID node if it does not exist
+  let myUniqueTacticalId = localStorage.getItem('my_unique_id');
+  if(!myUniqueTacticalId) {
+    myUniqueTacticalId = 'CL-' + Math.floor(10000 + Math.random() * 90000);
+    localStorage.setItem('my_unique_id', myUniqueTacticalId);
+  }
+
   let tournaments = JSON.parse(localStorage.getItem('n_tourneys')) || [
-    { id: 't_default', name: 'Pro Angler Summer Open', leaderboard: [{ name: 'You', points: 0 }, { name: 'BassMaster_Jim', points: 45 }]}
+    { id: 't_default', name: 'Pro Angler Summer Open', leaderboard: [{ name: 'You', points: 0 }, { name: 'BassMaster_Jim', points: 45 }, { name: 'Angler_Pete', points: 20 }]}
   ];
+  
   let chatHistories = {};
   let aiChatHistory = [];
-  let selectedFriendId = 'f1';
+  let selectedFriendId = 'CL-81042';
   let map = null;
   let currentTelemetryContext = null;
 
@@ -381,99 +392,149 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     if(screenId==='ai') { navItems[5].classList.add('active'); renderAiMessages(); }
   }
 
-  /* ── LIVE WEATHER APP AND GEOLOCATION HARDWARE INTEGRATION ── */
-  function syncLocationAndWeather() {
-    showToast("Pinging Geolocation satellites...");
-    if (!navigator.geolocation) {
-      showToast("GPS Module missing or restricted by client container.");
+  /* ── UNIQUE ANGLER TOKEN PARSING SYSTEM ── */
+  function registerNewFriendById() {
+    const input = document.getElementById('new-friend-id');
+    const lookupId = input.value.trim().toUpperCase();
+    if(!lookupId) return;
+
+    if(lookupId === myUniqueTacticalId) {
+      showToast("Cannot loop routing node back to yourself.");
       return;
     }
 
+    // Check if link is already established
+    const existing = friends.find(f => f.id === lookupId);
+    if(existing) {
+      showToast("Mesh network connection already active for this ID.");
+      return;
+    }
+
+    // Pre-seed mock values for structural resolution checks
+    const proceduralHandles = ["LunkerHunter", "FlyCast_Pro", "LakeWeedWacker", "ReelCaptain", "DepthFinderX"];
+    const randomizedName = proceduralHandles[Math.floor(Math.random() * proceduralHandles.length)] + '_' + Math.floor(10 + Math.random() * 89);
+
+    const newPeer = {
+      id: lookupId,
+      name: randomizedName,
+      totalWeight: parseFloat((Math.random() * 15).toFixed(2)),
+      score: Math.floor(Math.random() * 120)
+    };
+
+    friends.push(newPeer);
+    tournaments.forEach(t => t.leaderboard.push({ name: randomizedName, points: Math.floor(Math.random() * 30) }));
+
+    input.value = '';
+    showToast(`Linked: @${randomizedName} successfully!`);
+    selectedFriendId = lookupId;
+    refreshAllEcosystemModules();
+  }
+
+  function renderFriendsSystem() {
+    document.getElementById('my-unique-id-badge').innerText = myUniqueTacticalId;
+    const container = document.getElementById('friends-list-container');
+    if(!container) return;
+
+    if(friends.length === 0) {
+      container.innerHTML = `<div style="font-size:12px; color:var(--text3)">No peer connections mapped.</div>`;
+      return;
+    }
+
+    container.innerHTML = friends.map(f => `
+      <div class="leader-row" style="cursor:pointer; border-color:${f.id===selectedFriendId ? 'var(--primary)': 'var(--border)'}" onclick="selectFriendForChat('${f.id}')">
+        <div>🟢 <b>${f.name}</b> <span style="font-size:10px; color:var(--text3); margin-left:6px;">[${f.id}]</span></div>
+        <div style="font-size:11px; color:var(--primary); font-weight:600;">Chat</div>
+      </div>
+    `).join('');
+
+    const activeF = friends.find(f => f.id === selectedFriendId);
+    if(activeF) {
+      document.getElementById('active-chat-target-lbl').innerText = `Target Node: @${activeF.name} (${activeF.id})`;
+      renderChatMessages();
+    }
+  }
+
+  function selectFriendForChat(id) {
+    selectedFriendId = id;
+    renderFriendsSystem();
+  }
+
+  function renderChatMessages() {
+    const box = document.getElementById('chat-stream-box');
+    const history = chatHistories[selectedFriendId] || [
+      { sender: 'them', text: 'Telemetry linked. Hit any premium feeding zones today?' }
+    ];
+    box.innerHTML = history.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function dispatchMessage() {
+    const input = document.getElementById('chat-message-input');
+    const val = input.value.trim();
+    if(!val) return;
+
+    if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId] = [{ sender: 'them', text: 'Telemetry linked.' }];
+    
+    chatHistories[selectedFriendId].push({ sender: 'me', text: val });
+    input.value = '';
+    renderChatMessages();
+
+    setTimeout(() => {
+      const responses = ["Solid telemetry package received.", "Acknowledged, matching parameters now.", "Good log info."];
+      chatHistories[selectedFriendId].push({ sender: 'them', text: responses[Math.floor(Math.random() * responses.length)] });
+      renderChatMessages();
+      localStorage.setItem('n_chats', JSON.stringify(chatHistories));
+    }, 800);
+  }
+
+  /* ── WEATHER & WEATHER APP SIMULATION MATRIX ── */
+  function syncLocationAndWeather() {
+    showToast("Pinging Geolocation satellites...");
+    if (!navigator.geolocation) {
+      executeWeatherSimulationFallback("38.6270", "-90.1994");
+      return;
+    }
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const lat = pos.coords.latitude.toFixed(4);
       const lon = pos.coords.longitude.toFixed(4);
-      
-      document.getElementById('weather-badge').innerText = "RESOLVING";
-      document.getElementById('weather-badge').style.background = "rgba(6,182,212,0.2)";
-      document.getElementById('weather-badge').style.color = "var(--primary)";
-      document.getElementById('weather-diagnostics').innerHTML = `<b>GPS Locked:</b> Lat ${lat}, Lon ${lon}. Contacting Weather Bureau Server Array...`;
-
       try {
-        // Step 1: Contact National Weather Service metadata point agent
         const pointRes = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
-        if (!pointRes.ok) throw new Error("Weather Grid Unresolved");
+        if (!pointRes.ok) throw new Error();
         const pointData = await pointRes.json();
-        
-        // Step 2: Extract real-time weather grid stream link
-        const forecastUrl = pointData.properties.forecastHourly;
-        const forecastRes = await fetch(forecastUrl);
-        if (!forecastRes.ok) throw new Error("Forecast Matrix Denied");
+        const forecastRes = await fetch(pointData.properties.forecastHourly);
         const forecastData = await forecastRes.json();
-        
-        // Step 3: Parse real-time local conditions
         const currentPeriod = forecastData.properties.periods[0];
-        const temp = currentPeriod.temperature;
-        const unit = currentPeriod.temperatureUnit;
-        const wind = currentPeriod.windSpeed;
-        const shortDesc = currentPeriod.shortForecast;
-
-        currentTelemetryContext = { lat, lon, temp, unit, wind, shortDesc };
-
-        // Step 4: UI telemetry update transformation
-        document.getElementById('weather-badge').innerText = "LIVE SYNCED";
-        document.getElementById('weather-badge').style.background = "rgba(16,185,129,0.2)";
-        document.getElementById('weather-badge').style.color = "var(--accent2)";
-        document.getElementById('weather-diagnostics').innerHTML = `<b>Location Vector Locked</b><br/>📍 Coordinates: ${lat}°N, ${lon}°W<br/>🌡️ Ambient: ${temp}°${unit} — ${shortDesc}<br/>💨 Wind Feed: ${wind}`;
-
-        // Step 5: Instantly push compiled contextual knowledge stack directly to AI Core
-        triggerAiWeatherAssessment(currentTelemetryContext);
-
+        
+        currentTelemetryContext = { lat, lon, temp: currentPeriod.temperature, unit: currentPeriod.temperatureUnit, wind: currentPeriod.windSpeed, shortDesc: currentPeriod.shortForecast };
+        updateWeatherUI();
       } catch (err) {
-        // Reliable fallback simulation framework if server hits standard spatial limit
-        console.warn("NWS limits triggered, executing internal precision modeling:", err);
         executeWeatherSimulationFallback(lat, lon);
       }
-    }, () => {
-      showToast("Location handshake denied. Defaulting to standard grid matrix.");
-      executeWeatherSimulationFallback("38.6270", "-90.1994");
-    });
+    }, () => executeWeatherSimulationFallback("38.6270", "-90.1994"));
   }
 
   function executeWeatherSimulationFallback(lat, lon) {
-    const conditions = ["Overcast & Drizzling", "Bright Sun / High Clarity", "Cloudy & High Barometric Compression", "Choppy Waters / Approaching Front"];
+    const conditions = ["Overcast Skies", "Bright Sun / High Clarity", "Cloudy & Cold Barometric Shift"];
     const desc = conditions[Math.floor(Math.random() * conditions.length)];
-    const temp = Math.floor(68 + Math.random() * 15);
-    
-    currentTelemetryContext = { lat, lon, temp, unit: 'F', wind: "12 mph NE", shortDesc: desc };
+    currentTelemetryContext = { lat, lon, temp: 72, unit: 'F', wind: "10 mph E", shortDesc: desc };
+    updateWeatherUI();
+  }
 
+  function updateWeatherUI() {
     document.getElementById('weather-badge').innerText = "LIVE SYNCED";
     document.getElementById('weather-badge').style.background = "rgba(16,185,129,0.2)";
     document.getElementById('weather-badge').style.color = "var(--accent2)";
-    document.getElementById('weather-diagnostics').innerHTML = `<b>Location Vector Locked (Grid Mode)</b><br/>📍 Coords: ${lat}°N, ${lon}°W<br/>🌡️ Ambient: ${temp}°F — ${desc}<br/>💨 Wind: 12 mph NE`;
-
+    document.getElementById('weather-diagnostics').innerHTML = `<b>Location Vector Locked</b><br/>📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌡️ Environment: ${currentTelemetryContext.temp}°${currentTelemetryContext.unit} — ${currentTelemetryContext.shortDesc}`;
     triggerAiWeatherAssessment(currentTelemetryContext);
   }
 
   function triggerAiWeatherAssessment(ctx) {
-    let recommendation = "";
-    let targetLureName = "";
-
+    let lure = "Neon Crawfish Popper / Deep-Diving Crankbait";
     if (ctx.shortDesc.toLowerCase().includes("sun") || ctx.shortDesc.toLowerCase().includes("clear")) {
-      targetLureName = "Deep-Diving Metallic Cranbait / Bluegill Swimbait";
-      recommendation = `☀️ Clear skies detected at Lat ${ctx.lat}. Sunlight drives target species down to structure lines. Deploy a <b>${targetLureName}</b> to maximize deep reflection matrix tracking.`;
-    } else if (ctx.shortDesc.toLowerCase().includes("cloud") || ctx.shortDesc.toLowerCase().includes("overcast") || ctx.shortDesc.toLowerCase().includes("drizzle")) {
-      targetLureName = "Midnight Shad Topwater Spinner / Dark Chatterbait";
-      recommendation = `☁️ Overcast/drizzle detected at Lat ${ctx.lat}. Low barometric ceilings bring sport fish up to surface weed lines to feed aggressively. Deploy a <b>${targetLureName}</b> near shallow pads.`;
-    } else {
-      targetLureName = "Neon Crawfish Popper / High-Vibration Jig";
-      recommendation = `💨 Active weather dynamics (${ctx.shortDesc}) observed at Lat ${ctx.lat}. Water column clarity is shifting. Tie on a high-displacement <b>${targetLureName}</b> to activate acoustic lateral line attraction.`;
+      lure = "Deep Metallic Spinner / Bluegill Swimbait";
     }
-
-    aiChatHistory.push({ sender: 'me', text: `[System telemetry packet dispatched: Telemetry coordinates ${ctx.lat}, Temp ${ctx.temp}°${ctx.unit}]` });
-    aiChatHistory.push({
-      sender: 'them',
-      text: `🔮 <b>AI Predictive Weather Engine Assessment:</b><br/><br/>${recommendation}<br/><br/><i>Recommended Tactics Matrix: Slow retrieve across structural shelves.</i>`
-    });
+    aiChatHistory.push({ sender: 'me', text: `[Synced matrix coordinates ${ctx.lat}, Temp ${ctx.temp}°${ctx.unit}]` });
+    aiChatHistory.push({ sender: 'them', text: `🔮 <b>AI Live Recommendation Framework:</b><br/>Weather application reports <b>${ctx.shortDesc}</b>. Your targets have shifted down structural drop-offs. Tie on the <b>${lure}</b> to maintain tracking profile efficiency.` });
     renderAiMessages();
   }
 
@@ -481,17 +542,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     const input = document.getElementById('ai-chat-message-input');
     const val = input.value.trim();
     if(!val) return;
-
     aiChatHistory.push({ sender: 'me', text: val });
     input.value = '';
     renderAiMessages();
-
     setTimeout(() => {
-      let reply = "AI Console Node: Awaiting environmental parameter mapping. Press 'Sync Location & Weather Context' above to unlock precision targeting arrays.";
-      if (currentTelemetryContext) {
-        reply = `AI Diagnostics: Current telemetry context is loaded (${currentTelemetryContext.temp}°F, ${currentTelemetryContext.shortDesc}). Cross-referencing matching lures from your active inventory matrix show optimal strike synergy.`;
-      }
-      aiChatHistory.push({ sender: 'them', text: reply });
+      aiChatHistory.push({ sender: 'them', text: currentTelemetryContext ? `AI Node: Ready. Environmental telemetry (${currentTelemetryContext.temp}°F) is currently mapped to active terminal tackle selection tables.` : "Awaiting location handshake telemetry. Select 'Sync Location & Weather Context' above to calculate structural matrix advice." });
       renderAiMessages();
     }, 600);
   }
@@ -502,20 +557,21 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       if(type === 'fillet') {
         document.getElementById('hw-fillet-status').innerHTML = '🟢 Connected & Mapped (0.00 lbs Baseline)';
         document.getElementById('hw-fillet-status').style.color = 'var(--accent2)';
-        showToast("Smart Fillet Board Matrix Locked!");
       } else {
         document.getElementById('hw-bobber-status').innerHTML = '🟢 Connected & Paired (Sonar Active)';
         document.getElementById('hw-bobber-status').style.color = 'var(--accent2)';
-        showToast("Sonar Bobber Sync Mapped!");
       }
-    }, 800);
+      showToast("Hardware Sync Confirmed!");
+    }, 600);
   }
 
   function refreshAllEcosystemModules() {
+    localStorage.setItem('n_friends', JSON.stringify(friends));
     renderGlobalLeaderboard();
     renderTournaments();
     renderCatchHistory();
     renderTackleMatrix();
+    renderFriendsSystem();
     syncDropdownMenus();
   }
 
