@@ -1,5 +1,3 @@
-I updated the scan logic so QR codes are no longer forced into UPC mode when they return numeric-only values. If the QR contains a BassPro URL it uses that, otherwise it uses the raw QR text as the search query.
-
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +35,7 @@ I updated the scan logic so QR codes are no longer forced into UPC mode when the
 }
 html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);background-image:radial-gradient(circle at top right,rgba(6,182,212,0.08),transparent 40%),radial-gradient(circle at bottom left,rgba(16,185,129,0.04),transparent 35%);}
 #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:rgba(10,15,29,0.95);box-shadow:0 0 40px rgba(0,0,0,0.6);border-left:1px solid var(--border);border-right:1px solid var(--border);}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav_h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
 .screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
 .hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17,24,39,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#fff,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -428,32 +426,36 @@ function normalizeBassProProductName(urlString){
 
 function resolveScannedProductMetadata(rawValue, scanFormat=''){
   const trimmed=(rawValue||'').trim();
-  let productName='';
-  let purchaseUrl='';
-  const numericOnly=trimmed.replace(/\D/g,'');
+  const format=(scanFormat||'').toString().toLowerCase();
   if(trimmed.toLowerCase().includes('basspro.com')){
-    purchaseUrl=trimmed;
-    productName=normalizeBassProProductName(trimmed)||'BassPro Product';
-    return {productName,purchaseUrl};
+    return {
+      productName: normalizeBassProProductName(trimmed) || 'BassPro Product',
+      purchaseUrl: trimmed
+    };
   }
   if(/^https?:\/\//i.test(trimmed)){
-    purchaseUrl=trimmed;
-    productName=normalizeBassProProductName(trimmed)||trimmed;
-    return {productName,purchaseUrl};
+    return {
+      productName: normalizeBassProProductName(trimmed) || trimmed,
+      purchaseUrl: trimmed
+    };
   }
-  if(scanFormat==='qr_code'){
-    productName=trimmed||'Scanned Tackle Item';
-    purchaseUrl=getBassProSearchUrl(trimmed||'Fishing Lure');
-    return {productName,purchaseUrl};
+  if(format.includes('qr')){
+    return {
+      productName: trimmed || 'Scanned Tackle Item',
+      purchaseUrl: getBassProSearchUrl(trimmed || 'Fishing Lure')
+    };
   }
-  if(numericOnly.length>=8 && numericOnly.length<=14){
-    productName='UPC-'+numericOnly;
-    purchaseUrl=getBassProSearchUrl('UPC '+numericOnly);
-    return {productName,purchaseUrl,upc:numericOnly};
+  const numericOnly = trimmed.replace(/\D/g,'');
+  if(numericOnly.length >= 8 && numericOnly.length <= 14){
+    return {
+      productName: trimmed,
+      purchaseUrl: getBassProSearchUrl(trimmed)
+    };
   }
-  productName=trimmed||'Scanned Tackle Item';
-  purchaseUrl=getBassProSearchUrl(trimmed||'Fishing Lure');
-  return {productName,purchaseUrl};
+  return {
+    productName: trimmed || 'Scanned Tackle Item',
+    purchaseUrl: getBassProSearchUrl(trimmed || 'Fishing Lure')
+  };
 }
 
 async function bootOpticalSystem(mode,optionalLureId=null){
