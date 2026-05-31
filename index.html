@@ -9,64 +9,79 @@
   :root{--bg:#0d1117;--bg2:#161b22;--text:#e6edf3;--primary:#00b4d8;}
   body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
 
-  /* Persistent Background Logo */
-  .bg-logo {
-    position:fixed; top:0; left:0; width:100%; height:100%;
-    z-index:-1; display:flex; align-items:center; justify-content:center;
-    opacity:0.05; pointer-events:none;
-  }
-  .bg-logo svg { width:60vw; height:60vw; fill:var(--primary); }
-
-  #app{max-width:430px; margin:0 auto; height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center;}
-  .screen{width:100%; padding:20px; box-sizing:border-box; display:none;}
+  #app{max-width:430px; margin:0 auto; height:100dvh; display:flex; flex-direction:column;}
+  .screen{flex-grow:1; padding:20px; display:none; overflow-y:auto;}
   .screen.active{display:block;}
 
   .card{background:var(--bg2); border:1px solid #30363d; border-radius:16px; padding:24px; text-align:center;}
   .form-input{width:100%; background:#21262d; border:1px solid #30363d; border-radius:10px; padding:12px; color:white; margin-top:8px; box-sizing:border-box;}
+  
+  /* Nav Bar */
+  .nav-bar{display:flex; background:var(--bg2); border-top:1px solid #30363d; padding:10px;}
+  .nav-btn{flex:1; text-align:center; padding:10px; cursor:pointer; color:#8b949e;}
+  .nav-btn.active{color:var(--primary);}
 </style>
 </head>
 <body>
 
-<div class="bg-logo">
-  <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/></svg>
-</div>
-
 <div id="app">
+  <!-- AUTH SCREEN -->
   <div id="auth-screen" class="screen active">
-    <div class="card">
+    <div class="card" style="margin-top:20vh;">
       <h2>CatchLog Pro</h2>
-      <p style="color:#8b949e;">Authenticate to continue</p>
-      
       <div id="g_id_onload" 
            data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" 
            data-callback="handleLogin">
       </div>
-      <div class="g_id_signin" data-type="standard"></div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+        <div class="g_id_signin" data-type="standard"></div>
+        <button onclick="alert('Sign up flow')" style="padding:10px; border-radius:8px; border:none; background:var(--primary); color:white; cursor:pointer;">Sign Up</button>
+      </div>
     </div>
   </div>
 
+  <!-- LOG SCREEN -->
   <div id="log-screen" class="screen">
+    <h3>Log Catch</h3>
     <div class="card">
-      <label style="font-weight:600; display:block; text-align:left;">Target Species</label>
-      <input list="fish-list" class="form-input" placeholder="Type or select fish...">
-      <datalist id="fish-list">
-        <option value="Largemouth Bass">
-        <option value="Smallmouth Bass">
-        <option value="Walleye">
-        <option value="Bluegill">
-        <option value="Crappie">
-        <option value="Channel Catfish">
-        <option value="Rainbow Trout">
-      </datalist>
+      <input list="fish-list" class="form-input" placeholder="Species...">
+      <input class="form-input" type="number" placeholder="Weight (lbs)">
+      <button class="form-input" style="background:var(--primary); cursor:pointer;">Save</button>
     </div>
+  </div>
+
+  <!-- FRIENDS SCREEN -->
+  <div id="friends-screen" class="screen">
+    <h3>Friends</h3>
+    <div class="card"><p>No friends added yet.</p></div>
+  </div>
+
+  <!-- AI SCREEN -->
+  <div id="ai-screen" class="screen">
+    <h3>AI Assistant</h3>
+    <div class="card"><p>Ask the AI about fishing tips...</p></div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <div id="nav-bar" class="nav-bar" style="display:none;">
+    <div class="nav-btn active" onclick="showScreen('log-screen', this)">Log</div>
+    <div class="nav-btn" onclick="showScreen('friends-screen', this)">Friends</div>
+    <div class="nav-btn" onclick="showScreen('ai-screen', this)">AI</div>
   </div>
 </div>
 
 <script>
   function handleLogin(response) {
-    // Switch from Auth to Log screen
     document.getElementById('auth-screen').classList.remove('active');
     document.getElementById('log-screen').classList.add('active');
+    document.getElementById('nav-bar').style.display = 'flex';
+  }
+
+  function showScreen(screenId, btn) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    btn.classList.add('active');
   }
 </script>
 </body>
