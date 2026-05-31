@@ -3,92 +3,117 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>CatchLog Pro – Tactical Network</title>
+<title>CatchLog Pro – Premium Tactical Interface</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <!-- Official Google Identity Services SDK -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* ── SYSTEM ARCHITECTURE RESET ───────────────────────────── */
+/* ── PREMIUM SYSTEM RESET & DESIGN TOKENS ────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#30363d;
-  --border:#30363d;--text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --primary:#00b4d8;--primary-d:#0077b6;
-  --accent:#ff6b35;--accent2:#22c55e;--accent3:#f59e0b;
-  --card:#161b22;--radius:16px;
-  --nav-h:70px;--hdr-h:60px;
-  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --bg: #0a0f1d;
+  --bg2: #111827;
+  --bg3: #1f2937;
+  --bg4: #374151;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(0, 180, 216, 0.3);
+  --text: #f3f4f6;
+  --text2: #9ca3af;
+  --text3: #6b7280;
+  --primary: #06b6d4;
+  --primary-glow: rgba(6, 182, 212, 0.2);
+  --primary-d: #0891b2;
+  --accent: #f97316;
+  --accent2: #10b981;
+  --accent3: #f59e0b;
+  --card: rgba(17, 24, 39, 0.7);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --nav-h: 76px;
+  --hdr-h: 64px;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
 }
-html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text)}
-#app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 20px);opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .2s,transform .2s;padding-top:10px;}
-.screen.active{opacity:1;pointer-events:auto;transform:translateX(0)}
-.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:var(--bg);border-bottom:1px solid var(--border);}
-.hdr-title{font-size:18px;font-weight:800;color:var(--text)}
-#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:4px;z-index:100;}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;cursor:pointer;color:var(--text3);}
-.nav-item.active{color:var(--primary)}
-.nav-icon{font-size:18px;}
-.nav-label{font-size:10px;font-weight:700;}
-.fab-wrap{position:relative;top:-8px}
-.fab{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:0 14px 12px}
-.section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin:14px 18px 6px}
-.form-group{margin-bottom:12px;padding:0 14px}
-.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;display:block}
-.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-size:14px;outline:none;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
-.btn{display:flex;align-items:center;justify-content:center;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;}
-.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;}
-.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.leader-row{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.financial-tab{background:linear-gradient(135deg, #1e293b, #0f172a);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:10px 14px;text-align:center;}
-#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--accent2);color:#fff;border-radius:20px;padding:8px 16px;font-size:12px;font-weight:700;z-index:99999;opacity:0;transition:.2s;pointer-events:none;}
-#toast.show{opacity:1}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);background-image: radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 40%), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.04), transparent 35%);}
+#app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:rgba(10, 15, 29, 0.95);box-shadow: 0 0 40px rgba(0,0,0,0.6);border-left: 1px solid var(--border);border-right: 1px solid var(--border);}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4, 0, 0.2, 1), transform .3s cubic-bezier(0.4, 0, 0.2, 1);padding-top:16px;}
+.screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
+.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17, 24, 39, 0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg, #fff, var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 
-/* Communications Interface Styles */
-.chat-window{display:flex;flex-direction:column;height:240px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);overflow:hidden;}
-.chat-stream{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;}
-.msg-b{max-width:80%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.4;}
-.msg-b.me{align-self:flex-end;background:var(--primary);color:#000;border-bottom-right-radius:2px;}
-.msg-b.them{align-self:flex-start;background:var(--bg4);color:var(--text);border-bottom-left-radius:2px;}
+/* ── LUXURY BOTTOM NAVIGATION ────────────────────────────── */
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:rgba(17, 24, 39, 0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px;z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;cursor:pointer;color:var(--text3);transition:color 0.2s, transform 0.2s;}
+.nav-item:active{transform:scale(0.9);}
+.nav-item.active{color:var(--primary);filter:drop-shadow(0 0 8px var(--primary-glow));}
+.nav-icon{font-size:20px;}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:0.3px;}
+.fab-wrap{position:relative;top:-12px}
+.fab{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg, var(--primary), var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4), inset 0 2px 4px rgba(255,255,255,0.3);transition:transform 0.2s;}
+.fab:active{transform:scale(0.92);}
+
+/* ── MODERN CARD & ELEMENT DESIGNS ───────────────────────── */
+.card{background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 14px;box-shadow: 0 4px 20px rgba(0,0,0,0.25);transition:border-color 0.2s, box-shadow 0.2s;}
+.card:hover{border-color:rgba(6, 182, 212, 0.25);box-shadow: 0 4px 24px rgba(6, 182, 212, 0.05);}
+.section-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:16px 22px 8px;display:flex;align-items:center;gap:6px;}
+.form-group{margin-bottom:14px;padding:0 16px}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:0.3px;}
+.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none;transition:border-color 0.2s, box-shadow 0.2s;}
+.form-input:focus, .form-select:focus{border-color:var(--primary);box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+
+/* ── HIGH QUALITY INTERACTIVE ELEMENTS ───────────────────── */
+.btn{display:flex;align-items:center;justify-content:center;padding:12px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;transition:transform 0.2s, filter 0.2s;letter-spacing:0.3px;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:linear-gradient(135deg, var(--primary), var(--primary-d));color:#fff;box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border);box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
+.btn-secondary:hover{background:var(--bg4);}
+.leader-row{background:rgba(31, 41, 55, 0.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;backdrop-filter:blur(4px);}
+.financial-tab{background:linear-gradient(135deg, #1e293b, #0f172a);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:12px 16px;text-align:center;box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 15px rgba(0,0,0,0.3);}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16, 185, 129, 0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);transition:opacity 0.3s, top 0.3s;pointer-events:none;}
+#toast.show{opacity:1;top:24px;}
+
+/* Communications Matrix Engine */
+.chat-window{display:flex;flex-direction:column;height:260px;background:rgba(17, 24, 39, 0.6);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden;}
+.chat-stream{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45;box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+.msg-b.me{align-self:flex-end;background:linear-gradient(135deg, var(--primary), var(--primary-d));color:#fff;border-bottom-right-radius:4px;}
+.msg-b.them{align-self:flex-start;background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border);}
 .chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2)}
-.chat-input-row input{flex:1;background:transparent;border:none;padding:10px;color:var(--text);font-size:13px;outline:none;}
+.chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none;}
 
-/* AI Advisor Interface Adjustments */
-.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 40px);margin:0 14px;}
+/* AI System Component Layout Modifiers */
+.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 48px);margin:0 16px;}
+.split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 12px;}
 
-/* Split Input Row Structure */
-.split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 10px;}
-
-/* AUTH SYSTEM HUB SCREEN */
+/* ── PREMIUM AUTH SYSTEM HUD SCREEN ──────────────────────── */
 #auth-wrap {
   position:fixed;inset:0;z-index:1000;background:var(--bg);
+  background-image: radial-gradient(circle at 50% 30%, rgba(6, 182, 212, 0.15), transparent 60%), radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05), transparent 50%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
-.auth-container { position:relative; z-index:5; width:100%; max-width:340px; text-align:center; }
+.auth-container { position:relative; z-index:5; width:100%; max-width:350px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: rgba(17, 24, 39, 0.85); }
 
-/* Dedicated App Fish Logo Style Block */
+/* Luxury Fish Logo Crest Component */
 .app-fish-logo {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 16px;
-  fill: var(--primary);
-  filter: drop-shadow(0 0 12px rgba(0, 180, 216, 0.4));
-  animation: logo-glow 3s ease-in-out infinite alternate;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 20px;
+  fill: url(#fishGradient);
+  filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.5));
+  animation: logo-glow 3.5s ease-in-out infinite alternate;
 }
 @keyframes logo-glow {
-  0% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(0, 180, 216, 0.3)); }
-  100% { transform: scale(1.03); filter: drop-shadow(0 0 18px rgba(0, 180, 216, 0.6)); }
+  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.4)); }
+  100% { transform: scale(1.04) translateY(-4px); filter: drop-shadow(0 0 24px rgba(6, 182, 212, 0.7)); }
 }
 
 /* Custom Google Stack Layout Formatting */
 .oauth-btn-stack {
-  margin-top: 24px;
+  margin-top: 26px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
 }
 .oauth-action-block {
@@ -96,6 +121,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+.oauth-divider {
+  font-size: 11px;
+  margin-bottom: 8px;
+  font-weight: 800;
+  color: var(--text3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 </style>
 </head>
@@ -105,17 +138,24 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <!-- GOOGLE OAUTH SECURITY AUTH PAGE -->
 <div id="auth-wrap">
-  <div class="auth-container card" style="padding: 24px 16px;">
+  <div class="auth-container card" style="padding: 32px 24px;">
     
     <!-- BRAND FISH LOGO EMBLEM Component -->
     <div class="app-fish-logo">
       <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;">
-        <path d="M12,2C11.38,2 10.74,2.15 10.14,2.45L2.45,6.3C1.16,6.94 0.5,8.43 1,9.83L2.4,13.75C2.14,14.65 2,15.6 2,16.5C2,17.84 2.3,19.13 2.87,20.3L3,20.5L3.2,20.35C4.83,19.12 6.83,18.5 8.85,18.6C10.37,18.68 11.84,19.15 13.15,19.94L18.42,23.1C19.7,23.87 21.36,23.5 22.2,22.25L23.75,20C24.4,19 24.1,17.6 23.12,16.92L21.36,15.7C21.78,14.2 21.87,12.63 21.6,11.08L22.9,9.3C23.73,8.17 23.5,6.6 22.37,5.77L18.64,3C17.7,2.3 16.5,2 15.34,2H12M12,4H15.34C16,4 16.63,4.18 17.18,4.58L20.9,7.35C21.23,7.6 21.3,8.06 21.05,8.4L19.47,10.55L17.74,9.25C17.14,8.8 16.33,8.9 15.86,9.5C15.4,10.1 15.5,10.9 16.1,11.37L18.25,13C18.12,14.4 17.76,15.77 17.18,17.04L12.1,14C11.5,13.64 10.72,13.73 10.2,14.23C9.7,14.74 9.6,15.5 10,16.1L11.83,18.8C10.93,18.15 9.9,17.74 8.8,17.67C7,17.5 5.23,18 3.73,19C4,17.3 4.4,15.64 5,14.07L9.34,16.67C9.94,17 10.72,16.9 11.2,16.3C11.66,15.7 11.56,14.9 11,14.56L7.1,12.22C7.86,10.63 8.84,9.18 10,7.9L12.35,9.65C12.65,9.87 13,10 13.34,10C13.84,10 14.33,9.75 14.6,9.3C15.07,8.7 14.97,7.9 14.37,7.43L11.6,5.35C12.2,5 12.87,4.82 13.56,4.82A1,1 0 0,0 14.56,3.82A1,1 0 0,0 13.56,2.82C12.4,2.82 11.26,3.15 10.27,3.77L11.08,4.3L10.5,5.1L9,4C8.16,4.56 7.42,5.26 6.8,6.07L8.6,7.42C9.2,7.88 9.3,8.7 8.84,9.3C8.38,9.9 7.56,10 7,9.5L5.6,8.45C5.23,9.33 4.96,10.24 4.8,11.18L6.87,12.42C7.47,12.8 7.63,13.6 7.25,14.2C6.9,14.7 6.35,14.9 5.8,14.9C5.5,14.9 5.2,14.8 4.93,14.64L3.23,13.62C3.1,12.5 3.14,11.37 3.37,10.28L2.24,9C2.06,8.5 2.25,7.9 2.7,7.66L10.38,3.82C10.88,3.57 11.44,3.45 12,3.45M19.5,6A1,1 0 0,1 20.5,7A1,1 0 0,1 19.5,8A1,1 0 0,1 18.5,7A1,1 0 0,1 19.5,6Z"/>
+        <defs>
+          <linearGradient id="fishGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#22d3ee" />
+            <stop offset="100%" stop-color="#0891b2" />
+          </linearGradient>
+        </defs>
+        <!-- High Quality Abstract Fish Crest Geometry -->
+        <path d="M2,12C4.5,7 8.5,4.5 13,4.5C15.5,4.5 18,5.5 20,7C19,8 18,9.5 18,11C18,12.5 19,14 20,15C18,16.5 15.5,17.5 13,17.5C8.5,17.5 4.5,15 2,12 M13,6.5C11,6.5 8,8 6,12C8,16 11,17.5 13,17.5C16.5,17.5 18,14.5 16,12C18,9.5 16.5,6.5 13,6.5 M22,6C21,8 21,10 22,12C21,14 21,16 22,18C20,16.5 19.5,14.5 19.5,12C19.5,9.5 20,7.5 22,6 M13,10.5A1.5,1.5 0 1,1 11.5,12A1.5,1.5 0 0,1 13,10.5Z"/>
       </svg>
     </div>
 
-    <h2 style="margin-bottom:4px; font-weight:800; font-size:24px; letter-spacing:-0.5px;">CatchLog Pro</h2>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:4px;">Tactical Ecosystem Gateway</p>
+    <h2 style="margin-bottom:4px; font-weight:900; font-size:26px; letter-spacing:-0.75px; background: linear-gradient(135deg, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CatchLog Pro</h2>
+    <p style="font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; letter-spacing:0.5px;">Tactical Ecosystem Gateway</p>
     
     <!-- Google GIS Credential Configuration Script Tag -->
     <div id="g_id_onload" 
@@ -128,14 +168,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       
       <!-- RETURNING USERS CONTAINER -->
       <div class="oauth-action-block">
-        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3); letter-spacing: 0.5px;">RETURNING MEMBERS</p>
-        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
+        <p class="oauth-divider">Returning Members</p>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
       </div>
       
       <!-- NEW ACCOUNT CREATION CONTAINER -->
       <div class="oauth-action-block">
-        <p style="font-size: 11px; margin-bottom: 6px; font-weight: bold; color: var(--text3); letter-spacing: 0.5px;">NEW ANGLER REGISTRATION</p>
-        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
+        <p class="oauth-divider">New Angler Registration</p>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
       </div>
 
     </div>
@@ -145,42 +185,42 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <div id="app">
   <header class="hdr">
     <div class="hdr-title">CatchLog Tactical</div>
-    <div style="font-size:10px;font-weight:800;background:var(--bg3);padding:4px 8px;border-radius:8px;">🟢 ONLINE NODE</div>
+    <div style="font-size:10px; font-weight:800; background:rgba(16, 185, 129, 0.15); color: var(--accent2); border: 1px solid rgba(16, 185, 129, 0.3); padding:4px 10px; border-radius:20px; letter-spacing:0.5px;">🟢 ONLINE NODE</div>
   </header>
   
-  <main style="flex:1;position:relative;">
+  <main style="flex:1; position:relative;">
     
     <!-- DASHBOARD VIEW -->
     <div id="screen-dashboard" class="screen active">
-      <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.08),transparent)">
-        <div style="font-size:12px;color:var(--text2)">Global Angler Valuation</div>
-        <div style="font-size:18px;font-weight:800;" id="dash-valuation-label">Tackle Box Value: $0.00</div>
+      <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.02)); border-color: rgba(6, 182, 212, 0.2);">
+        <div style="font-size:12px; color:var(--text2); font-weight:600; letter-spacing:0.3px;">Global Angler Valuation</div>
+        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:2px;" id="dash-valuation-label">Tackle Box Value: $0.00</div>
       </div>
       
-      <div class="section-label">🏆 Global Daily Leaderboard (Total Weight)</div>
-      <div style="padding:0 14px;" id="global-leaderboard-deck"></div>
+      <div class="section-label">🏆 Global Daily Leaderboard</div>
+      <div style="padding:0 16px;" id="global-leaderboard-deck"></div>
 
       <div class="section-label">⚡ Active Custom Tournaments</div>
-      <div style="padding:0 14px;" id="tournament-deck"></div>
-      <div style="padding:0 14px; margin-top:4px;">
+      <div style="padding:0 16px;" id="tournament-deck"></div>
+      <div style="padding:0 16px; margin-top:6px;">
         <button class="btn btn-secondary" onclick="switchScreen('tourney-manager')">🛠️ Tournament Design Center</button>
       </div>
 
       <div class="section-label">Recent Catch Stream</div>
-      <div id="dashboard-catch-list" style="padding:0 14px;"></div>
+      <div id="dashboard-catch-list" style="padding:0 16px;"></div>
     </div>
 
     <!-- TOURNAMENT BUILDER VIEW -->
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Design Custom Tournament Arena</div>
       <div class="card">
-        <div style="margin-bottom:10px;">
+        <div style="margin-bottom:14px;">
           <label class="form-label">Tournament Arena Label</label>
           <input type="text" id="t-name-input" class="form-input" value="Weekend Bass Brawl"/>
         </div>
         <button class="btn btn-primary" onclick="createNewTournament()">Launch Tournament Structure</button>
       </div>
-      <div style="padding:0 14px;">
+      <div style="padding:0 16px;">
          <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back to Dashboard</button>
       </div>
     </div>
@@ -226,7 +266,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
             <option value="Mythic">Mythic Tier (5x Multiplier)</option>
           </select>
         </div>
-        <div class="form-row" style="margin-bottom:12px;">
+        <div class="form-row" style="margin-bottom:14px;">
           <div class="form-group" style="padding:0;"><label class="form-label">Weight (lbs)</label><input type="number" id="form-weight" step="0.01" class="form-input" placeholder="0.00" required/></div>
           <div class="form-group" style="padding:0;"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
         </div>
@@ -240,7 +280,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
             <option value="global">Global Marketplace Standings Only</option>
           </select>
         </div>
-        <div style="padding:0 14px;">
+        <div style="padding:0 16px;">
            <button type="submit" class="btn btn-primary">Publish Certified Entry Logs</button>
         </div>
       </form>
@@ -249,22 +289,22 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <!-- FRIENDS & COMMUNICATIONS VIEW -->
     <div id="screen-friends" class="screen">
       <div class="section-label">Add Peer Connection</div>
-      <div class="card" style="display:flex; gap:8px; margin-bottom:10px;">
+      <div class="card" style="display:flex; gap:10px; margin-bottom:12px;">
         <input type="text" id="new-friend-name" class="form-input" placeholder="Enter Angler Handle..."/>
-        <button class="btn btn-primary" style="width:auto; padding:0 16px;" onclick="registerNewFriend()">Add</button>
+        <button class="btn btn-primary" style="width:auto; padding:0 20px;" onclick="registerNewFriend()">Add</button>
       </div>
 
       <div class="section-label">Peer Array</div>
-      <div style="padding:0 14px; margin-bottom:14px;" id="friends-list-container"></div>
+      <div style="padding:0 16px; margin-bottom:16px;" id="friends-list-container"></div>
 
       <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
-      <div class="card" style="padding:8px;">
-        <div style="font-size:12px; margin-bottom:6px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
+      <div class="card" style="padding:10px;">
+        <div style="font-size:12px; margin-bottom:8px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
         <div class="chat-window">
           <div class="chat-stream" id="chat-stream-box"></div>
           <div class="chat-input-row">
             <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
-            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 16px;" onclick="dispatchMessage()">Send</button>
+            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchMessage()">Send</button>
           </div>
         </div>
       </div>
@@ -273,32 +313,32 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <!-- TACKLE STORAGE BOX -->
     <div id="screen-tackle" class="screen">
       <div class="financial-tab">
-        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;">💼 Total Active Tackle Value</div>
-        <div style="font-size:22px;font-weight:800;color:var(--accent2);margin-top:2px;" id="fin-active-val">$0.00</div>
+        <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
+        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px; filter: drop-shadow(0 0 10px rgba(16,185,129,0.2));" id="fin-active-val">$0.00</div>
       </div>
 
       <div class="section-label">Tackle Storage Matrix</div>
-      <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 14px;"></div>
+      <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;"></div>
     </div>
 
     <!-- AI ADVISOR VIEW -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 CatchLog AI Core Tactical Console</div>
-      <div class="ai-chat-window card" style="padding:8px;">
+      <div class="ai-chat-window card" style="padding:10px;">
         <div class="chat-window" style="height:100%;">
           <div class="chat-stream" id="ai-chat-stream-box">
             <div class="msg-b them">Welcome to your AI Tactical Node. Ask me about custom rigs, tackle synergy mapping, water patterns, or tournament rarity score balancing.</div>
           </div>
           <div class="chat-input-row">
             <input type="text" id="ai-chat-message-input" placeholder="Ask AI Advisor..."/>
-            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 16px;" onclick="dispatchAiMessage()">Query</button>
+            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchAiMessage()">Query</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- DEPLOYED MAP VIEW -->
-    <div id="screen-map" class="screen"><div id="full-map" style="position:absolute;inset:0;"></div></div>
+    <div id="screen-map" class="screen"><div id="full-map" style="position:absolute; inset:0;"></div></div>
   </main>
 
   <nav id="bottom-nav">
@@ -336,7 +376,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
   const rarityMap = { "Common": 1, "Uncommon": 2, "Rare": 3, "Mythic": 5 };
 
-  // Verification callback handling for Google One Tap / Button Ecosystem Responses
   function handleGoogleAuthResponse(response) {
     if (response.credential) {
       initAppCore();
@@ -373,7 +412,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     }
   }
 
-  // Detect manual keyboard adjustment to flip select node setting to none
   function handleManualTyping() {
     document.getElementById('form-species-dropdown').value = 'none';
   }
@@ -394,7 +432,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     syncDropdownMenus();
   }
 
-  // LEADERBOARD STACK
   function renderGlobalLeaderboard() {
     let myWeight = catches.reduce((acc, c) => acc + parseFloat(c.weight), 0);
     let boardList = [{ name: 'You (Online Node)', w: myWeight }, ...friends.map(f => ({ name: f.name, w: f.totalWeight }))];
@@ -403,7 +440,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `
       <div class="leader-row">
         <div>🎯 ${idx+1}. <b>${p.name}</b></div>
-        <div style="font-weight:800;color:var(--primary);">${p.w.toFixed(2)} lbs</div>
+        <div style="font-weight:800; color:var(--primary);">${p.w.toFixed(2)} lbs</div>
       </div>
     `).join('');
   }
@@ -415,15 +452,15 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       standings.sort((a,b) => b.points - a.points);
       
       let standingsHtml = standings.map((s, idx) => `
-        <div style="font-size:12px; display:flex; justify-content:between; margin-top:4px; color:var(--text2)">
-          <span style="flex:1;">${idx+1}. ${s.name}</span>
+        <div style="font-size:12px; display:flex; justify-content:space-between; margin-top:6px; color:var(--text2)">
+          <span>${idx+1}. ${s.name}</span>
           <span style="font-weight:bold; color:var(--accent3)">${s.points} Pts</span>
         </div>
       `).join('');
 
       return `
-        <div class="card" style="margin:0 0 8px 0; background:var(--bg3)">
-          <div style="font-size:13px; font-weight:800; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:4px;">🏆 ${t.name}</div>
+        <div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)">
+          <div style="font-size:13px; font-weight:800; color:#fff; border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:4px;">🏆 ${t.name}</div>
           ${standingsHtml}
         </div>
       `;
@@ -444,7 +481,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     switchScreen('dashboard');
   }
 
-  // COMMUNICATIONS MESH
   function registerNewFriend() {
     const input = document.getElementById('new-friend-name');
     const name = input.value.trim();
@@ -522,7 +558,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     }, 800);
   }
 
-  // FINANCIAL TACKLE BOX SYSTEMS
   function renderTackleMatrix() {
     let activeTotal = 0;
     lures.forEach(l => { if(l.status === 'Active') activeTotal += (l.cost * l.qty); });
@@ -531,15 +566,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${activeTotal.toFixed(2)}`;
 
     document.getElementById('tackle-grid').innerHTML = lures.map(l => `
-      <div class="card" style="margin:0; background:var(--bg2)">
-        <div style="font-size:13px; font-weight:700;">${l.name}</div>
-        <div style="font-size:11px; color:var(--accent2);">$${l.cost.toFixed(2)}</div>
-        <div style="font-size:12px; color:var(--text3); margin-top:4px;">Qty Owned: ${l.qty}</div>
+      <div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45)">
+        <div style="font-size:13px; font-weight:700; color:#fff;">${l.name}</div>
+        <div style="font-size:12px; color:var(--accent2); font-weight:600; margin-top:2px;">$${l.cost.toFixed(2)}</div>
+        <div style="font-size:11px; color:var(--text3); margin-top:6px; font-weight:500;">Qty Owned: ${l.qty}</div>
       </div>
     `).join('');
   }
 
-  // TACTICAL AI CORES
   function renderAiMessages() {
     const box = document.getElementById('ai-chat-stream-box');
     if (aiChatHistory.length === 0) {
@@ -575,7 +609,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     }, 700);
   }
 
-  // DATA PERSISTENCE COMMIT CORES
   function syncDropdownMenus() {
     document.getElementById('form-lure-link').innerHTML = lures.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
     
@@ -609,8 +642,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     }
 
     document.getElementById('catch-form').reset();
-    
-    // Reset inputs and defaults
     document.getElementById('form-species-dropdown').value = 'Largemouth Bass';
     document.getElementById('form-species').value = "Largemouth Bass";
     
@@ -622,7 +653,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function renderCatchHistory() {
     const element = document.getElementById('dashboard-catch-list');
     if(catches.length === 0) {
-      element.innerHTML = `<div style="font-size:12px; color:var(--text3); text-align:center; padding:10px;">Journal empty.</div>`;
+      element.innerHTML = `<div style="font-size:12px; color:var(--text3); text-align:center; padding:16px;">Journal empty.</div>`;
       return;
     }
     element.innerHTML = catches.map(c => `
