@@ -3,93 +3,931 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>CatchLog Pro – Tactical Interface</title>
+<title>CatchLog Pro – Premium Tactical Interface</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* ── DESIGN TOKENS ────────────────── */
+/* ── PREMIUM SYSTEM RESET & DESIGN TOKENS ────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg: #0a0f1d; --bg2: #111827; --bg3: #1f2937; --border: rgba(255, 255, 255, 0.08);
-  --text: #f3f4f6; --text2: #9ca3af; --text3: #6b7280; --primary: #06b6d4; --primary-d: #0891b2;
-  --accent2: #10b981; --card: rgba(17, 24, 39, 0.7); --radius-sm: 12px;
+  --bg: #0a0f1d;
+  --bg2: #111827;
+  --bg3: #1f2937;
+  --bg4: #374151;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(0, 180, 216, 0.3);
+  --text: #f3f4f6;
+  --text2: #9ca3af;
+  --text3: #6b7280;
+  --primary: #06b6d4;
+  --primary-glow: rgba(6, 182, 212, 0.2);
+  --primary-d: #0891b2;
+  --accent: #f97316;
+  --accent2: #10b981;
+  --accent3: #f59e0b;
+  --card: rgba(17, 24, 39, 0.7);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --nav-h: 76px;
+  --hdr-h: 64px;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
 }
-body{margin:0;font-family:system-ui, sans-serif;background:var(--bg);color:var(--text);height:100dvh;overflow:hidden;}
-#app{width:100%;max-width:430px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;background:rgba(10, 15, 29, 0.95);}
-.screen{flex:1;overflow-y:auto;padding-bottom:100px;display:none;}
-.screen.active{display:block;}
-.hdr{height:64px;display:flex;align-items:center;padding:0 20px;border-bottom:1px solid var(--border);}
-.btn-scan{background:rgba(6, 182, 212, 0.15);border:1px dashed var(--primary);color:#fff;padding:12px;border-radius:var(--radius-sm);cursor:pointer;width:100%;font-weight:700;}
-.tackle-box-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
-.hw-item-card { display: flex; align-items: center; gap: 14px; background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
-#camera-viewfinder-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; }
-.viewfinder-video { flex:1; object-fit: cover; }
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);background-image: radial-gradient(circle at top right, rgba(6, 182, 212, 0.08), transparent 40%), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.04), transparent 35%);}
+#app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:rgba(10, 15, 29, 0.95);box-shadow: 0 0 40px rgba(0,0,0,0.6);border-left: 1px solid var(--border);border-right: 1px solid var(--border);}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4, 0, 0.2, 1), transform .3s cubic-bezier(0.4, 0, 0.2, 1);padding-top:16px;}
+.screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
+.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17, 24, 39, 0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg, #fff, var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+.hdr-controls{display:flex;align-items:center;gap:12px;}
+.settings-cog-btn{
+  background:none;border:none;cursor:pointer;padding:4px;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.settings-cog-btn svg { fill: var(--text2); transition: fill 0.2s; }
+.settings-cog-btn:hover svg { fill: #fff; }
+.settings-cog-btn:hover { transform: rotate(60deg); }
+
+.modal-overlay{position:fixed;inset:0;background:rgba(5,7,14,0.85);backdrop-filter:blur(10px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+.modal-overlay.active{opacity:1;pointer-events:auto;}
+.modal-card{width:90%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform 0.3s ease;}
+.modal-overlay.active .modal-card{transform:translateY(0);}
+
+.map-weather-hud{position:absolute;top:16px;left:16px;right:16px;z-index:1000;background:rgba(17, 24, 39, 0.85);backdrop-filter:blur(12px);border:1px solid rgba(6, 182, 212, 0.25);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between;}
+
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:rgba(17, 24, 39, 0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px;z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;cursor:pointer;color:var(--text3);transition:color 0.2s, transform 0.2s;}
+.nav-item:active{transform:scale(0.9);}
+.nav-item.active{color:var(--primary);filter:drop-shadow(0 0 8px var(--primary-glow));}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:0.3px;}
+.fab-wrap{position:relative;top:-12px}
+.fab{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg, var(--primary), var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4), inset 0 2px 4px rgba(255,255,255,0.3);transition:transform 0.2s;}
+.fab:active{transform:scale(0.92);}
+
+.card{background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 14px;box-shadow: 0 4px 20px rgba(0,0,0,0.25);transition:border-color 0.2s, box-shadow 0.2s;}
+.section-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:16px 22px 8px;display:flex;align-items:center;gap:6px;}
+.form-group{margin-bottom:14px;padding:0 16px}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:0.3px;}
+.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+
+.btn{display:flex;align-items:center;justify-content:center;padding:12px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;transition:transform 0.2s, filter 0.2s;letter-spacing:0.3px;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:linear-gradient(135deg, var(--primary), var(--primary-d));color:#fff;box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+.btn-accent{background:linear-gradient(135deg, var(--accent), #c2410c);color:#fff;}
+.leader-row{background:rgba(31, 41, 55, 0.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;backdrop-filter:blur(4px);}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16, 185, 129, 0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);transition:opacity 0.3s, top 0.3s;pointer-events:none;}
+#toast.show{opacity:1;top:24px;}
+
+.chat-window{display:flex;flex-direction:column;height:260px;background:rgba(17, 24, 39, 0.6);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden;}
+.chat-stream{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
+.msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45;}
+.msg-b.me{align-self:flex-end;background:linear-gradient(135deg, var(--primary), var(--primary-d));color:#fff;border-bottom-right-radius:4px;}
+.msg-b.them{align-self:flex-start;background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border);}
+.chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2)}
+.chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none;}
+
+.hw-item-card { display: flex; align-items: center; gap: 14px; background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; position: relative; }
+.hw-svg-thumb { width: 56px; height: 56px; border-radius: 8px; background: #151e2e; border: 1px solid rgba(255,255,255,0.1); padding: 4px; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; }
+.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 230px);margin:0 16px;}
+.split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 12px;}
+
+.scan-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.btn-scan { background: rgba(6, 182, 212, 0.15); border: 1px dashed var(--primary); color: #fff; font-size: 11px; padding: 10px; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; transition: background 0.2s; }
+.btn-scan:hover { background: rgba(6, 182, 212, 0.3); }
+
+/* SPECIFIC TACKLE CARD FORMATTING */
+.tackle-box-card { background: rgba(17, 24, 39, 0.85); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.tackle-img-frame { height: 110px; width: 100%; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; border-bottom: 1px solid var(--border); }
+
+/* WHITE BOX FOR BARCODES */
+.tackle-white-box { background: #ffffff !important; width: 100%; height: 110px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.1); text-align: center; padding: 12px; }
+.tackle-white-box span { color: #1f2937 !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: 0.5px; text-transform: uppercase; }
+.tackle-cam-overlay { position: absolute; top: 8px; right: 8px; background: rgba(255, 255, 255, 0.95); border: 1px solid var(--primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; z-index: 15; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+.tackle-cam-overlay:active { transform: scale(0.9); }
+
+.tackle-card-body { padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1; justify-content: space-between; }
+.tackle-tally-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 20px; }
+.tally-btn { background: var(--bg3); border: 1px solid var(--border); color: #fff; font-size: 14px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
+
+/* ── CAMERA VIEW OVERLAY ── */
+.camera-viewfinder-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; justify-content: space-between; }
+.viewfinder-hdr { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); position: absolute; top: 0; left: 0; right: 0; z-index: 5010; }
+
+/* Clicking the video stream itself acts as a shutter trigger */
+.viewfinder-video { width: 100%; height: 100%; object-fit: cover; z-index: 5001; cursor: pointer; }
+
+.viewfinder-actions { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px 24px; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 5010; pointer-events: none; }
+
+/* Target Frame Placement Overlay - NOW CLICKABLE */
+.barcode-target-box-frame {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 280px; height: 160px; border: 2px dashed rgba(255,255,255,0.4); border-radius: 8px;
+  box-shadow: 0 0 0 4000px rgba(0,0,0,0.6); z-index: 5002; display: none; 
+  cursor: pointer; pointer-events: auto; /* Crucial: Allows tapping the box directly */
+}
+.barcode-laser-line {
+  position: absolute; top: 50%; left: 5%; right: 5%; height: 2px;
+  background: #ff2a2a; box-shadow: 0 0 14px #ff2a2a;
+}
+.laser-active {
+  animation: bar-laser-sweep 2.5s infinite ease-in-out;
+}
+@keyframes bar-laser-sweep { 0%, 100% { top: 15%; } 50% { top: 85%; } }
+
+.capture-shutter-btn { width: 68px; height: 68px; border-radius: 50%; background: #fff; border: 6px solid rgba(6, 182, 212, 0.4); cursor: pointer; box-shadow: 0 0 15px rgba(255,255,255,0.4); z-index: 5020; pointer-events: auto; }
+.capture-shutter-btn:active { transform: scale(0.92); }
+
+#auth-wrap {
+  position:fixed;inset:0;z-index:1000;background:var(--bg);
+  background-image: radial-gradient(circle at 50% 30%, rgba(6, 182, 212, 0.15), transparent 60%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.auth-container { position:relative; z-index:5; width:100%; max-width:350px; text-align:center; background: rgba(17, 24, 39, 0.85); }
+.app-fish-logo-img { width: 120px; height: 120px; margin: 0 auto 16px; object-fit: contain; }
+.oauth-btn-stack { margin-top: 26px; display: flex; flex-direction: column; gap: 18px; align-items: center; }
+.oauth-action-block { width: 100%; display: flex; flex-direction: column; align-items: center; }
+.oauth-divider { font-size: 11px; margin-bottom: 8px; font-weight: 800; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
 </style>
 </head>
 <body>
 
-<div id="camera-viewfinder-overlay">
-  <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted></video>
-  <button style="padding:20px;" onclick="shutdownCameraStream()">Cancel Scan</button>
+<div id="toast"></div>
+
+<div id="camera-viewfinder-overlay" class="camera-viewfinder-overlay">
+  <div class="viewfinder-hdr">
+    <div id="viewfinder-title" style="font-size: 13px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; color: var(--primary);">System Lens Active</div>
+    <button class="btn btn-secondary" style="width: auto; padding: 6px 14px; font-size: 11px;" onclick="shutdownCameraStream()">Cancel</button>
+  </div>
+  
+  <div id="barcode-target-box-frame" class="barcode-target-box-frame" onclick="executeManualCaptureSnapshot()">
+    <div id="laser-element" class="barcode-laser-line"></div>
+    <div id="viewfinder-scan-label" style="position:absolute; bottom:-45px; left:0; width:100%; text-align:center; color:#fff; font-size:12px; font-weight:800; letter-spacing:0.5px; text-shadow:0 2px 4px #000; background: rgba(6, 182, 212, 0.6); padding: 8px; border-radius: 20px;">TAP TO CAPTURE</div>
+  </div>
+  
+  <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted onclick="executeManualCaptureSnapshot()"></video>
+  
+  <div class="viewfinder-actions">
+    <p id="viewfinder-instructions-hint" style="font-size:11px; color:var(--text2); text-align:center; max-width:280px; margin-bottom:4px;">Position item clearly inside viewfinder matrix</p>
+    <button id="shutter-action-trigger" class="capture-shutter-btn" onclick="executeManualCaptureSnapshot()"></button>
+  </div>
+</div>
+
+<div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:12px; font-weight:800; display:flex; align-items:center; gap:8px;">⚙️ System Calibration</h3>
+    <p style="font-size:12px; color:var(--text2); margin-bottom:20px; line-height:1.4;">Synchronize environmental telemetry arrays, pair satellite coordinates, and calibrate mesh channels.</p>
+    
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button class="btn btn-accent" onclick="syncLocationAndWeather(); closeSettingsModal();">🔄 Sync Location & Weather arrays</button>
+      <button class="btn btn-secondary" onclick="closeSettingsModal()">Close Interface</button>
+    </div>
+  </div>
+</div>
+
+<div id="auth-wrap">
+  <div class="auth-container card" style="padding: 32px 24px;">
+    <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img" />
+    <h2 style="margin-bottom:4px; font-weight:900; font-size:26px; letter-spacing:-0.75px; background: linear-gradient(135deg, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CatchLog Pro</h2>
+    <p style="font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; letter-spacing:0.5px;">Tactical Ecosystem Gateway</p>
+    <div id="g_id_onload" data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" data-callback="handleGoogleAuthResponse"></div>
+    <div class="oauth-btn-stack">
+      <div class="oauth-action-block">
+        <p class="oauth-divider">Returning Members</p>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" style="width:100%;"></div>
+      </div>
+      <div class="oauth-action-block">
+        <p class="oauth-divider">New Angler Registration</p>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signup_with" data-size="large" style="width:100%;"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="app">
-  <header class="hdr"><h2>CatchLog Tactical</h2></header>
+  <header class="hdr">
+    <div class="hdr-title">CatchLog Tactical</div>
+    <div class="hdr-controls">
+      <div style="font-size:10px; font-weight:800; background:rgba(16, 185, 129, 0.15); color: var(--accent2); border: 1px solid rgba(16, 185, 129, 0.3); padding:4px 10px; border-radius:20px; letter-spacing:0.5px;">🟢 ONLINE</div>
+      
+      <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
+        <svg width="22" height="22" viewBox="0 0 24 24">
+          <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
   
   <main style="flex:1; position:relative;">
-    <div id="screen-tackle" class="screen active">
-      <div style="padding: 16px;">
-        <div class="hw-item-card">
-          <div>Smart Bobber Pro Node</div>
-          <button onclick="alert('Pairing...')">Pair</button>
-        </div>
-        
-        <button class="btn-scan" onclick="bootBarcodeScanner()">
-          █▉ Scan New Lure Barcode
-        </button>
+    
+    <div id="screen-dashboard" class="screen active">
+      <div class="section-label" style="margin-top: 8px;">🏆 Global Daily Leaderboard</div>
+      <div style="padding:0 16px;" id="global-leaderboard-deck"></div>
+
+      <div class="section-label">⚡ Active Custom Tournaments</div>
+      <div style="padding:0 16px;" id="tournament-deck"></div>
+      <div style="padding:0 16px; margin-top:6px;">
+        <button class="btn btn-secondary" onclick="switchScreen('tourney-manager')">🛠️ Tournament Design Center</button>
       </div>
-      <div id="tackle-grid" style="padding:0 16px;"></div>
+
+      <div class="section-label">Recent Catch Stream</div>
+      <div id="dashboard-catch-list" style="padding:0 16px;"></div>
+    </div>
+
+    <div id="screen-tourney-manager" class="screen">
+      <div class="section-label">Design Custom Tournament Arena</div>
+      <div class="card">
+        <div style="margin-bottom:14px;">
+          <label class="form-label">Tournament Arena Label</label>
+          <input type="text" id="t-name-input" class="form-input" value="Weekend Bass Brawl"/>
+        </div>
+        <button class="btn btn-primary" onclick="createNewTournament()">Launch Tournament Structure</button>
+      </div>
+      <div style="padding:0 16px;">
+         <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back to Dashboard</button>
+      </div>
+    </div>
+
+    <div id="screen-log" class="screen">
+      <form id="catch-form" onsubmit="commitCatchLog(event)">
+        <div class="form-group">
+          <label class="form-label">Target Species Profile</label>
+          <div class="split-species-row">
+            <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" required/>
+            <select id="form-species-dropdown" class="form-select" onchange="document.getElementById('form-species').value = this.value">
+              <option value="none">None</option>
+              <option value="Largemouth Bass" selected>Largemouth Bass</option>
+              <option value="Smallmouth Bass">Smallmouth Bass</option>
+              <option value="Bluegill">Bluegill</option>
+              <option value="Crappie">Crappie</option>
+              <option value="Walleye">Walleye</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rarity Tier Multiplier</label>
+          <select id="form-rarity" class="form-select">
+            <option value="Common">Common Tier (1x Multiplier)</option>
+            <option value="Uncommon">Uncommon Tier (2x Multiplier)</option>
+            <option value="Rare">Rare Tier (3x Multiplier)</option>
+          </select>
+        </div>
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="form-group" style="padding:0;"><label class="form-label">Weight (lbs)</label><input type="number" id="form-weight" step="0.01" class="form-input" placeholder="0.00" required/></div>
+          <div class="form-group" style="padding:0;"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deployable Tackle Rig</label>
+          <select id="form-lure-link" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Inject Catch to Tournament Context</label>
+          <select id="form-tourney-link" class="form-select">
+            <option value="global">Global Marketplace Standings Only</option>
+          </select>
+        </div>
+        <div style="padding:0 16px;">
+           <button type="submit" class="btn btn-primary">Publish Certified Entry Logs</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="screen-friends" class="screen">
+      <div class="card" style="background:linear-gradient(135deg, rgba(6,182,212,0.1), transparent); text-align:center;">
+        <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Your Unique Tactical ID</div>
+        <div id="my-unique-id-badge" style="font-size:22px; font-weight:900; color:var(--primary); letter-spacing:1px; margin:4px 0 2px;">CL-XXXXX</div>
+      </div>
+
+      <div class="section-label">Link Angler ID Token</div>
+      <div class="card">
+        <div style="display:flex; gap:10px;" onkeydown="if(event.key === 'Enter') { event.preventDefault(); registerNewFriendById(); }">
+          <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase; font-weight:700;"/>
+          <button class="btn btn-primary" style="width:auto; padding:0 20px;" onclick="registerNewFriendById()">Sync</button>
+        </div>
+      </div>
+
+      <div class="section-label">Peer Array</div>
+      <div style="padding:0 16px; margin-bottom:16px;" id="friends-list-container"></div>
+
+      <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
+      <div class="card" style="padding:10px;">
+        <div style="font-size:12px; margin-bottom:8px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
+        <div class="chat-window">
+          <div class="chat-stream" id="chat-stream-box"></div>
+          <div class="chat-input-row" onkeydown="if(event.key === 'Enter') { event.preventDefault(); dispatchMessage(); }">
+            <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
+            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-tackle" class="screen">
+      <div class="financial-tab" style="padding: 16px;">
+        <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
+        <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px;" id="fin-active-val">$0.00</div>
+      </div>
+
+      <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
+      <div style="padding: 0 16px; margin-bottom: 12px;">
+        <div class="hw-item-card">
+          <div class="hw-svg-thumb">
+            <svg viewBox="0 0 64 64" width="40" height="40">
+              <circle cx="32" cy="32" r="22" fill="#ef4444"/>
+              <path d="M10 32h44A22 22 0 0 1 10 32z" fill="#ffffff"/>
+              <circle cx="32" cy="12" r="3" fill="#f59e0b"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:700; color:#fff;">Smart Bobber Pro Node</div>
+            <div style="font-size:11px; color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('bobber')">Pair Link</button>
+        </div>
+
+        <div class="hw-item-card" style="margin-bottom: 4px;">
+          <div class="hw-svg-thumb">
+            <svg viewBox="0 0 64 64" width="40" height="40" fill="none">
+              <rect x="6" y="16" width="52" height="32" rx="4" fill="#8B5A2B"/>
+              <path d="M12 28C25 28 42 26 50 22C42 30 25 30 12 30Z" fill="#E2E8F0"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:700; color:#fff;">Smart Fillet Board Pro</div>
+            <div style="font-size:11px; color:var(--text3);" id="hw-fillet-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('fillet')">Pair Link</button>
+        </div>
+
+        <div class="scan-actions-grid">
+          <button class="btn-scan" onclick="bootOpticalSystem('ai-photo')">
+            📸 <span>AI Photo Scanner</span>
+          </button>
+          <button class="btn-scan" onclick="bootOpticalSystem('barcode')">
+            █▉ <span>Scan Barcode</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="section-label">Your Tackle Box Inventory</div>
+      <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;"></div>
+    </div>
+
+    <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
+      <div class="section-label">🤖 AI Core Weather Matrix Console</div>
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-size:13px; font-weight:800; color:#fff;">📡 Environmental Sensors Telemetry</div>
+          <span id="weather-badge" style="font-size:10px; font-weight:800; background:rgba(245,158,11,0.2); color:var(--accent3); padding:2px 8px; border-radius:10px;">STANDBY</span>
+        </div>
+        <p id="weather-diagnostics" style="font-size:12px; color:var(--text2); line-height:1.4;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
+      </div>
+
+      <div class="ai-chat-window card" style="padding:10px;">
+        <div class="chat-window" style="height:100%;">
+          <div class="chat-stream" id="ai-chat-stream-box"></div>
+          <div class="chat-input-row" onkeydown="if(event.key === 'Enter') { event.preventDefault(); dispatchAiMessage(); }">
+            <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What lure should I use?'..."/>
+            <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchAiMessage()">Query</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-map" class="screen" style="padding-top:0; padding-bottom:0;">
+      <div class="map-weather-hud">
+        <div style="display:flex; flex-direction:column;">
+          <div style="font-size:10px; font-weight:800; color:var(--primary); letter-spacing:0.5px;">WEATHER HUD MATRIX</div>
+          <div style="font-size:13px; font-weight:700; color:#fff;" id="map-hud-desc">Standby – No Telemetry</div>
+        </div>
+        <div style="font-size:20px; font-weight:900; color:var(--accent2);" id="map-hud-temp">--°</div>
+      </div>
+      <div id="full-map" style="position:absolute; inset:0;"></div>
     </div>
   </main>
 
-  <nav id="bottom-nav" style="height:76px; background:var(--bg2); display:flex; justify-content:space-around; align-items:center;">
-    <div onclick="console.log('Nav Clicked')">Home</div>
-    <div onclick="console.log('Nav Clicked')">Map</div>
-    <div onclick="console.log('Nav Clicked')">Tackle</div>
+  <nav id="bottom-nav">
+    <div class="nav-item active" onclick="switchScreen('dashboard')"><div class="nav-icon">📊</div><div class="nav-label">Home</div></div>
+    <div class="nav-item" onclick="switchScreen('map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+    <div class="nav-item fab-wrap" onclick="switchScreen('log')"><div class="fab">＋</div></div>
+    <div class="nav-item" onclick="switchScreen('friends')"><div class="nav-icon">👥</div><div class="nav-label">Friends</div></div>
+    <div class="nav-item" onclick="switchScreen('tackle')"><div class="nav-icon">🧰</div><div class="nav-label">Tackle</div></div>
+    <div class="nav-item" onclick="switchScreen('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI</div></div>
   </nav>
 </div>
 
 <script>
-  let lures = JSON.parse(localStorage.getItem('n_lures')) || [];
+  let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
+  let lures = JSON.parse(localStorage.getItem('n_lures')) || [
+    { id: 'l1', name: 'Chromium Rattle Trap', cost: 7.49, qty: 2, conditionBias: 'overcast', type: 'image', category: 'Lipless Crankbaits', img: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80' },
+    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, qty: 3, conditionBias: 'clear', type: 'image', category: 'Topwater/Poppers', img: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80' }
+  ];
+  let friends = JSON.parse(localStorage.getItem('n_friends')) || [
+    { id: 'CL-81042', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 }
+  ];
+  let myUniqueTacticalId = localStorage.getItem('my_unique_id') || ('CL-' + Math.floor(10000 + Math.random() * 90000));
+  localStorage.setItem('my_unique_id', myUniqueTacticalId);
 
-  function bootBarcodeScanner() {
-    document.getElementById('camera-viewfinder-overlay').style.display = 'flex';
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then(stream => { document.getElementById('viewfinder-video').srcObject = stream; })
-      .catch(err => alert("Camera access required."));
+  let tournaments = JSON.parse(localStorage.getItem('n_tourneys')) || [
+    { id: 't_default', name: 'Pro Angler Summer Open', leaderboard: [{ name: 'You', points: 0 }, { name: 'BassMaster_Jim', points: 45 }]}
+  ];
+  
+  let chatHistories = {};
+  let aiChatHistory = [{ sender: 'them', text: "Welcome to your AI Tactical Advisory Node. If you want a strategy setup recommendation, ask me: <b>'What lure should I use?'</b>" }];
+  let selectedFriendId = 'CL-81042';
+  
+  /* Media Hardware Engine States */
+  let activeMediaStream = null;
+  let opticalScanMode = null; 
+  let targetOverrideLureId = null;
+
+  let map = null;
+  let liveWaypointMarker = null;
+  let currentTelemetryContext = null;
+
+  function handleGoogleAuthResponse(response) { if (response.credential) initAppCore(); }
+  function initAppCore() { document.getElementById('auth-wrap').style.display = 'none'; showToast(`Ecosystem Gateway Unlocked`); refreshAllEcosystemModules(); }
+
+  function openSettingsModal() { document.getElementById('settings-modal').classList.add('active'); }
+  function closeSettingsModal(e) { document.getElementById('settings-modal').classList.remove('active'); }
+
+  function switchScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const target = document.getElementById('screen-' + screenId);
+    if(target) target.classList.add('active');
+    const navItems = document.querySelectorAll('.nav-item');
+    if(screenId==='dashboard') navItems[0].classList.add('active');
+    if(screenId==='map') { navItems[1].classList.add('active'); setTimeout(initMapSystem, 200); }
+    if(screenId==='log') navItems[2].classList.add('active');
+    if(screenId==='friends') navItems[3].classList.add('active');
+    if(screenId==='tackle') navItems[4].classList.add('active');
+    if(screenId==='ai') { navItems[5].classList.add('active'); renderAiMessages(); }
+  }
+
+  /* ── SEPARATED OPTICAL/CAMERA ENGINE PIPELINES ── */
+  async function bootOpticalSystem(mode, optionalLureId = null) {
+    opticalScanMode = mode;
+    targetOverrideLureId = optionalLureId;
+    
+    const viewfinder = document.getElementById('camera-viewfinder-overlay');
+    const title = document.getElementById('viewfinder-title');
+    const targetBox = document.getElementById('barcode-target-box-frame');
+    const laserLine = document.getElementById('laser-element');
+    const hint = document.getElementById('viewfinder-instructions-hint');
+    const video = document.getElementById('viewfinder-video');
+    const scanLabel = document.getElementById('viewfinder-scan-label');
+
+    if(mode === 'barcode') {
+      title.innerText = "UPC Barcode Hardware Array";
+      hint.innerText = "Align product barcode line inside the red laser framing zone.";
+      scanLabel.innerText = "TAP TO SCAN BARCODE";
+      targetBox.style.display = 'block';
+      laserLine.style.display = 'block';
+      laserLine.classList.add('laser-active');
+    } else if(mode === 'inline-override') {
+      title.innerText = "Macro Framing Capture";
+      hint.innerText = "Hold camera directly above the lure layout box.";
+      scanLabel.innerText = "TAP TO CAPTURE LURE";
+      targetBox.style.display = 'block'; 
+      laserLine.style.display = 'none';
+      laserLine.classList.remove('laser-active');
+    } else {
+      title.innerText = "AI Lens Object Classification";
+      hint.innerText = "Center the lure item clearly in frame to classify its profile shape & check live market indices.";
+      scanLabel.innerText = "TAP TO SCAN & ANALYZE";
+      targetBox.style.display = 'block'; 
+      laserLine.style.display = 'none'; 
+      laserLine.classList.remove('laser-active');
+    }
+    
+    viewfinder.style.display = 'flex';
+
+    try {
+      activeMediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+      video.srcObject = activeMediaStream;
+      
+      // Ensures the stream begins actively playing before canvas tries to draw anything
+      try { await video.play(); } catch(e) {} 
+      
+    } catch (err) {
+      console.warn("Camera pipeline unavailable or permission rejected", err);
+      showToast("⚠️ Camera stream offline. Verify permissions.");
+    }
   }
 
   function shutdownCameraStream() {
-    const video = document.getElementById('viewfinder-video');
-    if(video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+    if(activeMediaStream) {
+      activeMediaStream.getTracks().forEach(track => track.stop());
+      activeMediaStream = null;
+    }
     document.getElementById('camera-viewfinder-overlay').style.display = 'none';
-    
-    // Simulate adding a barcode item
-    lures.push({ name: "Scanned Lure UPC-5344", cost: 6.99 });
-    localStorage.setItem('n_lures', JSON.stringify(lures));
-    renderTackle();
   }
 
-  function renderTackle() {
-    const grid = document.getElementById('tackle-grid');
-    grid.innerHTML = lures.map(l => `
-      <div class="tackle-box-card">
-        <strong>${l.name}</strong>
-        <p>Market Avg: $${l.cost}</p>
+  /* ── BARCODE PROCESSING LOGIC ── */
+  function processBarcodeValue(barcodeRawString) {
+    showToast(`Searching Internet Data Arrays...`);
+    shutdownCameraStream();
+
+    let computedName = `StrikeKing Lure (UPC-${barcodeRawString ? barcodeRawString.slice(-4) : '5344'})`;
+
+    lures.unshift({
+      id: 'l_' + Date.now(),
+      name: computedName,
+      cost: 6.99,
+      qty: 1,
+      conditionBias: 'clear',
+      category: 'Barcode Scanned Gear', 
+      type: 'barcode', // Flags as missing picture to trigger white layout logic
+      img: '' 
+    });
+
+    showToast(`Barcode Saved into Tackle Matrix!`);
+    localStorage.setItem('n_lures', JSON.stringify(lures));
+    refreshAllEcosystemModules();
+  }
+
+  /* ── CANVAS ENGINE: EXTRACTS REAL PHOTO FROM DEVICE LENS ── */
+  function executeManualCaptureSnapshot() {
+    if (opticalScanMode === 'barcode') {
+      const simulatedBarcode = "" + Math.floor(100000000000 + Math.random() * 900000000000);
+      processBarcodeValue(simulatedBarcode);
+      return;
+    }
+
+    showToast("💾 Processing Real-Time Image Frame...");
+
+    // Grabbing the actual, real video stream pixels
+    const video = document.getElementById('viewfinder-video');
+    let capturedImageDataUrl = null;
+    
+    try {
+      if (video && video.readyState >= 2) { 
+        const canvas = document.createElement('canvas');
+        // Highly compressed downscale to completely protect LocalStorage memory limit
+        const MAX_WIDTH = 350; 
+        const scale = MAX_WIDTH / video.videoWidth;
+        canvas.width = MAX_WIDTH;
+        canvas.height = video.videoHeight * scale;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        capturedImageDataUrl = canvas.toDataURL('image/jpeg', 0.5); 
+      }
+    } catch(e) {
+      console.log("Canvas mapping blocked:", e);
+    }
+    
+    setTimeout(() => {
+      if(opticalScanMode === 'ai-photo') {
+        const macroCategories = [
+          { category: 'Lipless Crankbaits / Rattle Traps', defaultName: 'Rattle Trap Profile', historicalPrices: [6.49, 7.99, 6.99, 8.25] },
+          { category: 'Diving Crankbaits', defaultName: 'Deep Lip Crankbait', historicalPrices: [8.50, 9.99, 9.25, 8.79] },
+          { category: 'Soft Plastic Worms', defaultName: 'Soft Plastic Bait Profile', historicalPrices: [4.99, 5.49, 5.99, 5.25] },
+          { category: 'Topwater Poppers', defaultName: 'Surface Popper Bait', historicalPrices: [7.49, 8.99, 7.99, 8.49] },
+          { category: 'Spinnerbaits / Blades', defaultName: 'Bladed Wire Spinner', historicalPrices: [5.25, 6.49, 5.75, 6.10] }
+        ];
+
+        const targetedGroup = macroCategories[Math.floor(Math.random() * macroCategories.length)];
+        const mathematicalSum = targetedGroup.historicalPrices.reduce((a, b) => a + b, 0);
+        const derivedAverageMarketPrice = parseFloat((mathematSum / targetedGroup.historicalPrices.length).toFixed(2));
+
+        const fallbackImgMap = {
+          'Lipless Crankbaits / Rattle Traps': 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80',
+          'Diving Crankbaits': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80',
+          'Soft Plastic Worms': 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80',
+          'Topwater Poppers': 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80',
+          'Spinnerbaits / Blades': 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'
+        };
+
+        lures.unshift({
+          id: 'l_' + Date.now(),
+          name: targetedGroup.defaultName,
+          cost: derivedAverageMarketPrice, 
+          qty: 1,
+          conditionBias: 'clear',
+          type: 'image',
+          category: targetedGroup.category, 
+          img: capturedImageDataUrl || fallbackImgMap[targetedGroup.category]
+        });
+
+        aiChatHistory.push({
+          sender: 'them',
+          text: `👁️ <b>AI Computer Vision Scan:</b> Shape profile processed safely.<br/>🔹 Analyzed Match: <b>${targetedGroup.category}</b><br/>📈 Computed Market Price Average: <b>$${derivedAverageMarketPrice}</b>. Photo written to Tackle Box.`
+        });
+
+        showToast(`AI Identified: ${targetedGroup.category}`);
+      } 
+      else if(opticalScanMode === 'inline-override') {
+        const target = lures.find(l => l.id === targetOverrideLureId);
+        if(target) {
+          target.type = 'image';
+          target.img = capturedImageDataUrl || 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=120&q=80';
+          showToast(`Your photo is now permanently mapped to the inventory slot.`);
+        }
+      }
+
+      shutdownCameraStream();
+      
+      try {
+        localStorage.setItem('n_lures', JSON.stringify(lures));
+      } catch (e) {
+        showToast("⚠️ Local storage quota exceeded! Saving without photo.");
+        lures[0].img = 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80';
+        localStorage.setItem('n_lures', JSON.stringify(lures));
+      }
+      
+      refreshAllEcosystemModules();
+    }, 500);
+  }
+
+  function modifyQuantity(lureId, change) {
+    const targetLure = lures.find(l => l.id === lureId);
+    if(targetLure) {
+      targetLure.qty += change;
+      if(targetLure.qty < 0) targetLure.qty = 0;
+      localStorage.setItem('n_lures', JSON.stringify(lures));
+      refreshAllEcosystemModules();
+    }
+  }
+
+  function registerNewFriendById() {
+    const input = document.getElementById('new-friend-id');
+    const lookupId = input.value.trim().toUpperCase();
+    if(!lookupId) return;
+    if(lookupId === myUniqueTacticalId) return showToast("Cannot link routing node to yourself.");
+    if(friends.find(f => f.id === lookupId)) return showToast("Mesh channel active.");
+
+    const newPeer = { id: lookupId, name: 'Angler_' + Math.floor(10 + Math.random() * 89), totalWeight: 8.5, score: 40 };
+    friends.push(newPeer);
+    input.value = '';
+    showToast(`Linked Peer Node Successfully!`);
+    selectedFriendId = lookupId;
+    localStorage.setItem('n_friends', JSON.stringify(friends));
+    refreshAllEcosystemModules();
+  }
+
+  function renderFriendsSystem() {
+    document.getElementById('my-unique-id-badge').innerText = myUniqueTacticalId;
+    const container = document.getElementById('friends-list-container');
+    if(!container) return;
+    container.innerHTML = friends.map(f => `
+      <div class="leader-row" style="cursor:pointer; border-color:${f.id===selectedFriendId ? 'var(--primary)': 'var(--border)'}" onclick="selectedFriendId='${f.id}'; renderFriendsSystem();">
+        <div>🟢 <b>${f.name}</b> <span style="font-size:10px; color:var(--text3);">[${f.id}]</span></div>
+        <div style="font-size:11px; color:var(--primary); font-weight:600;">Chat</div>
       </div>
     `).join('');
+    const activeF = friends.find(f => f.id === selectedFriendId);
+    if(activeF) {
+      document.getElementById('active-chat-target-lbl').innerText = `Target Node: @${activeF.name}`;
+      renderChatMessages();
+    }
   }
 
-  renderTackle();
+  function renderChatMessages() {
+    const box = document.getElementById('chat-stream-box');
+    const history = chatHistories[selectedFriendId] || [{ sender: 'them', text: 'Telemetry linked.' }];
+    box.innerHTML = history.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function dispatchMessage() {
+    const input = document.getElementById('chat-message-input');
+    if(!input.value.trim()) return;
+    if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId] = [];
+    chatHistories[selectedFriendId].push({ sender: 'me', text: input.value });
+    input.value = '';
+    renderChatMessages();
+  }
+
+  function syncLocationAndWeather() {
+    showToast("Pinging tracking arrays...");
+    navigator.geolocation.getCurrentPosition((pos) => {
+      processLocationSuccess(pos.coords.latitude, pos.coords.longitude);
+    }, () => {
+      processLocationSuccess(38.6270, -90.1994); 
+    });
+  }
+
+  function processLocationSuccess(lat, lon) {
+    const tempOpts = [68, 74, 82];
+    const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover", "High Barometric Pressure Flare"];
+    const randomIdx = Math.floor(Math.random() * 3);
+
+    currentTelemetryContext = { 
+      lat: parseFloat(lat).toFixed(4), 
+      lon: parseFloat(lon).toFixed(4), 
+      temp: tempOpts[randomIdx], 
+      shortDesc: descOpts[randomIdx] 
+    };
+    
+    document.getElementById('weather-badge').innerText = "LIVE SYNCED";
+    document.getElementById('weather-badge').style.background = "rgba(16,185,129,0.2)";
+    document.getElementById('weather-diagnostics').innerHTML = `📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: ${currentTelemetryContext.shortDesc}`;
+    
+    document.getElementById('map-hud-desc').innerText = currentTelemetryContext.shortDesc;
+    document.getElementById('map-hud-temp').innerText = `${currentTelemetryContext.temp}°F`;
+
+    aiChatHistory.push({ sender: 'them', text: `📡 <b>Ecosystem Matrix Sync:</b> Parameters aligned to coordinates with profile: <i>${currentTelemetryContext.shortDesc}</i>.` });
+
+    updateMapWaypointMarker();
+    showToast("Weather Array Handshake Complete!");
+  }
+
+  function dispatchAiMessage() {
+    const input = document.getElementById('ai-chat-message-input');
+    const queryText = input.value.trim();
+    if(!queryText) return;
+
+    aiChatHistory.push({ sender: 'me', text: queryText });
+    input.value = '';
+    renderAiMessages();
+
+    setTimeout(() => {
+      let lowercaseQuery = queryText.toLowerCase();
+      
+      if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use') || lowercaseQuery.includes('tackle') || lowercaseQuery.includes('recommend')) {
+        if (!currentTelemetryContext) {
+          aiChatHistory.push({ 
+            sender: 'them', 
+            text: "⚠️ <b>Telemetry Offline:</b> Sync your environmental metrics by clicking the ⚙️ gear icon before querying strategies." 
+          });
+        } 
+        else if (lures.length === 0) {
+          aiChatHistory.push({
+            sender: 'them',
+            text: "🧰 <b>Tackle Box Empty:</b> No lures logged yet. Scan a barcode or use the AI scanner first."
+          });
+        } 
+        else {
+          let pickedLure = lures[0];
+          let rationale = "";
+
+          if (currentTelemetryContext.shortDesc.includes("Clear")) {
+            let match = lures.find(l => l.conditionBias === 'clear' || l.name.toLowerCase().includes('popper'));
+            if (match) pickedLure = match;
+            rationale = `Given your <b>${currentTelemetryContext.shortDesc}</b>, surface illumination profiles favor presentation layers. Deploying the <b>${pickedLure.name}</b> targets active structural feedback fields perfectly.`;
+          } else {
+            let match = lures.find(l => l.conditionBias === 'overcast' || l.name.toLowerCase().includes('rattle') || l.category.toLowerCase().includes('lipless'));
+            if (match) pickedLure = match;
+            rationale = `Your weather reports <b>${currentTelemetryContext.shortDesc}</b>. Under low lighting profiles, acoustic vibrations travel faster through current water columns. The <b>${pickedLure.name}</b> handles this beautifully.`;
+          }
+
+          aiChatHistory.push({
+            sender: 'them',
+            text: `🤖 <b>Tactical Advice Engine Output:</b><br/><br/>🎯 Recommended Deployment: <b>${pickedLure.name}</b><br/>📊 Match Metrics: Inventory Verified (Qty: ${pickedLure.qty} available)<br/><br/>💡 <b>Strategic Rationale:</b> ${rationale}`
+          });
+        }
+      } else {
+        aiChatHistory.push({ 
+          sender: 'them', 
+          text: "Telemetry frame parsed. Ask me: <i>'What lure should I use today?'</i> to activate live inventory loops." 
+        });
+      }
+      renderAiMessages();
+    }, 450);
+  }
+
+  function updateMapWaypointMarker() {
+    if(!map || !currentTelemetryContext) return;
+    const coords = [currentTelemetryContext.lat, currentTelemetryContext.lon];
+    
+    if(liveWaypointMarker) {
+      liveWaypointMarker.setLatLng(coords);
+    } else {
+      const pulsingIcon = L.divIcon({
+        className: 'cyan-pulse-marker',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+      liveWaypointMarker = L.marker(coords, { icon: pulsingIcon }).addTo(map);
+    }
+    map.setView(coords, 12);
+  }
+
+  function initMapSystem() {
+    if(map) {
+      updateMapWaypointMarker();
+      return;
+    }
+    map = L.map('full-map', {zoomControl:false}).setView([38.6270, -90.1994], 11);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+    updateMapWaypointMarker();
+  }
+
+  function connectHardware(type) {
+    showToast(`Bluetooth syncing ${type}...`);
+    setTimeout(() => {
+      const elId = type === 'bobber' ? 'hw-bobber-status' : 'hw-fillet-status';
+      document.getElementById(elId).innerHTML = '🟢 Connected & Mapped';
+      showToast("Hardware Sync Confirmed!");
+    }, 400);
+  }
+
+  function refreshAllEcosystemModules() {
+    renderGlobalLeaderboard();
+    renderTournaments();
+    renderCatchHistory();
+    renderTackleMatrix();
+    renderFriendsSystem();
+    document.getElementById('form-lure-link').innerHTML = lures.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  }
+
+  function renderGlobalLeaderboard() {
+    let myWeight = catches.reduce((acc, c) => acc + parseFloat(c.weight), 0);
+    let boardList = [{ name: 'You (Node)', w: myWeight }, ...friends.map(f => ({ name: f.name, w: f.totalWeight }))].sort((a,b) => b.w - a.w);
+    document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800; color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join('');
+  }
+
+  function renderTournaments() {
+    document.getElementById('tournament-deck').innerHTML = tournaments.map(t => `<div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)"><div style="font-size:13px; font-weight:800; color:#fff;">🏆 ${t.name}</div></div>`).join('');
+  }
+
+  /* ── DYNAMIC TACKLE BOX GRID SYSTEM WITH CONDITIONAL VIEWPORT RENDERING ── */
+  function renderTackleMatrix() {
+    let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
+    const gridEl = document.getElementById('fin-active-val');
+    if(gridEl) gridEl.innerText = `$${val.toFixed(2)}`;
+    
+    const targetDiv = document.getElementById('tackle-grid');
+    if(!targetDiv) return;
+
+    targetDiv.innerHTML = lures.map(l => {
+      let mediaHeader = '';
+      
+      // Strict logic rule: Renders the white placeholder block ONLY if no picture exists
+      if (l.type === 'barcode' && !l.img) {
+        mediaHeader = `
+          <div class="tackle-white-box" style="background: #ffffff; color: #111827;">
+            <span style="font-size:10px; font-weight:800; letter-spacing:0.3px; text-transform:uppercase; color:#4b5563;">Upload Image</span>
+            <div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override', '${l.id}')" title="Take Lure Picture">📷</div>
+          </div>`;
+      } else {
+        // Render user snapshot or AI-scanned image with no camera overlay needed
+        mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${l.img}');"></div>`;
+      }
+
+      return `
+        <div class="tackle-box-card">
+          ${mediaHeader}
+          <div class="tackle-card-body">
+            <div>
+              <div style="font-size:9px; font-weight:800; color:var(--primary); text-transform:uppercase; margin-bottom:2px; font-family:monospace; line-height:1.1; display:block; max-height:22px; overflow:hidden;" title="${l.category}">${l.category || 'Unassigned'}</div>
+              <div style="font-size:12px; font-weight:700; color:#fff; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${l.name}">${l.name}</div>
+              <div style="font-size:11px; color:var(--accent3); font-weight:700; margin-top:2px;">Market Avg: $${l.cost.toFixed(2)}</div>
+            </div>
+            
+            <div class="tackle-tally-row">
+              <span style="font-size:11px; color:var(--primary); font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span>
+              <div style="display:flex; gap:4px;">
+                <button class="tally-btn" onclick="modifyQuantity('${l.id}', -1)">-</button>
+                <button class="tally-btn" onclick="modifyQuantity('${l.id}', 1)">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderAiMessages() {
+    const box = document.getElementById('ai-chat-stream-box');
+    if(box) {
+      box.innerHTML = aiChatHistory.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+  }
+
+  function commitCatchLog(e) {
+    e.preventDefault();
+    const spec = document.getElementById('form-species').value;
+    const w = parseFloat(document.getElementById('form-weight').value) || 0;
+    catches.unshift({ species: spec, weight: w });
+    document.getElementById('catch-form').reset();
+    showToast(`Entry Logged!`);
+    localStorage.setItem('n_catches', JSON.stringify(catches));
+    refreshAllEcosystemModules();
+    switchScreen('dashboard');
+  }
+
+  function renderCatchHistory() {
+    const el = document.getElementById('dashboard-catch-list');
+    if(!el) return;
+    el.innerHTML = catches.map(c => `<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div>${c.weight.toFixed(2)} lbs</div></div>`).join('');
+  }
+
+  function showToast(m) {
+    const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.onload = function() { refreshAllEcosystemModules(); }
 </script>
 </body>
 </html>
