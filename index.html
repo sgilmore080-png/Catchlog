@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>CatchLog Pro</title>
+<title>CatchLog Pro - Full Suite</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{--bg:#0d1117;--bg2:#161b22;--text:#e6edf3;--primary:#00b4d8;}
@@ -13,12 +13,9 @@
   .screen{flex-grow:1; padding:20px; display:none; overflow-y:auto;}
   .screen.active{display:block;}
 
-  .card{background:var(--bg2); border:1px solid #30363d; border-radius:16px; padding:24px; text-align:center;}
-  .form-input{width:100%; background:#21262d; border:1px solid #30363d; border-radius:10px; padding:12px; color:white; margin-top:8px; box-sizing:border-box;}
-  
-  /* Nav Bar */
-  .nav-bar{display:flex; background:var(--bg2); border-top:1px solid #30363d; padding:10px;}
-  .nav-btn{flex:1; text-align:center; padding:10px; cursor:pointer; color:#8b949e;}
+  .card{background:var(--bg2); border:1px solid #30363d; border-radius:16px; padding:20px; margin-bottom:15px;}
+  .nav-bar{display:flex; background:var(--bg2); border-top:1px solid #30363d; padding:10px; z-index:10;}
+  .nav-btn{flex:1; text-align:center; padding:8px; cursor:pointer; color:#8b949e; font-size:0.8rem;}
   .nav-btn.active{color:var(--primary);}
 </style>
 </head>
@@ -27,13 +24,13 @@
 <div id="app">
   <!-- AUTH SCREEN -->
   <div id="auth-screen" class="screen active">
-    <div class="card" style="margin-top:20vh;">
+    <div class="card" style="margin-top:20vh; text-align:center;">
       <h2>CatchLog Pro</h2>
       <div id="g_id_onload" 
            data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" 
            data-callback="handleLogin">
       </div>
-      <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
         <div class="g_id_signin" data-type="standard"></div>
         <button onclick="alert('Sign up flow')" style="padding:10px; border-radius:8px; border:none; background:var(--primary); color:white; cursor:pointer;">Sign Up</button>
       </div>
@@ -42,29 +39,23 @@
 
   <!-- LOG SCREEN -->
   <div id="log-screen" class="screen">
-    <h3>Log Catch</h3>
-    <div class="card">
-      <input list="fish-list" class="form-input" placeholder="Species...">
-      <input class="form-input" type="number" placeholder="Weight (lbs)">
-      <button class="form-input" style="background:var(--primary); cursor:pointer;">Save</button>
-    </div>
+    <h3>Tournament Log</h3>
+    <div class="card">Add Catch Form...</div>
   </div>
+
+  <!-- TACKLE SCREEN -->
+  <div id="tackle-screen" class="screen"><h3>Tackle Box</h3><div class="card">Manage Gear</div></div>
 
   <!-- FRIENDS SCREEN -->
-  <div id="friends-screen" class="screen">
-    <h3>Friends</h3>
-    <div class="card"><p>No friends added yet.</p></div>
-  </div>
+  <div id="friends-screen" class="screen"><h3>Friends</h3><div class="card">Active Anglers</div></div>
 
   <!-- AI SCREEN -->
-  <div id="ai-screen" class="screen">
-    <h3>AI Assistant</h3>
-    <div class="card"><p>Ask the AI about fishing tips...</p></div>
-  </div>
+  <div id="ai-screen" class="screen"><h3>AI Fishing Coach</h3><div class="card">Ask tips...</div></div>
 
-  <!-- NAVIGATION -->
+  <!-- NAVIGATION BAR -->
   <div id="nav-bar" class="nav-bar" style="display:none;">
     <div class="nav-btn active" onclick="showScreen('log-screen', this)">Log</div>
+    <div class="nav-btn" onclick="showScreen('tackle-screen', this)">Tackle</div>
     <div class="nav-btn" onclick="showScreen('friends-screen', this)">Friends</div>
     <div class="nav-btn" onclick="showScreen('ai-screen', this)">AI</div>
   </div>
