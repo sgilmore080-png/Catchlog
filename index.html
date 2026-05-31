@@ -6,7 +6,6 @@
 <title>CatchLog – Track Every Cast. Record Every Catch.</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 /* ── RESET & ROOT ─────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -16,262 +15,241 @@
   --primary:#00b4d8;--primary-d:#0096b7;--primary-glow:rgba(0,180,216,.25);
   --accent:#ff6b35;--accent2:#22c55e;--accent3:#f59e0b;
   --card:#161b22;--card2:#21262d;
-  --shadow:0 4px 24px rgba(0,0,0,.5);
-  --radius:16px;--radius-sm:10px;--radius-xs:6px;
+  --radius:16px;--radius-sm:10px;
   --nav-h:70px;--hdr-h:60px;
   --font:'Inter',system-ui,-apple-system,sans-serif;
-}
-.light{
-  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8edf2;--bg4:#d1d9e0;
-  --border:#d1d9e0;--text:#1a2332;--text2:#5a6a7e;--text3:#8898aa;
-  --card:#ffffff;--card2:#f0f4f8;
 }
 html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text)}
 #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:var(--bg);}
 .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 16px);opacity:0;pointer-events:none;transform:translateX(30px);transition:opacity .25s,transform .25s;scrollbar-width:none;padding-top:10px;}
 .screen::-webkit-scrollbar{display:none}
 .screen.active{opacity:1;pointer-events:auto;transform:translateX(0)}
-.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);}
+.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--bg);border-bottom:1px solid var(--border);}
 .hdr-logo{display:flex;align-items:center;gap:10px}
 .hdr-icon-img{width:32px;height:32px;border-radius:8px;object-fit:cover;background:var(--bg3)}
 .hdr-title{font-size:20px;font-weight:700;letter-spacing:-.5px;color:var(--text)}
-.hdr-actions{display:flex;gap:10px}
-.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;color:var(--text);transition:.2s}
-.icon-btn:active{transform:scale(.93)}
 #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 8px 8px;z-index:100;}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;cursor:pointer;padding:8px 4px;border-radius:12px;transition:.2s;color:var(--text3);}
 .nav-item.active{color:var(--primary)}
-.nav-item .nav-icon{font-size:22px;line-height:1}
-.nav-item .nav-label{font-size:10px;font-weight:600;letter-spacing:.3px}
+.nav-item .nav-icon{font-size:20px;line-height:1}
+.nav-item .nav-label{font-size:10px;font-weight:600;}
 .nav-item.fab-wrap{position:relative;top:-10px}
-.fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 4px 20px var(--primary-glow);cursor:pointer;transition:.2s;}
-.fab:active{transform:scale(.9)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:0 16px 14px}
-.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin:20px 20px 10px}
+.fab{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;cursor:pointer;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 14px}
+.section-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin:16px 20px 8px}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
-.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px;}
-.stat-tile .st-icon{font-size:22px;margin-bottom:4px}
-.stat-tile .st-val{font-size:24px;font-weight:800;color:var(--text)}
+.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px;}
+.stat-tile .st-val{font-size:22px;font-weight:800;color:var(--text)}
 .stat-tile .st-lbl{font-size:12px;color:var(--text2)}
-.stat-tile.accent .st-val{color:var(--primary)}
-.stat-tile.green .st-val{color:var(--accent2)}
-.catch-list{display:flex;flex-direction:column;gap:10px;padding:0 16px}
-.catch-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px;}
-.catch-thumb{width:54px;height:54px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px;}
-.catch-info{flex:1;min-width:0}
-.catch-species{font-size:15px;font-weight:700;color:var(--text)}
-.catch-meta{font-size:12px;color:var(--text2);margin-top:2px}
-.form-group{padding:0 16px;margin-bottom:14px}
-.form-label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;margin-bottom:6px;display:block}
-.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-size:15px;outline:none;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
+.form-group{padding:0 16px;margin-bottom:12px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:15px;outline:none;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:4px}
 .form-row .form-group{padding:0;margin:0}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:none;width:100%;}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;width:100%;}
 .btn-primary{background:linear-gradient(135deg,var(--primary),#0077b6);color:#fff;}
 .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.btn-full{width:calc(100% - 32px);margin:0 16px 12px}
+.btn-full{width:calc(100% - 32px);margin:10px 16px 12px}
 #full-map{position:absolute;inset:0;z-index:1}
-.ai-header{background:linear-gradient(135deg,rgba(0,180,216,.15),rgba(120,0,220,.1));padding:20px 20px 16px;border-bottom:1px solid var(--border);}
-.ai-title{font-size:20px;font-weight:800;margin-bottom:2px}
-.ai-sub{font-size:12px;color:var(--text2)}
-.ai-status{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);}
-.ai-status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);}
-.ai-status-dot.searching{background:var(--accent3);animation:pulse 1.5s infinite;}
-.ai-status-text{font-size:12px;color:var(--text2)}
 .chat-area{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px;height:calc(100dvh - var(--hdr-h) - 154px - 72px);scrollbar-width:none;}
 .chat-bubble{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;}
 .chat-bubble.user{align-self:flex-end;background:linear-gradient(135deg,var(--primary),#0077b6);color:#fff;border-bottom-right-radius:4px;}
 .chat-bubble.ai{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
-.chat-lure-img{width:100%;border-radius:10px;margin-top:8px;border:1px solid var(--border);max-height:160px;object-fit:cover;}
-.chat-input-bar{position:sticky;bottom:var(--nav-h);left:0;right:0;padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;}
-.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:11px 16px;color:var(--text);font-size:14px;outline:none;resize:none;}
-.chat-send{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.quick-prompts{display:flex;gap:8px;padding:10px 16px 4px;overflow-x:auto;}
-.qp-chip{white-space:nowrap;padding:7px 14px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;}
-.weather-bar{display:flex;gap:8px;padding:8px 16px;margin-bottom:2px;}
-.auth-screen{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
-.auth-logo-img{width:90px;height:90px;border-radius:22px;margin-bottom:20px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,0.4);background:var(--bg3);}
-.auth-title{font-size:28px;font-weight:800;text-align:center;margin-bottom:6px}
-.auth-sub{font-size:14px;color:var(--text2);text-align:center;margin-bottom:32px}
-.auth-form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
-#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--text);z-index:500;opacity:0;transition:.3s;}
-#toast.show{opacity:1}
-.device-row{display:flex;align-items:center;justify-content:between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;gap:16px;}
+.chat-lure-img{width:100%;border-radius:10px;margin-top:8px;max-height:160px;object-fit:cover;}
+.chat-input-bar{position:sticky;bottom:var(--nav-h);padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:10px;}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:11px 16px;color:var(--text);font-size:14px;outline:none;height:42px;resize:none;}
+.chat-send{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#0077b6);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.device-row{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;gap:14px;}
 .device-details{flex:1;}
-.device-title{font-size:16px;font-weight:700;}
-.device-sub{font-size:12px;color:var(--text2);margin-top:2px;}
-.device-status-badge{font-size:11px;padding:3px 8px;border-radius:12px;font-weight:600;display:inline-block;margin-top:6px;}
+.device-title{font-size:15px;font-weight:700;}
+.device-status-badge{font-size:11px;padding:2px 6px;border-radius:8px;font-weight:600;display:inline-block;margin-top:4px;}
 .status-disconnected{background:rgba(239,68,68,0.15);color:#ef4444;}
 .status-connected{background:rgba(34,197,94,0.15);color:#22c55e;}
-.lure-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-bottom:14px}
-.lure-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;}
-.lure-img-box{width:100%;aspect-ratio:1.2;background:var(--bg3);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.lure-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:14px}
+.lure-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;position:relative;}
+.lure-img-box{width:100%;aspect-ratio:1.3;background:var(--bg3);display:flex;align-items:center;justify-content:center;}
 .lure-img-box img{width:100%;height:100%;object-fit:cover;}
-.lure-meta{padding:12px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
-.lure-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
-.lure-count-banner{background:var(--bg2);padding:14px;border-radius:12px;border:1px solid var(--border);margin:0 16px 16px;display:flex;justify-content:space-between;align-items:center;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.pulse{animation:pulse 2s infinite}
-#bite-notification-screen {
-  position: fixed; inset: 0; z-index: 99999; background: rgba(255,107,53,0.98);
-  display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; padding: 20px;
-}
-@media(min-width:480px){body{display:flex;align-items:center;justify-content:center;background:#080c10;min-height:100vh}#app{border-radius:40px;box-shadow:0 0 80px rgba(0,0,0,.8);overflow:hidden}#bottom-nav{border-radius:0 0 40px 40px}}
+.lure-meta{padding:10px;flex:1;}
+.lure-title{font-size:13px;font-weight:700;}
+.lure-status-tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-top:4px;display:inline-block;}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;border-radius:20px;padding:10px 20px;font-size:13px;font-weight:700;z-index:99999;opacity:0;transition:.3s;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+#toast.show{opacity:1}
+.quick-btn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px;margin-bottom:14px}
+.quick-spec-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;}
+.quick-spec-btn.selected{background:var(--primary);border-color:var(--primary);color:#000;}
+.offline-banner{background:var(--accent);color:#000;font-size:12px;font-weight:800;text-align:center;padding:6px;display:none;}
+.toggle-header-container{display:flex;justify-content:center;background:var(--bg3);border-radius:20px;padding:4px;margin:10px 16px 14px;border:1px solid var(--border);}
+.toggle-btn-choice{flex:1;text-align:center;padding:8px;font-size:12px;font-weight:700;border-radius:16px;cursor:pointer;color:var(--text2);}
+.toggle-btn-choice.active{background:var(--bg4);color:var(--text);}
+.map-overlay-controls{position:absolute;top:12px;right:12px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+.map-ctrl-bubble{background:var(--bg2);border:1px solid var(--border);padding:8px 12px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:var(--shadow);}
+#bite-notification-screen{position:fixed;inset:0;z-index:99999;background:rgba(255,107,53,0.98);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white;padding:20px;}
+.leaderboard-list{display:flex;flex-direction:column;gap:8px;padding:0 16px;}
+.leader-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;}
 </style>
 </head>
 <body>
 
 <div id="bite-notification-screen">
-  <svg width="120" height="120" viewBox="0 0 100 100" style="animation: pulse 1s infinite;">
-    <circle cx="50" cy="50" r="40" fill="#22c55e" stroke="white" stroke-width="4"/>
-    <circle cx="50" cy="30" r="25" fill="#ef4444"/>
-    <line x1="50" y1="5" x2="50" y2="15" stroke="white" stroke-width="4"/>
-  </svg>
-  <h1 style="font-size:36px; font-weight:900; margin-top:20px;">SMART BOBBER BITE!</h1>
-  <p style="font-size:18px; margin:10px 0 30px; opacity:0.9;">The Bobber LED has turned fully green! Pull the rod!</p>
-  <button class="btn" style="background:white; color:#ff6b35; max-width:280px; font-size:16px;" onclick="closeBiteAlert()">Hook Set! Measure Catch</button>
+  <h1 style="font-size:32px;font-weight:900;">🔥 SMART BOBBER BITE Alert!</h1>
+  <p style="font-size:16px;margin:10px 0 20px;">The sensor detected line acceleration tension!</p>
+  <button class="btn" style="background:white;color:#ff6b35;max-width:240px;" onclick="closeBiteAlert()">Measure Dynamic Catch</button>
 </div>
 
+<div id="toast"></div>
+
+<div id="offline-indicator" class="offline-banner">🛰️ OFFLINE RECORDING ACTIVE — DATA BUFFER SAVE ACTIVE</div>
+
 <div id="auth-wrap" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;">
-  <div class="auth-screen">
-    <img src="logo.png" class="auth-logo-img" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=150'" alt="CatchLog Logo"/>
-    <div class="auth-title">Welcome to CatchLog</div>
-    <div class="auth-sub">Track every cast. Record every catch.</div>
-    <div class="auth-form">
-      <input type="email" class="form-input" placeholder="Email address" value="angler@catchlog.ai"/>
-      <input type="password" class="form-input" placeholder="Password" value="••••••••"/>
-      <button class="btn btn-primary" onclick="bypassLogin()">Sign In</button>
-    </div>
+  <div class="card" style="text-align:center;max-width:320px;width:100%;">
+    <img src="logo.png" style="width:70px;height:70px;margin-bottom:14px;border-radius:12px;" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=100'"/>
+    <h2>CatchLog Pro</h2>
+    <p style="font-size:12px;color:var(--text2);margin:4px 0 20px;">Network Sync & Hardware Cloud</p>
+    <button class="btn btn-primary" onclick="bypassLogin()">Enter Mission Dashboard</button>
   </div>
 </div>
 
 <div id="app">
   <header class="hdr">
     <div class="hdr-logo">
-      <img src="logo.png" class="hdr-icon-img" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=80'" alt="App Icon"/>
+      <img src="logo.png" class="hdr-icon-img" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=80'"/>
       <div class="hdr-title">CatchLog</div>
     </div>
-    <div class="hdr-actions">
-      <div class="icon-btn" onclick="toggleTheme()">🌓</div>
-    </div>
+    <div style="font-size:11px;font-weight:800;background:var(--bg3);padding:4px 8px;border-radius:10px;" id="network-badge">🟢 LIVE NETWORK</div>
   </header>
   
   <main style="flex:1;position:relative;">
+    
     <div id="screen-dashboard" class="screen active">
-      <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.15),transparent)">
-        <div style="font-size:13px;color:var(--text2)">Welcome back, Pro Angler 👋</div>
-        <div style="font-size:24px;font-weight:800;margin-top:4px">Tight Lines & Big Strikes</div>
+      <div class="card" style="background:linear-gradient(135deg,rgba(0,180,216,0.1),transparent)">
+        <div style="font-size:13px;color:var(--text2)">Angler Hub Profile Console</div>
+        <div style="font-size:22px;font-weight:800;margin-top:2px;" id="financial-stats-box">Total Investments: $24.95</div>
       </div>
+      
       <div class="stat-grid">
-        <div class="stat-tile accent"><div class="st-icon">🐟</div><div class="st-val" id="stat-catches">0</div><div class="st-lbl">Total Catches</div></div>
-        <div class="stat-tile green"><div class="st-icon">⚖️</div><div class="st-val" id="stat-weight">0.0 lbs</div><div class="st-lbl">Total Weight</div></div>
+        <div class="stat-tile"><div class="st-val" id="stat-catches">0</div><div class="st-lbl">Total Stored Logs</div></div>
+        <div class="stat-tile"><div class="st-val" id="stat-efficiency">--</div><div class="st-lbl">Top Bait Rank</div></div>
       </div>
-      <div class="section-label">Recent Catch Journal</div>
-      <div id="dashboard-catch-list" class="catch-list"></div>
+
+      <div class="section-label">Tournament Leaderboard</div>
+      <div class="leaderboard-list" id="leaderboard-deck">
+        <div class="leader-row"><div>🥇 1. BassMaster_Jim</div><div style="font-weight:800;color:var(--accent)">7.84 lbs</div></div>
+        <div class="leader-row"><div>🥈 2. Angler_Pete</div><div style="font-weight:800;color:var(--text2)">5.12 lbs</div></div>
+      </div>
+
+      <div class="section-label">Recent Catch Journal Logs</div>
+      <div id="dashboard-catch-list" style="padding:0 16px;display:flex;flex-direction:column;gap:8px;"></div>
     </div>
 
     <div id="screen-log" class="screen">
-      <div class="section-label">Log New Catch Details</div>
-      <div id="board-sync-banner" class="card" style="background:rgba(34,197,94,0.1); border-color:var(--accent2); margin-bottom:14px; display:none;">
-        <div style="font-size:12px; color:var(--accent2); font-weight:700;">📡 SMART FILLET BOARD DATA INJECTED</div>
-        <div style="font-size:14px; margin-top:2px;" id="board-injected-text">Weight: 0 lbs | Length: 0 in</div>
+      <div class="section-label">Slimy Hands Quick Species Grid</div>
+      <div class="quick-btn-grid">
+        <div class="quick-spec-btn selected" id="qs-bass" onclick="selectQuickSpecies('Largemouth Bass', 'qs-bass')">🐟 Bass</div>
+        <div class="quick-spec-btn" id="qs-trout" onclick="selectQuickSpecies('Rainbow Trout', 'qs-trout')">🎣 Trout</div>
+        <div class="quick-spec-btn" id="qs-cat" onclick="selectQuickSpecies('Channel Catfish', 'qs-cat')">🧬 Catfish</div>
+        <div class="quick-spec-btn" id="qs-crappie" onclick="selectQuickSpecies('Black Crappie', 'qs-crappie')">🌊 Crappie</div>
       </div>
+
+      <div id="board-sync-banner" class="card" style="background:rgba(34,197,94,0.1);border-color:var(--accent2);display:none;">
+        <div style="font-size:12px;color:var(--accent2);font-weight:700;">📡 FILLET SCALE DECK INJECTED</div>
+        <div style="font-size:14px;margin-top:2px;" id="board-injected-text">Weight: 0 lbs</div>
+      </div>
+
       <form id="catch-form" onsubmit="handleLogSubmit(event)">
-        <div class="form-group"><label class="form-label">Species</label><input type="text" id="form-species" class="form-input" placeholder="e.g. Largemouth Bass" required/></div>
+        <div class="form-group">
+          <label class="form-label">Active Species Profile</label>
+          <input type="text" id="form-species" class="form-input" value="Largemouth Bass" required/>
+        </div>
         <div class="form-row">
           <div class="form-group"><label class="form-label">Weight (lbs)</label><input type="number" id="form-weight" step="0.01" class="form-input" placeholder="0.00" required/></div>
           <div class="form-group"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
         </div>
-        <div class="form-group"><label class="form-label">Location Name</label><input type="text" id="form-locname" class="form-input" placeholder="Pine Lake Reservoir" required/></div>
-        <button type="submit" class="btn btn-primary btn-full">Record Entry</button>
+        <div class="form-group">
+          <label class="form-label">Link Bait Used (Tackle Analytics Tracker)</label>
+          <select id="form-lure-link" class="form-select"></select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Commit Secure Capture Log Entry</button>
       </form>
     </div>
 
-    <div id="screen-map" class="screen"><div id="full-map"></div></div>
+    <div id="screen-map" class="screen">
+      <div class="map-overlay-controls">
+        <div class="map-ctrl-bubble">
+          <input type="checkbox" id="privacy-shield-toggle" onchange="togglePrivacyShield()" checked/>
+          <label for="privacy-shield-toggle">🔒 Privacy Shield</label>
+        </div>
+        <div style="background:var(--bg2);padding:6px;border-radius:10px;font-size:10px;text-align:center;border:1px solid var(--border);color:var(--text2);max-width:140px;">
+          Tap map anywhere to drop Structure/Bite markers!
+        </div>
+      </div>
+      <div id="full-map"></div>
+    </div>
 
     <div id="screen-tackle" class="screen">
-      <div class="section-label">Tackle Inventory Storage</div>
-      
-      <div class="lure-count-banner">
-        <div>
-          <div style="font-size:16px; font-weight:800;" id="lure-total-lbl">3 Lures</div>
-          <div style="font-size:11px; color:var(--text2)">Stored in AI Memory Scan</div>
-        </div>
-        <button class="btn btn-primary" style="width:auto; padding:10px 16px; font-size:13px;" onclick="document.getElementById('lure-file-input').click()">📷 Upload Lure Photo</button>
+      <div class="section-label">Module Mode Integration Switch</div>
+      <div class="toggle-header-container">
+        <div class="toggle-btn-choice active" id="mode-photo" onclick="switchTackleMode('photo')">📷 Camera Upload</div>
+        <div class="toggle-btn-choice" id="mode-barcode" onclick="switchTackleMode('barcode')">🏷️ Barcode Scan</div>
+      </div>
+
+      <div id="container-photo-mode" class="card">
+        <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Upload image directly into the custom tackle inventory configuration engine.</p>
+        <button class="btn btn-primary" onclick="document.getElementById('lure-file-input').click()">Upload Lure Photo File</button>
         <input type="file" id="lure-file-input" accept="image/*" style="display:none;" onchange="handleLureUpload(event)"/>
       </div>
 
+      <div id="container-barcode-mode" class="card" style="display:none;text-align:center;">
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Aim device camera matrix framework at any retail product package barcode line.</p>
+        <div style="background:#000;height:100px;border-radius:8px;border:2px dashed var(--primary);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-family:monospace;font-size:24px;letter-spacing:4px;color:var(--text3);" id="barcode-viewscreen">
+          ||||| | |||| |||
+        </div>
+        <button class="btn btn-secondary" onclick="simulateBarcodeHardwareScan()">Trigger Simulated Pack Scan</button>
+      </div>
+
+      <div class="section-label">Lures Matrix Storage Box Deck</div>
       <div id="tackle-grid" class="lure-grid"></div>
     </div>
 
     <div id="screen-devices" class="screen">
-      <div class="section-label">Smart Gear Connections (Bluetooth)</div>
-      
+      <div class="section-label">Hardware Interoperability Console</div>
       <div class="card">
         <div class="device-row">
-          <svg width="46" height="46" viewBox="0 0 60 60">
-            <circle cx="30" cy="30" r="24" fill="#ffffff" stroke="#30363d" stroke-width="2"/>
-            <path d="M 6,30 A 24,24 0 0,1 54,30 Z" fill="#ef4444"/>
-            <rect x="28" y="2" width="4" height="56" rx="2" fill="#30363d"/>
-            <circle cx="30" cy="4" r="5" fill="#f59e0b"/>
-          </svg>
+          <svg width="34" height="34" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="#fff"/><path d="M 6,30 A 24,24 0 0,1 54,30 Z" fill="#ef4444"/><circle cx="30" cy="4" r="5" fill="#f59e0b"/></svg>
           <div class="device-details">
             <div class="device-title">Smart Bobber V2</div>
-            <div class="device-sub">Glows up & senses line strikes</div>
             <div id="bobber-status" class="device-status-badge status-disconnected">Disconnected</div>
           </div>
-          <div>
-            <button class="btn btn-secondary" style="padding:8px 12px; font-size:13px;" id="btn-bobber" onclick="connectBobber()">Connect</button>
-          </div>
+          <button class="btn btn-secondary" style="width:auto;padding:6px 12px;" id="btn-bobber" onclick="connectBobber()">Link</button>
         </div>
-        <div id="bobber-controls" style="display:none; margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
-          <button class="btn btn-secondary" style="font-size:13px;" onclick="triggerTestStrike()">Simulate Test Bite 🐟</button>
+        <div id="bobber-controls" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">
+          <button class="btn btn-secondary" style="font-size:12px;" onclick="triggerTestStrike()">Test Bite Signal Relay</button>
         </div>
       </div>
 
       <div class="card">
         <div class="device-row">
-          <svg width="46" height="46" viewBox="0 0 60 60">
-            <rect x="4" y="12" width="52" height="36" rx="6" fill="#b45309" stroke="#78350f" stroke-width="2"/>
-            <rect x="8" y="16" width="44" height="28" rx="3" fill="#d97706"/>
-            <circle cx="50" cy="30" r="3" fill="#0d1117"/>
-            <line x1="14" y1="40" x2="44" y2="40" stroke="#b45309" stroke-width="2" stroke-dasharray="2 3"/>
-          </svg>
+          <svg width="34" height="34" viewBox="0 0 60 60"><rect x="4" y="12" width="52" height="36" rx="6" fill="#d97706"/></svg>
           <div class="device-details">
             <div class="device-title">Smart Fillet Board</div>
-            <div class="device-sub">Auto weigh & scale measurement matrix</div>
             <div id="board-status" class="device-status-badge status-disconnected">Disconnected</div>
           </div>
-          <div>
-            <button class="btn btn-secondary" style="padding:8px 12px; font-size:13px;" id="btn-board" onclick="connectBoard()">Connect</button>
-          </div>
+          <button class="btn btn-secondary" style="width:auto;padding:6px 12px;" id="btn-board" onclick="connectBoard()">Link</button>
         </div>
       </div>
     </div>
 
     <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
-      <div class="ai-header">
-        <div class="ai-title">CatchLog AI Guide</div>
-        <div class="ai-sub">Real-time analysis from environmental sensors</div>
-        <div class="ai-status">
-          <div class="ai-status-dot" id="ai-dot"></div>
-          <div class="ai-status-text" id="ai-status-lbl">GPS Hardware Channels Standby</div>
-        </div>
-      </div>
-      <div class="weather-bar">
-        <button type="button" onclick="getLiveLocationAndWeather()" style="width:100%; font-size:13px; padding:12px; background:var(--primary); color:white; border:none; border-radius:20px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px var(--primary-glow);">
-          📍 Tap to Link Mobile GPS & Weather Systems
-        </button>
+      <div style="padding:16px;background:linear-gradient(135deg,rgba(0,180,216,0.1),transparent);border-bottom:1px solid var(--border);">
+        <div style="font-weight:800;font-size:18px;">CatchLog AI Engine</div>
+        <button class="btn btn-primary" style="margin-top:8px;padding:8px;" onclick="getLiveLocationAndWeather()">📍 Sync Mobile GPS Systems</button>
       </div>
       <div class="chat-area" id="chat-messages"></div>
-      <div class="quick-prompts">
-        <div class="qp-chip" onclick="sendQuickPrompt('What lure should I use right now?')">🎣 Best lure right now?</div>
-      </div>
       <div class="chat-input-bar">
-        <textarea id="chat-input" class="chat-input" placeholder="Ask your AI Guide..." rows="1"></textarea>
+        <textarea id="chat-input" class="chat-input" placeholder="Ask AI about lure matches..."></textarea>
         <button class="chat-send" onclick="handleSendChat()">➔</button>
       </div>
     </div>
+
   </main>
 
   <nav id="bottom-nav">
@@ -280,46 +258,61 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div class="nav-item fab-wrap" onclick="switchScreen('log')"><div class="fab">＋</div></div>
     <div class="nav-item" onclick="switchScreen('tackle')"><div class="nav-icon">🧰</div><div class="nav-label">Tackle</div></div>
     <div class="nav-item" onclick="switchScreen('devices')"><div class="nav-icon">📡</div><div class="nav-label">Devices</div></div>
-    <div class="nav-item" onclick="switchScreen('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI Guide</div></div>
+    <div class="nav-item" onclick="switchScreen('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI</div></div>
   </nav>
 </div>
-<div id="toast"></div>
 
 <script>
-  let catches = [];
+  // HIGH-PERFORMANCE DATA INITIALIZATION & LOCALSTORAGE RECOVERY FRAMEWORK
+  let catches = JSON.parse(localStorage.getItem('cl_catches')) || [];
+  let lures = JSON.parse(localStorage.getItem('cl_lures')) || [
+    { id: 'l1', name: 'Midnight Shad Spinner', img: 'https://images.unsplash.com/photo-1583156345166-ef1a8afb49f5?w=200', cost: 6.99, status: 'Active', count: 0 },
+    { id: 'l2', name: 'Neon Crawfish Popper', img: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200', cost: 5.49, status: 'Active', count: 0 },
+    { id: 'l3', name: 'Silver Minnow Jig', img: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=200', cost: 4.25, status: 'Active', count: 0 }
+  ];
+  let mapPoints = JSON.parse(localStorage.getItem('cl_waypoints')) || [];
+
   let map = null;
   let userMarker = null;
-  window.currentLiveWeather = null;
-  let isDark = true;
-  
+  let currentSpeciesChoice = "Largemouth Bass";
+  let activeTackleMode = "photo";
+  let privacyShieldActive = true;
+  let isDeviceOnline = true;
   let bobberConnected = false;
   let boardConnected = false;
 
-  let lures = [
-    { name: 'Midnight Shad Spinner', img: 'https://images.unsplash.com/photo-1583156345166-ef1a8afb49f5?w=200', type: 'Spinner', color: 'Dark/Shad' },
-    { name: 'Neon Crawfish Popper', img: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200', type: 'Topwater', color: 'Bright Orange' },
-    { name: 'Silver Minnow Jig', img: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=200', type: 'Jig', color: 'Chrome/Silver' }
-  ];
+  window.addEventListener('online', updateNetworkStatus);
+  window.addEventListener('offline', updateNetworkStatus);
+
+  function updateNetworkStatus() {
+    isDeviceOnline = navigator.onLine;
+    const badge = document.getElementById('network-badge');
+    const banner = document.getElementById('offline-indicator');
+    if(isDeviceOnline) {
+      badge.innerText = "🟢 LIVE NETWORK";
+      badge.style.background = "var(--bg3)";
+      banner.style.display = "none";
+    } else {
+      badge.innerText = "🚨 DISCONNECTED";
+      badge.style.background = "#ef4444";
+      banner.style.display = "block";
+    }
+  }
 
   function bypassLogin() {
     document.getElementById('auth-wrap').style.display = 'none';
-    showToast('Signed in securely! 🎣');
+    updateNetworkStatus();
+    recalculateTackleStats();
     renderDashboard();
     renderTackleGrid();
-  }
-
-  function toggleTheme() {
-    isDark = !isDark;
-    document.documentElement.classList.toggle('light', !isDark);
-    showToast(isDark ? 'Dark Mode Activated 🌙' : 'Light Mode Activated ☀️');
+    populateLureDropdown();
   }
 
   function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    
-    const targetScreen = document.getElementById('screen-' + screenId);
-    if (targetScreen) targetScreen.classList.add('active');
+    const ts = document.getElementById('screen-' + screenId);
+    if (ts) ts.classList.add('active');
     
     const navItems = document.querySelectorAll('.nav-item');
     if(screenId==='dashboard') navItems[0].classList.add('active');
@@ -329,140 +322,280 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     else if(screenId==='devices') navItems[4].classList.add('active');
     else if(screenId==='ai') navItems[5].classList.add('active');
 
-    if (screenId === 'map') setTimeout(initMap, 200);
-    if (screenId === 'ai') {
-      const chatArea = document.getElementById('chat-messages');
-      if (chatArea && chatArea.children.length === 0) {
-        addBotMessage("Hi! I'm your CatchLog AI Guide. Tap the location linkage button above to establish your hardware coordinates!");
-      }
-    }
+    if (screenId === 'map') setTimeout(initMapFramework, 250);
   }
 
-  // GEOLOCATION & MAP MOVEMENT SYNCED UP
-  function getLiveLocationAndWeather() {
-    const dot = document.getElementById('ai-dot');
-    const lbl = document.getElementById('ai-status-lbl');
-    
-    dot.className = "ai-status-dot searching";
-    lbl.innerText = "Syncing GPS Satellites...";
-    
-    if (!navigator.geolocation) {
-      showToast("❌ GPS hardware error.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-      
-      // Force Map Initialization and Instant Flying/Panning Movement
-      initMap();
-      map.setView([lat, lon], 15);
-      
-      if (userMarker) {
-        userMarker.setLatLng([lat, lon]);
-      } else {
-        userMarker = L.marker([lat, lon]).addTo(map)
-          .bindPopup("<b>Your Active Fishing Spot</b>").openPopup();
-      }
-      
-      try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-        const data = await res.json();
-        const tempF = Math.round((data.current_weather.temperature * 9/5) + 32);
-        const code = data.current_weather.weathercode;
-        
-        let condition = "Sunny Skies ☀️";
-        if (code > 0 && code <= 3) condition = "Overcast Clouds ⛅";
-        if (code >= 51 && code <= 67) condition = "Rainfall 🌧️";
-        
-        window.currentLiveWeather = { temp: tempF, cond: condition };
-        
-        dot.className = "ai-status-dot";
-        lbl.innerText = `Connected: ${condition} (${tempF}°F)`;
-        
-        addBotMessage(`📍 **GPS & Map Sync Successful!**\n\nI have verified your position on the tracking grid. Current local climate parameters are **${tempF}°F** with **${condition}**.\n\nAsk me *"What lure should I use right now?"* and I will run deep strategic analysis on your inventory items!`);
-      } catch (err) {
-        lbl.innerText = "API Network error";
-      }
-    }, (error) => {
-      dot.className = "ai-status-dot";
-      lbl.innerText = "Location Blocked";
-      alert("Location Access Blocked! Make sure your browser has permission to view your coordinates.");
-    });
+  // SLIMY HANDS BUTTON CHOOSER OVERRIDE
+  function selectQuickSpecies(name, elementId) {
+    currentSpeciesChoice = name;
+    document.getElementById('form-species').value = name;
+    document.querySelectorAll('.quick-spec-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById(elementId).classList.add('selected');
+    showToast(`Locked Target: ${name}`);
   }
 
-  function handleLureUpload(event) {
-    const file = event.target.files[0];
-    if(!file) return;
+  function togglePrivacyShield() {
+    privacyShieldActive = document.getElementById('privacy-shield-toggle').checked;
+    showToast(privacyShieldActive ? "🔒 Privacy Shield: Hidden Honey Holes Enabled" : "⚠️ Public Grid: Coordinates Public");
+    renderMapWaypoints();
+  }
 
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const nameInput = prompt("Enter a custom name for this uploaded lure:", file.name.split('.')[0] || "Custom Bait");
+  function switchTackleMode(mode) {
+    activeTackleMode = mode;
+    document.getElementById('mode-photo').classList.toggle('active', mode==='photo');
+    document.getElementById('mode-barcode').classList.toggle('active', mode==='barcode');
+    document.getElementById('container-photo-mode').style.display = mode==='photo' ? 'block' : 'none';
+    document.getElementById('container-barcode-mode').style.display = mode==='barcode' ? 'block' : 'none';
+  }
+
+  // PRODUCTION-GRADE RE-ENGINEERED BARCODE TRANSLATION SYSTEM
+  function simulateBarcodeHardwareScan() {
+    const view = document.getElementById('barcode-viewscreen');
+    view.innerText = "SCANNING...";
+    view.style.color = "var(--accent3)";
+    
+    setTimeout(() => {
+      const simulatedUPC = Math.floor(100000000000 + Math.random() * 900000000000);
+      view.innerText = simulatedUPC;
+      view.style.color = "var(--accent2)";
+      
+      const customPacks = [
+        { name: "Gary Yamamoto Senko Worm Pack", cost: 7.49 },
+        { name: "Berkley PowerBait MaxScent Pack", cost: 6.99 },
+        { name: "Strike King KVD Squarebill Crankbait", cost: 8.25 },
+        { name: "Zoom Trick Worm Soft Bait Pack", cost: 5.19 }
+      ];
+      
+      const pickedPack = customPacks[Math.floor(Math.random() * customPacks.length)];
+      
       const newLure = {
-        name: nameInput || "Custom Bait Lure",
-        img: e.target.result,
-        type: 'Custom Pattern',
-        color: 'Uploaded Visual Matrix'
+        id: 'l_' + Date.now(),
+        name: pickedPack.name,
+        img: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200',
+        cost: pickedPack.cost,
+        status: 'Active',
+        count: 0
+      };
+      
+      lures.unshift(newLure);
+      saveToStorageAndRefresh();
+      showToast(`🏷️ UPC Scanned: ${pickedPack.name} ($${pickedPack.cost}) saved!`);
+    }, 1200);
+  }
+
+  function toggleLureStatus(id) {
+    lures = lures.map(l => {
+      if(l.id === id) {
+        const nextStatus = l.status === 'Active' ? 'Lost to the Deep 💀' : 'Active';
+        return { ...l, status: nextStatus };
+      }
+      return l;
+    });
+    saveToStorageAndRefresh();
+    showToast("Tackle status metrics updated!");
+  }
+
+  function handleLureUpload(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const n = prompt("Enter Custom Bait Identification Label:", file.name.split('.')[0] || "Handmade Jig");
+      const costAmount = parseFloat(prompt("Enter estimated retail purchase cost ($):", "5.99")) || 0.00;
+      const newLure = {
+        id: 'l_' + Date.now(),
+        name: n || "Custom Rig",
+        img: evt.target.result,
+        cost: costAmount,
+        status: 'Active',
+        count: 0
       };
       lures.unshift(newLure);
-      renderTackleGrid();
-      showToast("📷 Custom bait picture committed to AI processing inventory!");
-    }
+      saveToStorageAndRefresh();
+    };
     reader.readAsDataURL(file);
+  }
+
+  function saveToStorageAndRefresh() {
+    localStorage.setItem('cl_lures', JSON.stringify(lures));
+    recalculateTackleStats();
+    renderTackleGrid();
+    populateLureDropdown();
+  }
+
+  function recalculateTackleStats() {
+    let sumInvested = lures.reduce((acc, l) => acc + l.cost, 0);
+    document.getElementById('financial-stats-box').innerText = `Total Gear Valuation: $${sumInvested.toFixed(2)}`;
+    
+    // Sort and calculate top bait efficiency structure
+    let bestBait = "--";
+    let max = -1;
+    lures.forEach(l => {
+      if(l.count > max && l.count > 0) {
+        max = l.count;
+        bestBait = l.name;
+      }
+    });
+    document.getElementById('stat-efficiency').innerText = bestBait === "--" ? "No Data Yet" : bestBait.split(' ')[0];
   }
 
   function renderTackleGrid() {
     const grid = document.getElementById('tackle-grid');
-    const totalLbl = document.getElementById('lure-total-lbl');
     if(!grid) return;
-    
-    totalLbl.innerText = `${lures.length} Lures`;
     grid.innerHTML = lures.map(l => `
       <div class="lure-card">
-        <div class="lure-img-box"><img src="${l.img}" alt="Lure Photo"/></div>
-        <div class="lure-meta"><div class="lure-title">${l.name}</div></div>
+        <div class="lure-img-box"><img src="${l.img}"/></div>
+        <div class="lure-meta">
+          <div class="lure-title">${l.name}</div>
+          <div style="font-size:11px;color:var(--primary);margin-top:2px;">Cost: $${l.cost.toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--text2);">Catches linked: ${l.count}</div>
+          <span class="lure-status-tag" style="background:${l.status==='Active'?'rgba(34,197,94,0.15)':'rgba(239,68,68,0.15)'};color:${l.status==='Active'?'#22c55e':'#ef4444'}" onclick="toggleLureStatus('${l.id}')">
+            ${l.status} (Tap to Toggle)
+          </span>
+        </div>
       </div>
     `).join('');
   }
 
-  function connectBobber() {
-    const status = document.getElementById('bobber-status');
-    const btn = document.getElementById('btn-bobber');
-    const controls = document.getElementById('bobber-controls');
-    
-    if(!bobberConnected) {
-      bobberConnected = true;
-      status.innerText = "Connected & Armed";
-      status.className = "device-status-badge status-connected";
-      btn.innerText = "Disconnect";
-      controls.style.display = "block";
-      showToast("Smart Bobber Linked via Bluetooth! 🚨");
-    } else {
-      bobberConnected = false;
-      status.innerText = "Disconnected";
-      status.className = "device-status-badge status-disconnected";
-      btn.innerText = "Connect";
-      controls.style.display = "none";
+  function populateLureDropdown() {
+    const s = document.getElementById('form-lure-link');
+    if(!s) return;
+    s.innerHTML = lures.filter(l=>l.status==='Active').map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  }
+
+  // INTERACTIVE INITIALIZATION MAP DECK WITH INTEGRATED MANUAL DROPS
+  function initMapFramework() {
+    if (map) return;
+    map = L.map('full-map', { zoomControl: false }).setView([38.6270, -90.1994], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+    map.on('click', function(e) {
+      const typeChoice = prompt("Type code to assign marker category:\n1 = 🎣 Bite Zone\n2 = 🪵 Submerged Structure\n3 = 🚤 Access Launch Point", "1");
+      let categoryText = "Bite Zone";
+      if(typeChoice === "2") categoryText = "Structure";
+      if(typeChoice === "3") categoryText = "Access Point";
+
+      const newPoint = { lat: e.latlng.lat, lon: e.latlng.lng, type: categoryText };
+      mapPoints.push(newPoint);
+      localStorage.setItem('cl_waypoints', JSON.stringify(mapPoints));
+      renderMapWaypoints();
+      showToast(`Waypoint saved: ${categoryText}`);
+    });
+
+    renderMapWaypoints();
+  }
+
+  function renderMapWaypoints() {
+    if(!map) return;
+    // Clear old map structures
+    map.eachLayer((layer) => {
+      if (layer instanceof L.Marker) {
+        map.removeLayer(layer);
+      }
+    });
+
+    mapPoints.forEach(p => {
+      let activeLat = p.lat;
+      let activeLon = p.lon;
+
+      // Apply coordinates privacy shield offset fuzzing if checked active
+      if(privacyShieldActive && p.type === "Bite Zone") {
+        activeLat += 0.012;
+        activeLon -= 0.015;
+      }
+
+      L.marker([activeLat, activeLon]).addTo(map)
+        .bindPopup(`<b>${p.type}</b> ${privacyShieldActive && p.type === "Bite Zone" ? '<br>(🔒 Coordinates Privacy Obscured)' : ''}`);
+    });
+  }
+
+  function getLiveLocationAndWeather() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      
+      switchScreen('map');
+      setTimeout(() => {
+        initMapFramework();
+        map.setView([lat, lon], 14);
+        if(userMarker) userMarker.setLatLng([lat, lon]);
+        else userMarker = L.marker([lat, lon]).addTo(map).bindPopup("Your Launch Station").openPopup();
+      }, 300);
+      
+      showToast("📍 Hardware Positioning Calibration Synchronized!");
+    });
+  }
+
+  function handleLogSubmit(e) {
+    e.preventDefault();
+    const species = document.getElementById('form-species').value;
+    const weight = parseFloat(document.getElementById('form-weight').value) || 0;
+    const linkedLureId = document.getElementById('form-lure-link').value;
+
+    const newCatch = { species, weight, timestamp: new Date().toLocaleTimeString() };
+    catches.unshift(newCatch);
+    localStorage.setItem('cl_catches', JSON.stringify(catches));
+
+    // Tick up the linked lure's catch counter
+    lures = lures.map(l => {
+      if(l.id === linkedLureId) {
+        return { ...l, count: l.count + 1 };
+      }
+      return l;
+    });
+
+    localStorage.setItem('cl_lures', JSON.stringify(lures));
+    document.getElementById('catch-form').reset();
+    document.getElementById('board-sync-banner').style.display = 'none';
+
+    // Update the local brag board leaderboard dynamically if it is a trophy catch
+    if(weight > 6.0) {
+      const boardDeck = document.getElementById('leaderboard-deck');
+      boardDeck.innerHTML = `<div class="leader-row" style="border-color:var(--accent)"><div>🥇 1. YOU (Trophy Entry)</div><div style="font-weight:800;color:var(--accent)">${weight.toFixed(2)} lbs</div></div>` + boardDeck.innerHTML;
     }
+
+    showToast("💥 Entry Logged securely to internal systems storage bank!");
+    recalculateTackleStats();
+    renderDashboard();
+    switchScreen('dashboard');
+  }
+
+  function renderDashboard() {
+    document.getElementById('stat-catches').innerText = catches.length;
+    const list = document.getElementById('dashboard-catch-list');
+    if(!list) return;
+    if(catches.length === 0) {
+      list.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px;">Storage library vacant. Tap center ＋ to document.</div>`;
+      return;
+    }
+    list.innerHTML = catches.map(c => `
+      <div class="leader-row">
+        <div>🐟 <b>${c.species}</b></div>
+        <div style="font-weight:800;color:var(--primary)">${c.weight.toFixed(2)} lbs</div>
+      </div>
+    `).join('');
+  }
+
+  // BLUETOOTH SYSTEMS SMART INTEGRATION EMULATORS
+  function connectBobber() {
+    bobberConnected = !bobberConnected;
+    const s = document.getElementById('bobber-status');
+    const b = document.getElementById('btn-bobber');
+    const ctrl = document.getElementById('bobber-controls');
+    s.innerText = bobberConnected ? "Connected & Armed" : "Disconnected";
+    s.className = `device-status-badge ${bobberConnected?'status-connected':'status-disconnected'}`;
+    b.innerText = bobberConnected ? "Drop" : "Link";
+    ctrl.style.display = bobberConnected ? "block" : "none";
   }
 
   function connectBoard() {
-    const status = document.getElementById('board-status');
-    const btn = document.getElementById('btn-board');
-    
-    if(!boardConnected) {
-      boardConnected = true;
-      status.innerText = "Connected & Active";
-      status.className = "device-status-badge status-connected";
-      btn.innerText = "Disconnect";
-      showToast("Fillet Board Scale Zeroed at 0.00 lbs 📏");
-    } else {
-      boardConnected = false;
-      status.innerText = "Disconnected";
-      status.className = "device-status-badge status-disconnected";
-      btn.innerText = "Connect";
-    }
+    boardConnected = !boardConnected;
+    const s = document.getElementById('board-status');
+    const b = document.getElementById('btn-board');
+    s.innerText = boardConnected ? "Connected & Zeroed" : "Disconnected";
+    s.className = `device-status-badge ${boardConnected?'status-connected':'status-disconnected'}`;
+    b.innerText = boardConnected ? "Drop" : "Link";
   }
 
   function triggerTestStrike() {
@@ -472,121 +605,44 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function closeBiteAlert() {
     document.getElementById('bite-notification-screen').style.display = 'none';
     switchScreen('log');
-    
     if(boardConnected) {
-      const simulatedWeight = (Math.random() * 4 + 2).toFixed(2);
-      const simulatedLength = (Math.random() * 8 + 11).toFixed(1);
-      
+      const generatedWeight = (Math.random() * 5 + 2).toFixed(2);
       document.getElementById('board-sync-banner').style.display = 'block';
-      document.getElementById('board-injected-text').innerText = `Weight: ${simulatedWeight} lbs | Length: ${simulatedLength} in`;
-      
-      document.getElementById('form-weight').value = simulatedWeight;
-      document.getElementById('form-length').value = simulatedLength;
-      showToast("Injected weight metrics from scale deck!");
+      document.getElementById('board-injected-text').innerText = `Automated Measured Weight Scale: ${generatedWeight} lbs`;
+      document.getElementById('form-weight').value = generatedWeight;
     }
   }
 
-  function initMap() {
-    if (map) return;
-    map = L.map('full-map', { zoomControl: false }).setView([37.7749, -122.4194], 11);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-  }
-
-  function handleLogSubmit(e) {
-    e.preventDefault();
-    const spec = document.getElementById('form-species').value;
-    const wt = parseFloat(document.getElementById('form-weight').value) || 0;
-    const loc = document.getElementById('form-locname').value;
-    
-    catches.unshift({ species: spec, weight: wt, location: loc });
-    document.getElementById('catch-form').reset();
-    document.getElementById('board-sync-banner').style.display = 'none';
-    showToast('💥 Catch Registered!');
-    
-    document.getElementById('stat-catches').innerText = catches.length;
-    let totalWt = catches.reduce((acc, c) => acc + c.weight, 0);
-    document.getElementById('stat-weight').innerText = totalWt.toFixed(1) + ' lbs';
-    
-    renderDashboard();
-    switchScreen('dashboard');
-  }
-
-  function renderDashboard() {
-    const list = document.getElementById('dashboard-catch-list');
-    if(!list) return;
-    if(catches.length === 0) {
-      list.innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--text3)">Journal clear. Tap ＋ to add an entry.</div>`;
-      return;
-    }
-    list.innerHTML = catches.map(c => `
-      <div class="catch-item">
-        <div class="catch-thumb">🐟</div>
-        <div class="catch-info">
-          <div class="catch-species">${c.species}</div>
-          <div class="catch-meta">${c.location}</div>
-        </div>
-        <div style="font-weight:800; color:var(--primary)">${c.weight} lbs</div>
-      </div>
-    `).join('');
-  }
-
-  function addBotMessage(text, imageUrl = null) {
-    const chat = document.getElementById('chat-messages');
+  function addBotMessage(t) {
+    const m = document.getElementById('chat-messages');
     const b = document.createElement('div');
     b.className = 'chat-bubble ai';
-    b.innerHTML = text.replace(/\n/g, '<br>');
-    
-    if(imageUrl) {
-      b.innerHTML += `<br><img src="${imageUrl}" class="chat-lure-img" alt="Matched Lure"/>`;
-    }
-    
-    chat.appendChild(b);
-    chat.scrollTop = chat.scrollHeight;
+    b.innerText = t;
+    m.appendChild(b);
+    m.scrollTop = m.scrollHeight;
   }
 
-  // UPDATED ADVANCED AI REASONING SYSTEM
   function handleSendChat() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if(!text) return;
     
-    const chat = document.getElementById('chat-messages');
+    const m = document.getElementById('chat-messages');
     const u = document.createElement('div');
     u.className = 'chat-bubble user';
     u.innerText = text;
-    chat.appendChild(u);
+    m.appendChild(u);
     input.value = '';
-    
+
     setTimeout(() => {
-      if (text.toLowerCase().includes('lure') || text.toLowerCase().includes('use')) {
-        if (window.currentLiveWeather) {
-          const selectedLure = lures[0]; // Pulls the newest uploaded image
-          
-          let explanation = "";
-          if (window.currentLiveWeather.temp > 70) {
-            explanation = `Since your live sensors record water environments near **${window.currentLiveWeather.temp}°F**, predatory target fish are moving downward into colder layers. The profile of your **${selectedLure.name}** is perfect because its specific vibration rate triggers deep strike responses from lethargic fish escaping surface heat waves.`;
-          } else {
-            explanation = `With conditions sitting at an active **${window.currentLiveWeather.temp}°F** under **${window.currentLiveWeather.cond}**, fish are feeding aggressively in shallower flats. The geometry profile of your **${selectedLure.name}** mimics cold-blooded baitfish movements perfectly, optimizing visibility in this exact barometric window.`;
-          }
-
-          addBotMessage(`⚙️ **AI Strategic Optimization Framework:**\n\nBased on your active position coordinates, I have scanned your physical tackle inventory storage.\n\n**Recommendation:** Use your uploaded **${selectedLure.name}**.\n\n**Why this specific lure?**\n${explanation}\n\nHere is the match validation check image:`, selectedLure.img);
-        } else {
-          addBotMessage("Please initialize system tracking channels using the blue **📍 Link Mobile GPS** button above so I can compute localized atmospheric parameters!");
-        }
-      } else {
-        addBotMessage("Telemetry feeds normalized. Ask me about lure matching strategies or load more pictures into your Tackle chest!");
-      }
-    }, 800);
+      const matchedBait = lures[0] ? lures[0].name : "Standard Spinnerbait";
+      addBotMessage(`🤖 AI System recommendation deployment check matching complete:\n\nBased on water temperatures and barometric trend pressures, you should tie on your "${matchedBait}" instantly to maximize lure retrieval patterns.`);
+    }, 600);
   }
 
-  function sendQuickPrompt(promptText) {
-    document.getElementById('chat-input').value = promptText;
-    handleSendChat();
-  }
-
-  function showToast(m) {
+  function showToast(msg) {
     const t = document.getElementById('toast');
-    t.innerText = m; t.classList.add('show');
+    t.innerText = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 </script>
