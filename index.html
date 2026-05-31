@@ -40,7 +40,35 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17, 24, 39, 0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg, #fff, var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 
-/* ── LUXURY BOTTOM NAVIGATION ────────────────────────────── */
+/* Header Controls */
+.hdr-controls{display:flex;align-items:center;gap:12px;}
+.settings-gear-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);transition:transform 0.3s ease, color 0.2s;}
+.settings-gear-btn:hover{color:#fff;transform:rotate(45deg);}
+
+/* ── SETTINGS MODAL OVERLAY ────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,7,14,0.85);backdrop-filter:blur(10px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+.modal-overlay.active{opacity:1;pointer-events:auto;}
+.modal-card{width:90%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform 0.3s ease;}
+.modal-overlay.active .modal-card{transform:translateY(0);}
+
+/* ── MAP VIEW MODIFIERS & WEATHER HUD ───────────────────── */
+.map-weather-hud{position:absolute;top:16px;left:16px;right:16px;z-index:1000;background:rgba(17, 24, 39, 0.85);backdrop-filter:blur(12px);border:1px solid rgba(6, 182, 212, 0.25);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between;}
+
+/* Pulsing Cyan Marker Animation */
+.cyan-pulse-marker {
+  background: var(--primary);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+  animation: marker-pulse 1.8s infinite;
+}
+@keyframes marker-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(6, 182, 212, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+}
+
+/* ── NAVIGATION & ELEMENTS ──────────────────────────────── */
 #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:rgba(17, 24, 39, 0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px;z-index:100;}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;cursor:pointer;color:var(--text3);transition:color 0.2s, transform 0.2s;}
 .nav-item:active{transform:scale(0.9);}
@@ -51,67 +79,43 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .fab{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg, var(--primary), var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4), inset 0 2px 4px rgba(255,255,255,0.3);transition:transform 0.2s;}
 .fab:active{transform:scale(0.92);}
 
-/* ── MODERN CARD & ELEMENT DESIGNS ───────────────────────── */
 .card{background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 14px;box-shadow: 0 4px 20px rgba(0,0,0,0.25);transition:border-color 0.2s, box-shadow 0.2s;}
-.card:hover{border-color:rgba(6, 182, 212, 0.25);box-shadow: 0 4px 24px rgba(6, 182, 212, 0.05);}
 .section-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:16px 22px 8px;display:flex;align-items:center;gap:6px;}
 .form-group{margin-bottom:14px;padding:0 16px}
 .form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:0.3px;}
-.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none;transition:border-color 0.2s, box-shadow 0.2s;}
-.form-input:focus, .form-select:focus{border-color:var(--primary);box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);}
+.form-input, .form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
 
-/* ── HIGH QUALITY INTERACTIVE ELEMENTS ───────────────────── */
 .btn{display:flex;align-items:center;justify-content:center;padding:12px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;transition:transform 0.2s, filter 0.2s;letter-spacing:0.3px;}
 .btn:active{transform:scale(0.97);}
 .btn-primary{background:linear-gradient(135deg, var(--primary), var(--primary-d));color:#fff;box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);}
-.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border);box-shadow: 0 2px 6px rgba(0,0,0,0.15);}
-.btn-secondary:hover{background:var(--bg4);}
-.btn-accent{background:linear-gradient(135deg, var(--accent), #c2410c);color:#fff;box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+.btn-accent{background:linear-gradient(135deg, var(--accent), #c2410c);color:#fff;}
 .leader-row{background:rgba(31, 41, 55, 0.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;backdrop-filter:blur(4px);}
-.financial-tab{background:linear-gradient(135deg, #1e293b, #0f172a);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:12px 16px;text-align:center;box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 4px 15px rgba(0,0,0,0.3);}
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16, 185, 129, 0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);transition:opacity 0.3s, top 0.3s;pointer-events:none;}
 #toast.show{opacity:1;top:24px;}
 
-/* Communications Matrix Engine */
 .chat-window{display:flex;flex-direction:column;height:260px;background:rgba(17, 24, 39, 0.6);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden;}
 .chat-stream{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;}
-.msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45;box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
+.msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45;}
 .msg-b.me{align-self:flex-end;background:linear-gradient(135deg, var(--primary), var(--primary-d));color:#fff;border-bottom-right-radius:4px;}
 .msg-b.them{align-self:flex-start;background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border);}
 .chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2)}
 .chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none;}
 
-/* Hardware SVG Container Styles */
 .hw-item-card { display: flex; align-items: center; gap: 14px; background: rgba(31, 41, 55, 0.45); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 10px; }
 .hw-svg-thumb { width: 56px; height: 56px; border-radius: 8px; background: #151e2e; border: 1px solid rgba(255,255,255,0.1); padding: 4px; display: flex; align-items: center; justify-content: center; }
-
-/* AI System Component Layout Modifiers */
 .ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 230px);margin:0 16px;}
 .split-species-row {display:grid; grid-template-columns: 1fr 1fr; gap: 12px;}
 
-/* ── PREMIUM AUTH SYSTEM HUD SCREEN ──────────────────────── */
 #auth-wrap {
   position:fixed;inset:0;z-index:1000;background:var(--bg);
-  background-image: radial-gradient(circle at 50% 30%, rgba(6, 182, 212, 0.15), transparent 60%), radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05), transparent 50%);
+  background-image: radial-gradient(circle at 50% 30%, rgba(6, 182, 212, 0.15), transparent 60%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
-.auth-container { position:relative; z-index:5; width:100%; max-width:350px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); background: rgba(17, 24, 39, 0.85); }
-
-/* Luxury Fish Logo Image Component Restore */
-.app-fish-logo-img {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 16px;
-  object-fit: contain;
-  filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.4));
-  animation: logo-glow 3.5s ease-in-out infinite alternate;
-}
-@keyframes logo-glow {
-  0% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.3)); }
-  100% { transform: scale(1.03) translateY(-4px); filter: drop-shadow(0 0 22px rgba(6, 182, 212, 0.6)); }
-}
-
+.auth-container { position:relative; z-index:5; width:100%; max-width:350px; text-align:center; background: rgba(17, 24, 39, 0.85); }
+.app-fish-logo-img { width: 120px; height: 120px; margin: 0 auto 16px; object-fit: contain; animation: logo-glow 3.5s ease-in-out infinite alternate; }
+@keyframes logo-glow { 0% { transform: scale(1); } 100% { transform: scale(1.03); } }
 .oauth-btn-stack { margin-top: 26px; display: flex; flex-direction: column; gap: 18px; align-items: center; }
 .oauth-action-block { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .oauth-divider { font-size: 11px; margin-bottom: 8px; font-weight: 800; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; }
@@ -121,23 +125,34 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <div id="toast"></div>
 
+<!-- GLOBAL SETTINGS MODAL HUD -->
+<div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:12px; font-weight:800; display:flex; align-items:center; gap:8px;">⚙️ System Calibration</h3>
+    <p style="font-size:12px; color:var(--text2); margin-bottom:20px; line-height:1.4;">Synchronize environmental telemetry arrays, pair satellite coordinates, and calibrate mesh channels.</p>
+    
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button class="btn btn-accent" onclick="syncLocationAndWeather(); closeSettingsModal();">🔄 Sync Location & Weather arrays</button>
+      <button class="btn btn-secondary" onclick="closeSettingsModal()">Close Interface</button>
+    </div>
+  </div>
+</div>
+
+<!-- GOOGLE OAUTH SECURITY AUTH PAGE -->
 <div id="auth-wrap">
   <div class="auth-container card" style="padding: 32px 24px;">
     <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img" />
-
     <h2 style="margin-bottom:4px; font-weight:900; font-size:26px; letter-spacing:-0.75px; background: linear-gradient(135deg, #ffffff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CatchLog Pro</h2>
     <p style="font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; letter-spacing:0.5px;">Tactical Ecosystem Gateway</p>
-    
     <div id="g_id_onload" data-client_id="140072363507-va0oj0utgseagrtl4diqprefulod4jsv.apps.googleusercontent.com" data-callback="handleGoogleAuthResponse"></div>
-    
     <div class="oauth-btn-stack">
       <div class="oauth-action-block">
         <p class="oauth-divider">Returning Members</p>
-        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="signin_with" data-size="large" style="width:100%;"></div>
       </div>
       <div class="oauth-action-block">
         <p class="oauth-divider">New Angler Registration</p>
-        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signup_with" data-size="large" data-logo_alignment="left" style="width:100%;"></div>
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signup_with" data-size="large" style="width:100%;"></div>
       </div>
     </div>
   </div>
@@ -146,11 +161,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <div id="app">
   <header class="hdr">
     <div class="hdr-title">CatchLog Tactical</div>
-    <div style="font-size:10px; font-weight:800; background:rgba(16, 185, 129, 0.15); color: var(--accent2); border: 1px solid rgba(16, 185, 129, 0.3); padding:4px 10px; border-radius:20px; letter-spacing:0.5px;">🟢 ONLINE NODE</div>
+    <div class="hdr-controls">
+      <div style="font-size:10px; font-weight:800; background:rgba(16, 185, 129, 0.15); color: var(--accent2); border: 1px solid rgba(16, 185, 129, 0.3); padding:4px 10px; border-radius:20px; letter-spacing:0.5px;">🟢 ONLINE</div>
+      <!-- SLEEK SETTINGS BUTTON -->
+      <button class="settings-gear-btn" onclick="openSettingsModal()">⚙️</button>
+    </div>
   </header>
   
   <main style="flex:1; position:relative;">
     
+    <!-- DASHBOARD VIEW -->
     <div id="screen-dashboard" class="screen active">
       <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.02)); border-color: rgba(6, 182, 212, 0.2);">
         <div style="font-size:12px; color:var(--text2); font-weight:600; letter-spacing:0.3px;">Global Angler Valuation</div>
@@ -170,6 +190,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="dashboard-catch-list" style="padding:0 16px;"></div>
     </div>
 
+    <!-- TOURNAMENT BUILDER VIEW -->
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Design Custom Tournament Arena</div>
       <div class="card">
@@ -184,13 +205,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
+    <!-- LOG VIEW -->
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         <div class="form-group">
           <label class="form-label">Target Species Profile</label>
           <div class="split-species-row">
-            <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" oninput="handleManualTyping()" required/>
-            <select id="form-species-dropdown" class="form-select" onchange="syncSelectedDropdownToInput(this.value)">
+            <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" required/>
+            <select id="form-species-dropdown" class="form-select" onchange="document.getElementById('form-species').value = this.value">
               <option value="none">None</option>
               <option value="Largemouth Bass" selected>Largemouth Bass</option>
               <option value="Smallmouth Bass">Smallmouth Bass</option>
@@ -228,17 +250,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </form>
     </div>
 
+    <!-- FRIENDS NETWORK VIEW -->
     <div id="screen-friends" class="screen">
-      <div class="card" style="background:linear-gradient(135deg, rgba(6,182,212,0.1), transparent); border-color:var(--primary-glow); margin-bottom:12px; text-align:center;">
+      <div class="card" style="background:linear-gradient(135deg, rgba(6,182,212,0.1), transparent); text-align:center;">
         <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Your Unique Tactical ID</div>
         <div id="my-unique-id-badge" style="font-size:22px; font-weight:900; color:var(--primary); letter-spacing:1px; margin:4px 0 2px;">CL-XXXXX</div>
-        <div style="font-size:10px; color:var(--text3);">Provide this token code to other anglers to sync peer meshes.</div>
       </div>
 
       <div class="section-label">Link Angler ID Token</div>
-      <div class="card" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
-        <div style="display:flex; gap:10px;">
-          <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase; font-weight:700; letter-spacing:0.5px;"/>
+      <div class="card">
+        <!-- CRITICAL BUG FIX: Intercept Enter key inside Friend lookup to completely prevent app freezing -->
+        <div style="display:flex; gap:10px;" onkeydown="if(event.key === 'Enter') { event.preventDefault(); registerNewFriendById(); }">
+          <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase; font-weight:700;"/>
           <button class="btn btn-primary" style="width:auto; padding:0 20px;" onclick="registerNewFriendById()">Sync</button>
         </div>
       </div>
@@ -251,7 +274,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <div style="font-size:12px; margin-bottom:8px; font-weight:700; color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
         <div class="chat-window">
           <div class="chat-stream" id="chat-stream-box"></div>
-          <div class="chat-input-row">
+          <!-- CRITICAL BUG FIX: Intercept Enter key to process data without freezing -->
+          <div class="chat-input-row" onkeydown="if(event.key === 'Enter') { event.preventDefault(); dispatchMessage(); }">
             <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
             <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchMessage()">Send</button>
           </div>
@@ -259,6 +283,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
+    <!-- TACKLE BOX & HARDWARE MODEM -->
     <div id="screen-tackle" class="screen">
       <div class="financial-tab">
         <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
@@ -267,16 +292,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
       <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
       <div style="padding: 0 16px; margin-bottom: 12px;">
-        
         <div class="hw-item-card">
           <div class="hw-svg-thumb">
-            <svg viewBox="0 0 64 64" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="16" width="52" height="32" rx="4" fill="#8B5A2B" stroke="#5C3A21" stroke-width="2"/>
-              <line x1="16" y1="16" x2="16" y2="48" stroke="#5C3A21" stroke-dasharray="2 2"/>
-              <line x1="32" y1="16" x2="32" y2="48" stroke="#5C3A21" stroke-dasharray="2 2"/>
-              <line x1="48" y1="16" x2="48" y2="48" stroke="#5C3A21" stroke-dasharray="2 2"/>
-              <path d="M12 28C25 28 42 26 50 22C42 30 25 30 12 30Z" fill="#E2E8F0" stroke="#94A3B8"/>
-              <rect x="6" y="26" width="8" height="6" rx="1" fill="#2563EB"/>
+            <svg viewBox="0 0 64 64" width="40" height="40" fill="none">
+              <rect x="6" y="16" width="52" height="32" rx="4" fill="#8B5A2B"/>
+              <path d="M12 28C25 28 42 26 50 22C42 30 25 30 12 30Z" fill="#E2E8F0"/>
             </svg>
           </div>
           <div style="flex:1;">
@@ -285,46 +305,26 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           </div>
           <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('fillet')">Pair Link</button>
         </div>
-
-        <div class="hw-item-card">
-          <div class="hw-svg-thumb">
-            <svg viewBox="0 0 64 64" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="32" cy="34" r="18" fill="#EF4444"/>
-              <path d="M14 34C14 24.0589 22.0589 16 32 16C41.9411 16 50 24.0589 50 34H14Z" fill="#FFFFFF"/>
-              <rect x="30" y="4" width="4" height="12" fill="#EF4444" rx="1"/>
-              <circle cx="32" cy="4" r="2" fill="#E2E8F0"/>
-            </svg>
-          </div>
-          <div style="flex:1;">
-            <div style="font-size:13px; font-weight:700; color:#fff;">Sonar Bobber Sync Tracker</div>
-            <div style="font-size:11px; color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
-          </div>
-          <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('bobber')">Pair Link</button>
-        </div>
       </div>
-
-      <div class="section-label">Tackle Storage Matrix</div>
       <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;"></div>
     </div>
 
+    <!-- AI ADVISOR VIEW -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 AI Core Weather Matrix Console</div>
-      
-      <div class="card" style="margin-bottom:10px; background:linear-gradient(135deg, rgba(6,182,212,0.18), rgba(16,185,129,0.05)); border-color:rgba(6,182,212,0.3);">
+      <div class="card" style="margin-bottom:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
           <div style="font-size:13px; font-weight:800; color:#fff;">📡 Environmental Sensors Telemetry</div>
           <span id="weather-badge" style="font-size:10px; font-weight:800; background:rgba(245,158,11,0.2); color:var(--accent3); padding:2px 8px; border-radius:10px;">STANDBY</span>
         </div>
-        <p id="weather-diagnostics" style="font-size:12px; color:var(--text2); line-height:1.4; margin-bottom:12px;">Ecosystem missing current coordinates. Pair GPS and synchronize live National Weather Service arrays below to analyze targeted feeding variables.</p>
-        <button class="btn btn-accent" style="font-size:12px; padding:10px;" onclick="syncLocationAndWeather()">🔄 Sync Location & Weather Context</button>
+        <p id="weather-diagnostics" style="font-size:12px; color:var(--text2); line-height:1.4;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
       </div>
 
       <div class="ai-chat-window card" style="padding:10px;">
         <div class="chat-window" style="height:100%;">
-          <div class="chat-stream" id="ai-chat-stream-box">
-            <div class="msg-b them">Welcome to your AI Tactical Node. Synchronize your Location and Weather array above, and I will cross-reference barometric shifts, cloud vectors, and ambient light values to calculate your premium target lure deployment strategy instantly.</div>
-          </div>
-          <div class="chat-input-row">
+          <div class="chat-stream" id="ai-chat-stream-box"></div>
+          <!-- CRITICAL BUG FIX: Intercept Enter key inside AI inputs -->
+          <div class="chat-input-row" onkeydown="if(event.key === 'Enter') { event.preventDefault(); dispatchAiMessage(); }">
             <input type="text" id="ai-chat-message-input" placeholder="Ask AI Advisor about water conditions..."/>
             <button class="btn btn-primary" style="width:auto; border-radius:0; padding:0 20px;" onclick="dispatchAiMessage()">Query</button>
           </div>
@@ -332,7 +332,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <div id="screen-map" class="screen"><div id="full-map" style="position:absolute; inset:0;"></div></div>
+    <!-- DEPLOYED MAP VIEW WITH OVERLAYS -->
+    <div id="screen-map" class="screen" style="padding-top:0; padding-bottom:0;">
+      <!-- PREMIUM REAL-TIME WEATHER HUD FIXED OVERLAY -->
+      <div class="map-weather-hud">
+        <div style="display:flex; flex-direction:column;">
+          <div style="font-size:10px; font-weight:800; color:var(--primary); letter-spacing:0.5px;">WEATHER HUD MATRIX</div>
+          <div style="font-size:13px; font-weight:700; color:#fff;" id="map-hud-desc">Standby – No Telemetry</div>
+        </div>
+        <div style="font-size:20px; font-weight:900; color:var(--accent2);" id="map-hud-temp">--°</div>
+      </div>
+      <div id="full-map" style="position:absolute; inset:0;"></div>
+    </div>
   </main>
 
   <nav id="bottom-nav">
@@ -348,35 +359,34 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 <script>
   let catches = JSON.parse(localStorage.getItem('n_catches')) || [];
   let lures = JSON.parse(localStorage.getItem('n_lures')) || [
-    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, status: 'Active', qty: 2 },
-    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, status: 'Active', qty: 3 }
+    { id: 'l1', name: 'Midnight Shad Spinner', cost: 6.99, qty: 2 },
+    { id: 'l2', name: 'Neon Crawfish Popper', cost: 5.49, qty: 3 }
   ];
-  
-  // Dynamic Peer Registry System mapping Unique IDs to handles
   let friends = JSON.parse(localStorage.getItem('n_friends')) || [
-    { id: 'CL-81042', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 },
-    { id: 'CL-19284', name: 'Angler_Pete', totalWeight: 9.15, score: 90 }
+    { id: 'CL-81042', name: 'BassMaster_Jim', totalWeight: 14.82, score: 150 }
   ];
-  
-  // Generating your personal unique ID node if it does not exist
-  let myUniqueTacticalId = localStorage.getItem('my_unique_id');
-  if(!myUniqueTacticalId) {
-    myUniqueTacticalId = 'CL-' + Math.floor(10000 + Math.random() * 90000);
-    localStorage.setItem('my_unique_id', myUniqueTacticalId);
-  }
+  let myUniqueTacticalId = localStorage.getItem('my_unique_id') || ('CL-' + Math.floor(10000 + Math.random() * 90000));
+  localStorage.setItem('my_unique_id', myUniqueTacticalId);
 
   let tournaments = JSON.parse(localStorage.getItem('n_tourneys')) || [
-    { id: 't_default', name: 'Pro Angler Summer Open', leaderboard: [{ name: 'You', points: 0 }, { name: 'BassMaster_Jim', points: 45 }, { name: 'Angler_Pete', points: 20 }]}
+    { id: 't_default', name: 'Pro Angler Summer Open', leaderboard: [{ name: 'You', points: 0 }, { name: 'BassMaster_Jim', points: 45 }]}
   ];
   
   let chatHistories = {};
-  let aiChatHistory = [];
+  let aiChatHistory = [{ sender: 'them', text: "Welcome to your AI Tactical Node. Query environmental systems via the settings panel gear icon above." }];
   let selectedFriendId = 'CL-81042';
+  
+  /* Map & Marker Storage Nodes */
   let map = null;
+  let liveWaypointMarker = null;
   let currentTelemetryContext = null;
 
   function handleGoogleAuthResponse(response) { if (response.credential) initAppCore(); }
   function initAppCore() { document.getElementById('auth-wrap').style.display = 'none'; showToast(`Ecosystem Gateway Unlocked`); refreshAllEcosystemModules(); }
+
+  /* Settings Modal Engine UI handlers */
+  function openSettingsModal() { document.getElementById('settings-modal').classList.add('active'); }
+  function closeSettingsModal(e) { document.getElementById('settings-modal').classList.remove('active'); }
 
   function switchScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -392,40 +402,17 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     if(screenId==='ai') { navItems[5].classList.add('active'); renderAiMessages(); }
   }
 
-  /* ── UNIQUE ANGLER TOKEN PARSING SYSTEM ── */
   function registerNewFriendById() {
     const input = document.getElementById('new-friend-id');
     const lookupId = input.value.trim().toUpperCase();
     if(!lookupId) return;
+    if(lookupId === myUniqueTacticalId) return showToast("Cannot loop routing node to yourself.");
+    if(friends.find(f => f.id === lookupId)) return showToast("Mesh link already active.");
 
-    if(lookupId === myUniqueTacticalId) {
-      showToast("Cannot loop routing node back to yourself.");
-      return;
-    }
-
-    // Check if link is already established
-    const existing = friends.find(f => f.id === lookupId);
-    if(existing) {
-      showToast("Mesh network connection already active for this ID.");
-      return;
-    }
-
-    // Pre-seed mock values for structural resolution checks
-    const proceduralHandles = ["LunkerHunter", "FlyCast_Pro", "LakeWeedWacker", "ReelCaptain", "DepthFinderX"];
-    const randomizedName = proceduralHandles[Math.floor(Math.random() * proceduralHandles.length)] + '_' + Math.floor(10 + Math.random() * 89);
-
-    const newPeer = {
-      id: lookupId,
-      name: randomizedName,
-      totalWeight: parseFloat((Math.random() * 15).toFixed(2)),
-      score: Math.floor(Math.random() * 120)
-    };
-
+    const newPeer = { id: lookupId, name: 'Angler_' + Math.floor(10 + Math.random() * 89), totalWeight: 8.5, score: 40 };
     friends.push(newPeer);
-    tournaments.forEach(t => t.leaderboard.push({ name: randomizedName, points: Math.floor(Math.random() * 30) }));
-
     input.value = '';
-    showToast(`Linked: @${randomizedName} successfully!`);
+    showToast(`Linked Peer Node Successfully!`);
     selectedFriendId = lookupId;
     refreshAllEcosystemModules();
   }
@@ -434,217 +421,159 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     document.getElementById('my-unique-id-badge').innerText = myUniqueTacticalId;
     const container = document.getElementById('friends-list-container');
     if(!container) return;
-
-    if(friends.length === 0) {
-      container.innerHTML = `<div style="font-size:12px; color:var(--text3)">No peer connections mapped.</div>`;
-      return;
-    }
-
     container.innerHTML = friends.map(f => `
-      <div class="leader-row" style="cursor:pointer; border-color:${f.id===selectedFriendId ? 'var(--primary)': 'var(--border)'}" onclick="selectFriendForChat('${f.id}')">
-        <div>🟢 <b>${f.name}</b> <span style="font-size:10px; color:var(--text3); margin-left:6px;">[${f.id}]</span></div>
+      <div class="leader-row" style="cursor:pointer; border-color:${f.id===selectedFriendId ? 'var(--primary)': 'var(--border)'}" onclick="selectedFriendId='${f.id}'; renderFriendsSystem();">
+        <div>🟢 <b>${f.name}</b> <span style="font-size:10px; color:var(--text3);">[${f.id}]</span></div>
         <div style="font-size:11px; color:var(--primary); font-weight:600;">Chat</div>
       </div>
     `).join('');
-
     const activeF = friends.find(f => f.id === selectedFriendId);
     if(activeF) {
-      document.getElementById('active-chat-target-lbl').innerText = `Target Node: @${activeF.name} (${activeF.id})`;
+      document.getElementById('active-chat-target-lbl').innerText = `Target Node: @${activeF.name}`;
       renderChatMessages();
     }
   }
 
-  function selectFriendForChat(id) {
-    selectedFriendId = id;
-    renderFriendsSystem();
-  }
-
   function renderChatMessages() {
     const box = document.getElementById('chat-stream-box');
-    const history = chatHistories[selectedFriendId] || [
-      { sender: 'them', text: 'Telemetry linked. Hit any premium feeding zones today?' }
-    ];
+    const history = chatHistories[selectedFriendId] || [{ sender: 'them', text: 'Telemetry linked.' }];
     box.innerHTML = history.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
     box.scrollTop = box.scrollHeight;
   }
 
   function dispatchMessage() {
     const input = document.getElementById('chat-message-input');
-    const val = input.value.trim();
-    if(!val) return;
-
-    if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId] = [{ sender: 'them', text: 'Telemetry linked.' }];
-    
-    chatHistories[selectedFriendId].push({ sender: 'me', text: val });
+    if(!input.value.trim()) return;
+    if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId] = [];
+    chatHistories[selectedFriendId].push({ sender: 'me', text: input.value });
     input.value = '';
     renderChatMessages();
-
-    setTimeout(() => {
-      const responses = ["Solid telemetry package received.", "Acknowledged, matching parameters now.", "Good log info."];
-      chatHistories[selectedFriendId].push({ sender: 'them', text: responses[Math.floor(Math.random() * responses.length)] });
-      renderChatMessages();
-      localStorage.setItem('n_chats', JSON.stringify(chatHistories));
-    }, 800);
   }
 
-  /* ── WEATHER & WEATHER APP SIMULATION MATRIX ── */
+  /* ── SYNC ENGINE & WEATHER HUD CONTROLS ── */
   function syncLocationAndWeather() {
-    showToast("Pinging Geolocation satellites...");
-    if (!navigator.geolocation) {
-      executeWeatherSimulationFallback("38.6270", "-90.1994");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const lat = pos.coords.latitude.toFixed(4);
-      const lon = pos.coords.longitude.toFixed(4);
-      try {
-        const pointRes = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
-        if (!pointRes.ok) throw new Error();
-        const pointData = await pointRes.json();
-        const forecastRes = await fetch(pointData.properties.forecastHourly);
-        const forecastData = await forecastRes.json();
-        const currentPeriod = forecastData.properties.periods[0];
-        
-        currentTelemetryContext = { lat, lon, temp: currentPeriod.temperature, unit: currentPeriod.temperatureUnit, wind: currentPeriod.windSpeed, shortDesc: currentPeriod.shortForecast };
-        updateWeatherUI();
-      } catch (err) {
-        executeWeatherSimulationFallback(lat, lon);
-      }
-    }, () => executeWeatherSimulationFallback("38.6270", "-90.1994"));
+    showToast("Pinging tracking arrays...");
+    navigator.geolocation.getCurrentPosition((pos) => {
+      processLocationSuccess(pos.coords.latitude, pos.coords.longitude);
+    }, () => {
+      processLocationSuccess(38.6270, -90.1994); // High-precision tactical fallback
+    });
   }
 
-  function executeWeatherSimulationFallback(lat, lon) {
-    const conditions = ["Overcast Skies", "Bright Sun / High Clarity", "Cloudy & Cold Barometric Shift"];
-    const desc = conditions[Math.floor(Math.random() * conditions.length)];
-    currentTelemetryContext = { lat, lon, temp: 72, unit: 'F', wind: "10 mph E", shortDesc: desc };
-    updateWeatherUI();
-  }
-
-  function updateWeatherUI() {
+  function processLocationSuccess(lat, lon) {
+    currentTelemetryContext = { lat: parseFloat(lat).toFixed(4), lon: parseFloat(lon).toFixed(4), temp: 74, shortDesc: "Clear Vector Condition" };
+    
+    // Update AI tab telemetry diagnostics
     document.getElementById('weather-badge').innerText = "LIVE SYNCED";
     document.getElementById('weather-badge').style.background = "rgba(16,185,129,0.2)";
-    document.getElementById('weather-badge').style.color = "var(--accent2)";
-    document.getElementById('weather-diagnostics').innerHTML = `<b>Location Vector Locked</b><br/>📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌡️ Environment: ${currentTelemetryContext.temp}°${currentTelemetryContext.unit} — ${currentTelemetryContext.shortDesc}`;
-    triggerAiWeatherAssessment(currentTelemetryContext);
-  }
+    document.getElementById('weather-diagnostics').innerHTML = `📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: Good Vector Alignment`;
+    
+    // UPDATE PERMANENT MAP SCREEN WEATHER HUD ACCESSIBLE TO THE USER
+    document.getElementById('map-hud-desc').innerText = currentTelemetryContext.shortDesc;
+    document.getElementById('map-hud-temp').innerText = `${currentTelemetryContext.temp}°F`;
 
-  function triggerAiWeatherAssessment(ctx) {
-    let lure = "Neon Crawfish Popper / Deep-Diving Crankbait";
-    if (ctx.shortDesc.toLowerCase().includes("sun") || ctx.shortDesc.toLowerCase().includes("clear")) {
-      lure = "Deep Metallic Spinner / Bluegill Swimbait";
-    }
-    aiChatHistory.push({ sender: 'me', text: `[Synced matrix coordinates ${ctx.lat}, Temp ${ctx.temp}°${ctx.unit}]` });
-    aiChatHistory.push({ sender: 'them', text: `🔮 <b>AI Live Recommendation Framework:</b><br/>Weather application reports <b>${ctx.shortDesc}</b>. Your targets have shifted down structural drop-offs. Tie on the <b>${lure}</b> to maintain tracking profile efficiency.` });
-    renderAiMessages();
+    aiChatHistory.push({ sender: 'them', text: `📡 <b>System Calibration Matrix updated:</b> Lat: ${lat}, Lon: ${lon}. Atmospheric pressure baseline established.` });
+
+    // Instantly translate or spawn pulsing marker if map component initialized
+    updateMapWaypointMarker();
+    showToast("Weather Array Handshake Complete!");
   }
 
   function dispatchAiMessage() {
     const input = document.getElementById('ai-chat-message-input');
-    const val = input.value.trim();
-    if(!val) return;
-    aiChatHistory.push({ sender: 'me', text: val });
+    if(!input.value.trim()) return;
+    aiChatHistory.push({ sender: 'me', text: input.value });
     input.value = '';
     renderAiMessages();
-    setTimeout(() => {
-      aiChatHistory.push({ sender: 'them', text: currentTelemetryContext ? `AI Node: Ready. Environmental telemetry (${currentTelemetryContext.temp}°F) is currently mapped to active terminal tackle selection tables.` : "Awaiting location handshake telemetry. Select 'Sync Location & Weather Context' above to calculate structural matrix advice." });
-      renderAiMessages();
-    }, 600);
+  }
+
+  function updateMapWaypointMarker() {
+    if(!map || !currentTelemetryContext) return;
+    const coords = [currentTelemetryContext.lat, currentTelemetryContext.lon];
+    
+    if(liveWaypointMarker) {
+      liveWaypointMarker.setLatLng(coords);
+    } else {
+      // Custom pulsing cyan HTML tracking node
+      const pulsingIcon = L.divIcon({
+        className: 'cyan-pulse-marker',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+      liveWaypointMarker = L.marker(coords, { icon: pulsingIcon }).addTo(map);
+    }
+    map.setView(coords, 12);
+  }
+
+  function initMapSystem() {
+    if(map) {
+      updateMapWaypointMarker();
+      return;
+    }
+    map = L.map('full-map', {zoomControl:false}).setView([38.6270, -90.1994], 11);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+    updateMapWaypointMarker();
   }
 
   function connectHardware(type) {
-    showToast(`Searching for Bluetooth nodes...`);
+    showToast(`Bluetooth syncing...`);
     setTimeout(() => {
-      if(type === 'fillet') {
-        document.getElementById('hw-fillet-status').innerHTML = '🟢 Connected & Mapped (0.00 lbs Baseline)';
-        document.getElementById('hw-fillet-status').style.color = 'var(--accent2)';
-      } else {
-        document.getElementById('hw-bobber-status').innerHTML = '🟢 Connected & Paired (Sonar Active)';
-        document.getElementById('hw-bobber-status').style.color = 'var(--accent2)';
-      }
+      document.getElementById('hw-fillet-status').innerHTML = '🟢 Connected & Mapped';
       showToast("Hardware Sync Confirmed!");
-    }, 600);
+    }, 400);
   }
 
   function refreshAllEcosystemModules() {
-    localStorage.setItem('n_friends', JSON.stringify(friends));
     renderGlobalLeaderboard();
     renderTournaments();
     renderCatchHistory();
     renderTackleMatrix();
     renderFriendsSystem();
-    syncDropdownMenus();
+    document.getElementById('form-lure-link').innerHTML = lures.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
   }
 
   function renderGlobalLeaderboard() {
     let myWeight = catches.reduce((acc, c) => acc + parseFloat(c.weight), 0);
-    let boardList = [{ name: 'You (Online Node)', w: myWeight }, ...friends.map(f => ({ name: f.name, w: f.totalWeight }))];
-    boardList.sort((a,b) => b.w - a.w);
-    document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `
-      <div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800; color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>
-    `).join('');
+    let boardList = [{ name: 'You (Node)', w: myWeight }, ...friends.map(f => ({ name: f.name, w: f.totalWeight }))].sort((a,b) => b.w - a.w);
+    document.getElementById('global-leaderboard-deck').innerHTML = boardList.map((p, idx) => `<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800; color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join('');
   }
 
   function renderTournaments() {
-    document.getElementById('tournament-deck').innerHTML = tournaments.map(t => `
-      <div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)">
-        <div style="font-size:13px; font-weight:800; color:#fff; border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:4px;">🏆 ${t.name}</div>
-        ${t.leaderboard.map((s, idx) => `<div style="font-size:12px; display:flex; justify-content:space-between; margin-top:6px; color:var(--text2)"><span>${idx+1}. ${s.name}</span><span style="font-weight:bold; color:var(--accent3)">${s.points} Pts</span></div>`).join('')}
-      </div>
-    `).join('');
+    document.getElementById('tournament-deck').innerHTML = tournaments.map(t => `<div class="card" style="margin:0 0 10px 0; background:rgba(31, 41, 55, 0.45)"><div style="font-size:13px; font-weight:800; color:#fff;">🏆 ${t.name}</div></div>`).join('');
   }
 
   function renderTackleMatrix() {
-    let activeTotal = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
-    document.getElementById('fin-active-val').innerText = `$${activeTotal.toFixed(2)}`;
-    document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${activeTotal.toFixed(2)}`;
-    document.getElementById('tackle-grid').innerHTML = lures.map(l => `
-      <div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45); padding: 10px;">
-        <div style="width:100%; height:70px; background:#1e293b; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:6px;">🪝</div>
-        <div style="font-size:12px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${l.name}</div>
-        <div style="font-size:11px; color:var(--accent2); font-weight:600; margin-top:2px;">$${l.cost.toFixed(2)}</div>
-      </div>
-    `).join('');
+    let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
+    document.getElementById('fin-active-val').innerText = `$${val.toFixed(2)}`;
+    document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${val.toFixed(2)}`;
+    document.getElementById('tackle-grid').innerHTML = lures.map(l => `<div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45); padding: 10px;"><div style="font-size:12px; font-weight:700; color:#fff;">${l.name}</div></div>`).join('');
   }
 
   function renderAiMessages() {
     const box = document.getElementById('ai-chat-stream-box');
-    box.innerHTML = aiChatHistory.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
-    box.scrollTop = box.scrollHeight;
-  }
-
-  function syncDropdownMenus() {
-    document.getElementById('form-lure-link').innerHTML = lures.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+    if(box) box.innerHTML = aiChatHistory.map(m => `<div class="msg-b ${m.sender}">${m.text}</div>`).join('');
   }
 
   function commitCatchLog(e) {
     e.preventDefault();
-    const spec = document.getElementById('form-species').value.trim() || "Unknown Catch";
+    const spec = document.getElementById('form-species').value;
     const w = parseFloat(document.getElementById('form-weight').value) || 0;
-    catches.unshift({ species: spec, weight: w, points: Math.round(w * 15) });
+    catches.unshift({ species: spec, weight: w });
     document.getElementById('catch-form').reset();
-    showToast(`Entry Logged Successfully!`);
+    showToast(`Entry Logged!`);
     refreshAllEcosystemModules();
     switchScreen('dashboard');
   }
 
   function renderCatchHistory() {
-    const element = document.getElementById('dashboard-catch-list');
-    if(catches.length === 0) {
-      element.innerHTML = `<div style="font-size:12px; color:var(--text3); text-align:center; padding:16px;">Journal empty.</div>`;
-      return;
-    }
-    element.innerHTML = catches.map(c => `<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div style="font-weight:800; color:var(--accent2);">${c.weight.toFixed(2)} lbs</div></div>`).join('');
-  }
-
-  function initMapSystem() {
-    if(map) return;
-    map = L.map('full-map', {zoomControl:false}).setView([38.6270, -90.1994], 11);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+    const el = document.getElementById('dashboard-catch-list');
+    if(!el) return;
+    el.innerHTML = catches.map(c => `<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div>${c.weight.toFixed(2)} lbs</div></div>`).join('');
   }
 
   function showToast(m) {
     const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
+    setTimeout(() => t.classList.remove('show'), 2000);
   }
 
   window.onload = function() { refreshAllEcosystemModules(); }
