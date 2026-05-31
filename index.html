@@ -311,13 +311,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <div style="font-size:26px; font-weight:900; color:var(--accent2); margin-top:4px; filter: drop-shadow(0 0 10px rgba(16,185,129,0.2));" id="fin-active-val">$12.48</div>
       </div>
 
-      <!-- HARDWARE SMART SYNC REGISTRY MODULES -->
+      <!-- HARDWARE SMART SYNC REGISTRY MODULES WITH UPDATED ASSETS -->
       <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
       <div style="padding: 0 16px; margin-bottom: 12px;">
         
-        <!-- DIGITAL FILLET BOARD -->
+        <!-- DIGITAL FILLET BOARD (UPDATED WITH REVISED IMAGE ATTACHMENT) -->
         <div class="hw-item-card">
-          <img src="https://images.unsplash.com/photo-1601356616077-695728ec17ca?w=150&auto=format&fit=crop&q=60" alt="Smart Fillet Board Pro" class="hw-thumb"/>
+          <img src="Screenshot 2026-05-31 10.55.18 AM.png" alt="Smart Fillet Board Pro" class="hw-thumb"/>
           <div style="flex:1;">
             <div style="font-size:13px; font-weight:700; color:#fff;">Smart Fillet Board Pro</div>
             <div style="font-size:11px; color:var(--text3);" id="hw-fillet-status">Status: Disconnected</div>
@@ -325,9 +325,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('fillet')">Pair Link</button>
         </div>
 
-        <!-- SMART BOBBER SYNC TRACKER -->
+        <!-- SMART BOBBER SYNC TRACKER (UPDATED WITH REVISED IMAGE ATTACHMENT) -->
         <div class="hw-item-card">
-          <img src="https://images.unsplash.com/photo-1593138451121-6dc604be4403?w=150&auto=format&fit=crop&q=60" alt="Sonar Bobber Sync Tracker" class="hw-thumb"/>
+          <img src="Screenshot 2026-05-31 10.54.59 AM.png" alt="Sonar Bobber Sync Tracker" class="hw-thumb"/>
           <div style="flex:1;">
             <div style="font-size:13px; font-weight:700; color:#fff;">Sonar Bobber Sync Tracker</div>
             <div style="font-size:11px; color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
@@ -464,7 +464,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   }
 
   function triggerAiVisualScan(inferredName, guessedCost) {
-    showToast("Processing visual pixels via AI Core...");
+    showToast("Processing visual pixels via AI Core... ");
     
     setTimeout(() => {
       const newItem = {
