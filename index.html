@@ -2,37 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>CatchLog Pro – Complete Ecosystem</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>CatchLog Pro – Full Network</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-  :root{
-    --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--text:#e6edf3;--text2:#8b949e;
-    --primary:#00b4d8;
+  :root{--bg:#0d1117;--bg2:#161b22;--text:#e6edf3;--primary:#00b4d8;}
+  body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;}
+
+  /* PERSISTENT BACKGROUND LOGO */
+  #persistent-bg-logo {
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    z-index:-1; display:flex; align-items:center; justify-content:center;
+    opacity:0.05; pointer-events:none;
   }
-  html,body{height:100%;margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+  #persistent-bg-logo svg { width:60vw; height:60vw; fill:var(--primary); }
 
-  /* Persistent Background Logo */
-  #bg-logo {
-    position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;
-    display:flex;align-items:center;justify-content:center;opacity:0.06;
-  }
-  #bg-logo svg { width:50vh; height:50vh; fill:var(--primary); }
+  #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .screen{position:absolute;width:100%;padding:20px;box-sizing:border-box;display:none;}
+  .screen.active{display:block;}
 
-  #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;background:rgba(13,17,23,0.92);display:flex;flex-direction:column;border-left:1px solid #30363d;border-right:1px solid #30363d;}
-  .screen{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .3s;display:flex;flex-direction:column;justify-content:center;padding:20px;}
-  .screen.active{opacity:1;pointer-events:auto;}
-
-  .card{background:var(--bg2);border:1px solid #30363d;border-radius:16px;padding:24px;text-align:center}
-  
-  /* Input Styles */
-  .form-input{width:100%;background:var(--bg3);border:1px solid #30363d;border-radius:10px;padding:12px;color:var(--text);margin-top:8px;box-sizing:border-box;}
-  .split-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;text-align:left;}
+  .card{background:var(--bg2);border:1px solid #30363d;border-radius:16px;padding:24px;text-align:center;}
+  .form-input{width:100%;background:var(--bg2);border:1px solid #30363d;border-radius:10px;padding:12px;color:white;margin-top:8px;box-sizing:border-box;}
+  .split-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
 </style>
 </head>
 <body>
 
-<div id="bg-logo">
+<div id="persistent-bg-logo">
   <svg viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/></svg>
 </div>
 
@@ -40,9 +36,13 @@
   <div id="auth-screen" class="screen active">
     <div class="card">
       <h2>CatchLog Pro</h2>
-      <p style="color:var(--text2);">Authenticate with Google to continue.</p>
-      <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleLogin"></div>
-      <div class="g_id_signin" data-type="standard"></div>
+      <p>Use your account to continue</p>
+      <div id="g_id_onload" data-client_id="YOUR_CLIENT_ID.apps.googleusercontent.com" data-callback="handleLogin"></div>
+      
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="g_id_signin" data-type="standard" data-text="signin_with"></div>
+        <div class="g_id_signin" data-type="standard" data-text="signup_with"></div>
+      </div>
     </div>
   </div>
 
@@ -50,7 +50,7 @@
     <div class="card">
       <label style="font-weight:600;display:block;text-align:left;">Target Species Profile</label>
       <div class="split-row">
-        <input type="text" id="species-input" class="form-input" placeholder="Enter species..." oninput="checkManualInput()"/>
+        <input type="text" id="species-input" class="form-input" placeholder="Type or select..." oninput="checkManualInput()"/>
         <select id="species-select" class="form-input" onchange="commitSpecies(this.value)">
           <option value="none">None</option>
           <option value="Largemouth Bass">Largemouth Bass</option>
@@ -78,38 +78,27 @@
 </div>
 
 <script>
-  const select = document.getElementById('species-select');
-  const input = document.getElementById('species-input');
-
-  // Triggered by Google OAuth
   function handleLogin(response) {
     document.getElementById('auth-screen').classList.remove('active');
     document.getElementById('log-screen').classList.add('active');
   }
 
-  // Hover logic: preview in placeholder only
+  // Interaction Logic
+  const select = document.getElementById('species-select');
+  const input = document.getElementById('species-input');
+
   select.addEventListener('mouseover', (e) => {
-    if(e.target.tagName === 'OPTION' && e.target.value !== 'none') {
-      input.placeholder = e.target.value;
-    }
+    if(e.target.value !== 'none') input.placeholder = e.target.value;
   });
 
-  select.addEventListener('mouseout', () => {
-    input.placeholder = "Enter species...";
-  });
+  select.addEventListener('mouseout', () => input.placeholder = "Type or select...");
 
-  // Commit logic: Only on select change (click)
   function commitSpecies(val) {
-    if(val !== 'none') {
-      input.value = val;
-    }
+    if(val !== 'none') input.value = val;
   }
 
-  // Manual typing reset
   function checkManualInput() {
-    if(input.value.length > 0) {
-      select.value = 'none';
-    }
+    if(input.value.length > 0) select.value = 'none';
   }
 </script>
 </body>
