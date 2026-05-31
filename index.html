@@ -131,7 +131,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <div id="toast"></div>
 
-<!-- GLOBAL SETTINGS MODAL HUD -->
 <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px; font-weight:800; display:flex; align-items:center; gap:8px;">⚙️ System Calibration</h3>
@@ -144,7 +143,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   </div>
 </div>
 
-<!-- GOOGLE OAUTH SECURITY AUTH PAGE -->
 <div id="auth-wrap">
   <div class="auth-container card" style="padding: 32px 24px;">
     <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img" />
@@ -170,7 +168,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div class="hdr-controls">
       <div style="font-size:10px; font-weight:800; background:rgba(16, 185, 129, 0.15); color: var(--accent2); border: 1px solid rgba(16, 185, 129, 0.3); padding:4px 10px; border-radius:20px; letter-spacing:0.5px;">🟢 ONLINE</div>
       
-      <!-- ENGINE UPGRADE: SLEEK TACTICAL COGWHEEL BUTTON -->
       <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
         <svg width="22" height="22" viewBox="0 0 24 24">
           <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
@@ -181,14 +178,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   
   <main style="flex:1; position:relative;">
     
-    <!-- DASHBOARD VIEW -->
     <div id="screen-dashboard" class="screen active">
-      <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.02)); border-color: rgba(6, 182, 212, 0.2);">
-        <div style="font-size:12px; color:var(--text2); font-weight:600; letter-spacing:0.3px;">Global Angler Valuation</div>
-        <div style="font-size:20px; font-weight:900; color:#fff; margin-top:2px;" id="dash-valuation-label">Tackle Box Value: $0.00</div>
-      </div>
-      
-      <div class="section-label">🏆 Global Daily Leaderboard</div>
+      <div class="section-label" style="margin-top: 8px;">🏆 Global Daily Leaderboard</div>
       <div style="padding:0 16px;" id="global-leaderboard-deck"></div>
 
       <div class="section-label">⚡ Active Custom Tournaments</div>
@@ -201,7 +192,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="dashboard-catch-list" style="padding:0 16px;"></div>
     </div>
 
-    <!-- TOURNAMENT BUILDER VIEW -->
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Design Custom Tournament Arena</div>
       <div class="card">
@@ -216,7 +206,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- LOG VIEW -->
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         <div class="form-group">
@@ -261,7 +250,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </form>
     </div>
 
-    <!-- FRIENDS NETWORK VIEW -->
     <div id="screen-friends" class="screen">
       <div class="card" style="background:linear-gradient(135deg, rgba(6,182,212,0.1), transparent); text-align:center;">
         <div style="font-size:11px; color:var(--text2); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Your Unique Tactical ID</div>
@@ -292,7 +280,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- TACKLE BOX & HARDWARE MODEM -->
     <div id="screen-tackle" class="screen">
       <div class="financial-tab" style="padding: 16px;">
         <div style="font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:700;">💼 Total Active Tackle Value</div>
@@ -301,6 +288,21 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
       <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
       <div style="padding: 0 16px; margin-bottom: 12px;">
+        <div class="hw-item-card">
+          <div class="hw-svg-thumb">
+            <svg viewBox="0 0 64 64" width="40" height="40">
+              <circle cx="32" cy="32" r="22" fill="#ef4444"/>
+              <path d="M10 32h44A22 22 0 0 1 10 32z" fill="#ffffff"/>
+              <circle cx="32" cy="12" r="3" fill="#f59e0b"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:700; color:#fff;">Smart Bobber Pro Node</div>
+            <div style="font-size:11px; color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto; font-size:11px; padding:6px 12px;" onclick="connectHardware('bobber')">Pair Link</button>
+        </div>
+
         <div class="hw-item-card">
           <div class="hw-svg-thumb">
             <svg viewBox="0 0 64 64" width="40" height="40" fill="none">
@@ -318,7 +320,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div id="tackle-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px;"></div>
     </div>
 
-    <!-- AI ADVISOR VIEW WITH ENVIRONMENT MATRIX -->
     <div id="screen-ai" class="screen" style="display:flex; flex-direction:column; padding-top:0;">
       <div class="section-label">🤖 AI Core Weather Matrix Console</div>
       <div class="card" style="margin-bottom:10px;">
@@ -340,9 +341,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
     </div>
 
-    <!-- DEPLOYED MAP VIEW WITH OVERLAYS -->
     <div id="screen-map" class="screen" style="padding-top:0; padding-bottom:0;">
-      <!-- PREMIUM REAL-TIME WEATHER HUD FIXED OVERLAY -->
       <div class="map-weather-hud">
         <div style="display:flex; flex-direction:column;">
           <div style="font-size:10px; font-weight:800; color:var(--primary); letter-spacing:0.5px;">WEATHER HUD MATRIX</div>
@@ -458,18 +457,17 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     renderChatMessages();
   }
 
-  /* ── TELEMETRY HARDWARE CONFIGURATION ENGINE ── */
+  /* ── TELEMETRY CONFIGURATION ENGINE ── */
   function syncLocationAndWeather() {
     showToast("Pinging tracking arrays...");
     navigator.geolocation.getCurrentPosition((pos) => {
       processLocationSuccess(pos.coords.latitude, pos.coords.longitude);
     }, () => {
-      processLocationSuccess(38.6270, -90.1994); // Fallback coordinate matrix
+      processLocationSuccess(38.6270, -90.1994); 
     });
   }
 
   function processLocationSuccess(lat, lon) {
-    // Generate simulated tactical weather based on random matrix variables
     const tempOpts = [68, 74, 82];
     const descOpts = ["Clear Vector Condition", "Overcast Tactical Cover", "High Barometric Pressure Flare"];
     const randomIdx = Math.floor(Math.random() * 3);
@@ -494,7 +492,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     showToast("Weather Array Handshake Complete!");
   }
 
-  /* ── ADVANCED INVENTORY-BASED AI ADVISOR LOGIC ── */
+  /* ── ADVANCED INVENTORY-BASED AI ADVISOR ── */
   function dispatchAiMessage() {
     const input = document.getElementById('ai-chat-message-input');
     const queryText = input.value.trim();
@@ -507,39 +505,31 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     setTimeout(() => {
       let lowercaseQuery = queryText.toLowerCase();
       
-      // Look for contextual keywords asking for advice
       if (lowercaseQuery.includes('lure') || lowercaseQuery.includes('use') || lowercaseQuery.includes('tackle') || lowercaseQuery.includes('recommend')) {
-        
-        // Safety Fallback: User hasn't hit sync button yet
         if (!currentTelemetryContext) {
           aiChatHistory.push({ 
             sender: 'them', 
-            text: "⚠️ <b>Telemetry Offline:</b> I cannot safely look up your active tackle profile without knowing your location. Please press the ⚙️ <b>Settings Cogwheel</b> in the top right to sync your environmental sensor arrays first." 
+            text: "⚠️ <b>Telemetry Offline:</b> I cannot safely evaluate your active tackle profile without knowing your location parameters. Please press the ⚙️ <b>Settings Cogwheel</b> in the top right header to sync coordinates first." 
           });
         } 
-        // Safety Fallback 2: Tackle Box is empty
         else if (lures.length === 0) {
           aiChatHistory.push({
             sender: 'them',
-            text: "🧰 <b>Tackle Box Empty:</b> I see your telemetry coordinates, but you don't have any items registered in your hardware box. Add lures inside the Tackle tab so I can map your real inventory strategy."
+            text: "🧰 <b>Tackle Box Empty:</b> I see your telemetry arrays, but your hardware box inventory reports zero items. Register lures inside your Tackle tab first."
           });
         } 
-        // SUCCESS: Weather sync is done AND items are in the inventory
         else {
-          // Dynamic choice pattern matching against current weather status
-          let pickedLure = lures[0]; // default
+          let pickedLure = lures[0];
           let rationale = "";
 
           if (currentTelemetryContext.shortDesc.includes("Clear")) {
-            // Prefer brighter color or surface setups if available
             let match = lures.find(l => l.conditionBias === 'clear' || l.name.toLowerCase().includes('neon') || l.name.toLowerCase().includes('popper'));
             if (match) pickedLure = match;
-            rationale = `Since your current GPS context reads <b>${currentTelemetryContext.shortDesc} (${currentTelemetryContext.temp}°F)</b>, visibility beneath the surface layer is maximized. The fish are targeting clean shadows. I selected your <b>${pickedLure.name}</b> from your tackle box because its bright color profiles trigger reflex action adjustments in high light.`;
+            rationale = `Since your current GPS context reads <b>${currentTelemetryContext.shortDesc} (${currentTelemetryContext.temp}°F)</b>, visibility beneath the surface layer is maximized. The fish are targeting clear shadows. I selected your <b>${pickedLure.name}</b> from your tackle box because its bright color profiles trigger reflex action adjustments in high light.`;
           } else {
-            // Overcast or high pressure
             let match = lures.find(l => l.conditionBias === 'overcast' || l.name.toLowerCase().includes('shad') || l.name.toLowerCase().includes('spinner'));
             if (match) pickedLure = match;
-            rationale = `Your local coordinates are reporting <b>${currentTelemetryContext.shortDesc}</b>. Under low-light or low barometric thresholds, underwater vibration signatures perform vastly better than static color profiles. I chosen your <b>${pickedLure.name}</b> because its vibration displacements perfectly cut through dense water density structures right now.`;
+            rationale = `Your local coordinates are reporting <b>${currentTelemetryContext.shortDesc}</b>. Under low-light or low barometric thresholds, underwater vibration signatures perform vastly better than static color profiles. I chose your <b>${pickedLure.name}</b> because its vibration displacements perfectly cut through dense water density structures right now.`;
           }
 
           aiChatHistory.push({
@@ -548,10 +538,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           });
         }
       } else {
-        // Default catch-all responses for generic conversation items
         aiChatHistory.push({ 
           sender: 'them', 
-          text: "Telemetry frame parsed. For optimal results, ask me: <i>'What lure should I use today?'</i> to activate the live inventory array mapping." 
+          text: "Telemetry frame parsed. For optimal results, ask me: <i>'What lure should I use today?'</i> to activate live inventory mapping matrix loops." 
         });
       }
       renderAiMessages();
@@ -586,9 +575,10 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   }
 
   function connectHardware(type) {
-    showToast(`Bluetooth syncing...`);
+    showToast(`Bluetooth syncing ${type}...`);
     setTimeout(() => {
-      document.getElementById('hw-fillet-status').innerHTML = '🟢 Connected & Mapped';
+      const elId = type === 'bobber' ? 'hw-bobber-status' : 'hw-fillet-status';
+      document.getElementById(elId).innerHTML = '🟢 Connected & Mapped';
       showToast("Hardware Sync Confirmed!");
     }, 400);
   }
@@ -615,7 +605,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   function renderTackleMatrix() {
     let val = lures.reduce((acc, l) => acc + (l.cost * l.qty), 0);
     document.getElementById('fin-active-val').innerText = `$${val.toFixed(2)}`;
-    document.getElementById('dash-valuation-label').innerText = `Tackle Box Value: $${val.toFixed(2)}`;
     document.getElementById('tackle-grid').innerHTML = lures.map(l => `<div class="card" style="margin:0; background:rgba(31, 41, 55, 0.45); padding: 10px;"><div style="font-size:12px; font-weight:700; color:#fff;">${l.name}</div><div style="font-size:11px; color:var(--primary)">Qty: ${l.qty}</div></div>`).join('');
   }
 
