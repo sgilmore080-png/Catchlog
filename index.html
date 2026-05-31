@@ -105,7 +105,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .tackle-white-box { background: #1f2937; width: 100%; height: 90px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); text-align: center; padding: 8px; }
 .tackle-cam-overlay { position: absolute; top: 6px; right: 6px; background: rgba(17, 24, 39, 0.85); border: 1px solid var(--primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; z-index: 10; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
 .tackle-card-body { padding: 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between; }
-.tackle-tally-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 20px; }
+.tackle-tally-row { display: flex; align-items: center; justify-content:space-between; margin-top: 6px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 20px; }
 .tally-btn { background: var(--bg3); border: 1px solid var(--border); color: #fff; font-size: 14px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; }
 
 /* ── CAMERA VIEW OVERLAY ── */
@@ -117,7 +117,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 /* Target Frame Placement Overlay */
 .barcode-target-box-frame {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  position: absolute; top: 50%; left: 50%; transform: translate(-1X%, -50%);
   width: 280px; height: 160px; border: 2px dashed rgba(255,255,255,0.4); border-radius: 8px;
   box-shadow: 0 0 0 4000px rgba(0,0,0,0.6); z-index: 5002; display: none; pointer-events: none;
 }
@@ -207,7 +207,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       
       <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
         <svg width="22" height="22" viewBox="0 0 24 24">
-          <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.30.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+          <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
         </svg>
       </button>
     </div>
@@ -458,7 +458,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     if(screenId==='ai') { navItems[5].classList.add('active'); renderAiMessages(); }
   }
 
-  /* ── SEPARATED OPTICAL/CAMERA ENGINE PIPELINES ── */
   async function bootOpticalSystem(mode, optionalLureId = null) {
     opticalScanMode = mode;
     targetOverrideLureId = optionalLureId;
@@ -644,6 +643,12 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       localStorage.setItem('n_lures', JSON.stringify(lures));
       refreshAllEcosystemModules();
     }
+  }
+
+  function removeLure(lureId) {
+    lures = lures.filter(l => l.id !== lureId);
+    localStorage.setItem('n_lures', JSON.stringify(lures));
+    refreshAllEcosystemModules();
   }
 
   function registerNewFriendById() {
@@ -848,7 +853,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
     targetDiv.innerHTML = lures.map(l => {
       let mediaHeader = '';
-      
       if (l.type === 'image' && l.img) {
         mediaHeader = `<div class="tackle-img-frame" style="background-image: url('${l.img}');"></div>`;
       } else {
@@ -874,6 +878,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
               <div style="display:flex; gap:4px;">
                 <button class="tally-btn" onclick="modifyQuantity('${l.id}', -1)">-</button>
                 <button class="tally-btn" onclick="modifyQuantity('${l.id}', 1)">+</button>
+                <button class="tally-btn" onclick="removeLure('${l.id}')" title="Remove">🗑</button>
               </div>
             </div>
           </div>
