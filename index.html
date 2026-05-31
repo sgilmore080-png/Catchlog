@@ -1,9 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Catchlog</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchLog - My Fishing Journal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1a5f7a;
+            text-align: center;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            background-color: #1a5f7a;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #124559;
+        }
+        .log-section {
+            margin-top: 30px;
+        }
+        .catch-item {
+            background: #f9f9f9;
+            border-left: 5px solid #1a5f7a;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .catch-item h3 {
+            margin: 0 0 5px 0;
+            color: #1a5f7a;
+        }
+        .catch-item p {
+            margin: 2px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+        }
+    </style>
 </head>
 <body>
-  <h1>Catchlog is working 🎣</h1>
+
+    <div class="container">
+        <h1>CatchLog 🎣</h1>
+        <p style="text-align: center; color: #666;">Track your fishing adventures</p>
+        
+        <form id="catchForm">
+            <div class="form-group">
+                <label for="species">Fish Species:</label>
+                <input type="text" id="species" placeholder="e.g. Largemouth Bass, Rainbow Trout" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="weight">Weight (lbs/oz):</label>
+                <input type="text" id="weight" placeholder="e.g. 3 lbs 4 oz">
+            </div>
+            
+            <div class="form-group">
+                <label for="location">Location:</label>
+                <input type="text" id="location" placeholder="e.g. Pine Lake, Pier 4">
+            </div>
+            
+            <div class="form-group">
+                <label for="bait">Bait / Lure Used:</label>
+                <input type="text" id="bait" placeholder="e.g. Plastic Worm, Spinnerbait">
+            </div>
+            
+            <button type="submit">Log This Catch</button>
+        </form>
+
+        <div class="log-section">
+            <h2>Your Catches</h2>
+            <div id="catchList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Grab elements from the page
+        const catchForm = document.getElementById('catchForm');
+        const catchList = document.getElementById('catchList');
+
+        // Load existing catches from Chromebook's memory when page opens
+        let savedCatches = JSON.parse(localStorage.getItem('catches')) || [];
+
+        // Function to display the fish on the screen
+        function displayCatches() {
+            catchList.innerHTML = '';
+            if (savedCatches.length === 0) {
+                catchList.innerHTML = '<p style="color: #999; text-align: center;">No catches logged yet. Go catch some fish!</p>';
+                return;
+            }
+            
+            savedCatches.forEach((fish, index) => {
+                const catchDiv = document.createElement('div');
+                catchDiv.className = 'catch-item';
+                catchDiv.innerHTML = `
+                    <h3>${fish.species}</h3>
+                    <p><strong>Weight:</strong> ${fish.weight || 'Not recorded'}</p>
+                    <p><strong>Location:</strong> ${fish.location || 'Not recorded'}</p>
+                    <p><strong>Bait:</strong> ${fish.bait || 'Not recorded'}</p>
+                    <button class="delete-btn" onclick="deleteCatch(${index})">Delete</button>
+                `;
+                catchList.appendChild(catchDiv);
+            });
+        }
+
+        // Handle form submission (clicking "Log This Catch")
+        catchForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Stop page from refreshing
+            
+            // Get values from input boxes
+            const newCatch = {
+                species: document.getElementById('species').value,
+                weight: document.getElementById('weight').value,
+                location: document.getElementById('location').value,
+                bait: document.getElementById('bait').value
+            };
+            
+            // Add new fish to our array and save to memory
+            savedCatches.push(newCatch);
+            localStorage.setItem('catches', JSON.stringify(savedCatches));
+            
+            // Refresh the display and clear the form boxes
+            displayCatches();
+            catchForm.reset();
+        });
+
+        // Function to delete a catch
+        window.deleteCatch = function(index) {
+            savedCatches.splice(index, 1);
+            localStorage.setItem('catches', JSON.stringify(savedCatches));
+            displayCatches();
+        }
+
+        // Run this right away when the page loads
+        displayCatches();
+    </script>
+
 </body>
 </html>
