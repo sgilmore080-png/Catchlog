@@ -30,7 +30,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .settings-cog-btn:hover{transform:rotate(60deg)}
 .modal-overlay{position:fixed;inset:0;background:rgba(5,7,14,0.85);backdrop-filter:blur(10px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;}
 .modal-overlay.active{opacity:1;pointer-events:auto;}
-.modal-card{width:90%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform .3s ease;}
+.modal-card{width:90%;max-width:380px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform .3s ease;}
 .modal-overlay.active .modal-card{transform:translateY(0);}
 .map-weather-hud{position:absolute;top:16px;left:16px;right:16px;z-index:1000;background:rgba(17,24,39,0.85);backdrop-filter:blur(12px);border:1px solid rgba(6,182,212,0.25);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between;}
 #bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:rgba(17,24,39,0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px;z-index:100;}
@@ -45,7 +45,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .section-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:16px 22px 8px;display:flex;align-items:center;gap:6px}
 .form-group{margin-bottom:14px;padding:0 16px}
 .form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:.3px}
-.form-input,.form-select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none}
+.form-textarea{min-height:80px;resize:vertical}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
 .btn{display:flex;align-items:center;justify-content:center;padding:12px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;transition:transform .2s,filter .2s;letter-spacing:.3px}
 .btn:active{transform:scale(0.97)}
@@ -92,9 +93,12 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .oauth-btn-stack{margin-top:26px;display:flex;flex-direction:column;gap:18px;align-items:center}
 .oauth-action-block{width:100%;display:flex;flex-direction:column;align-items:center}
 .oauth-divider{font-size:11px;margin-bottom:8px;font-weight:800;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase}
-.manual-form-group{margin-bottom:12px;padding:0 16px}
-.manual-form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:.3px}
-.price-hint{font-size:10px;color:var(--accent2);font-style:italic;margin-top:2px;display:block}
+.photo-preview{margin-top:10px;width:100%;height:120px;border:1px solid var(--border);border-radius:var(--radius-sm);background-size:cover;background-position:center center;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;text-align:center;padding:10px}
+.suggestion-note{font-size:12px;color:var(--accent2);line-height:1.4}
+.status-pill{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.status-active{background:rgba(16,185,129,0.18);color:#10b981}
+.status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
+.status-broken{background:rgba(248,113,113,0.18);color:#f87171}
 </style>
 </head>
 <body>
@@ -142,23 +146,43 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <div id="manual-lure-modal" class="modal-overlay" onclick="closeManualLureModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
-    <h3 style="margin-bottom:12px;font-weight:800;">Add Lure Manually</h3>
-    <div class="manual-form-group">
-      <label class="manual-form-label">Lure Category</label>
-      <select id="manual-lure-category" class="form-select" onchange="updatePriceHint()"></select>
+    <h3 style="margin-bottom:12px;font-weight:800;">Quick Add Lure</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;">
+      Fast entry: category first, exact name optional, photo encouraged.
+    </p>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select id="manual-lure-category" class="form-select" onchange="onManualCategoryChange()"></select>
     </div>
-    <div class="manual-form-group">
-      <label class="manual-form-label">Price</label>
-      <input type="number" id="manual-lure-price" class="form-input" step="0.01" min="0.01" placeholder="0.00"/>
-      <span class="price-hint" id="price-hint-text"></span>
+    <div class="form-group">
+      <label class="form-label">Exact lure name (optional)</label>
+      <input type="text" id="manual-lure-name" class="form-input" placeholder="Strike King Red Eye Shad 1/2oz Sexy Shad"/>
     </div>
-    <div class="manual-form-group">
-      <label class="manual-form-label">Quantity</label>
-      <input type="number" id="manual-lure-qty" class="form-input" min="1" value="1"/>
+    <div class="form-group">
+      <label class="form-label">Photo (optional)</label>
+      <input type="file" id="manual-lure-photo" class="form-input" accept="image/*" onchange="handleManualLurePhotoInput(event)"/>
+      <div id="manual-lure-photo-preview" class="photo-preview">No photo selected</div>
+      <div id="manual-lure-suggestion" class="suggestion-note"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea id="manual-lure-notes" class="form-textarea" placeholder="Any extra details, conditions, or location tips..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select id="manual-lure-status" class="form-select">
+        <option value="active" selected>Active</option>
+        <option value="lost">Lost</option>
+        <option value="broken">Broken</option>
+      </select>
     </div>
     <div style="display:flex;gap:12px;margin-top:18px;">
       <button class="btn btn-primary" onclick="saveManualLure()">Save Lure</button>
       <button class="btn btn-secondary" onclick="closeManualLureModal()">Cancel</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-scan" onclick="bootOpticalSystem('barcode')" style="flex:1;">📦 Scan barcode (optional)</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="bootOpticalSystem('ai-photo')">📷 Use camera</button>
     </div>
   </div>
 </div>
@@ -383,22 +407,19 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
 <script>
 const lureCategories = [
-  'Topwater/Poppers',
-  'Lipless Crankbaits',
-  'Soft Plastics',
-  'Spinnerbaits/Blades',
-  'Diving Crankbaits',
-  'Jigs',
-  'Swimbaits',
-  'Buzzbaits',
-  'Worms',
-  'Senko/Stickbaits'
+  'Crankbait',
+  'Swimbait',
+  'Jig',
+  'Spinnerbait',
+  'Topwater',
+  'Soft Plastic',
+  'Other'
 ];
 
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
 let lures=JSON.parse(localStorage.getItem('n_lures'))||[
-  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Lipless Crankbaits',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/search/results.html?searchInput=Lipless%20Crankbaits'},
-  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater/Poppers',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/search/results.html?searchInput=Topwater%2FPoppers'}
+  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Crankbait',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/search/results.html?searchInput=Lipless%20Crankbaits',notes:'Great for cloudy days',status:'active'},
+  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',purchaseUrl:'https://www.basspro.com/search/results.html?searchInput=Topwater%2FPoppers',notes:'Use in calm water',status:'active'}
 ];
 let friends=JSON.parse(localStorage.getItem('n_friends'))||[{id:'CL-81042',name:'BassMaster_Jim',totalWeight:14.82,score:150}];
 let myUniqueTacticalId=localStorage.getItem('my_unique_id')||('CL-'+Math.floor(10000+Math.random()*90000));
@@ -414,6 +435,7 @@ let pendingTrashLureId=null;
 let map=null;
 let liveWaypointMarker=null;
 let currentTelemetryContext=null;
+let manualPhotoSuggestion=null;
 
 window.handleGoogleAuthResponse = function(response){
   if(response && response.credential){ initAppCore(); } else { showToast('Google sign-in failed.'); }
@@ -435,25 +457,61 @@ function switchScreen(screenId){
   if(screenId==='ai'){ document.querySelectorAll('.nav-item')[5].classList.add('active'); renderAiMessages(); }
 }
 
-function calculateAveragePriceForCategory(category){
-  const matchingLures=lures.filter(l=>l.category===category);
-  if(matchingLures.length===0) return null;
-  const total=matchingLures.reduce((sum,l)=>sum+l.cost,0);
-  return total/matchingLures.length;
+function normalizeCategory(category){
+  if(!category) return 'Other';
+  const normalized=category.toLowerCase();
+  if(normalized.includes('crank')) return 'Crankbait';
+  if(normalized.includes('swim')) return 'Swimbait';
+  if(normalized.includes('jig')) return 'Jig';
+  if(normalized.includes('spinner')) return 'Spinnerbait';
+  if(normalized.includes('top')) return 'Topwater';
+  if(normalized.includes('soft')) return 'Soft Plastic';
+  return 'Other';
 }
 
-function updatePriceHint(){
+function suggestLureFromImage(imageDataUrl){
+  const choices=[
+    {label:'Lipless Crankbait',category:'Crankbait',match:'Strike King Red Eye Shad'},
+    {label:'Soft Plastic Worm',category:'Soft Plastic',match:'Zoom Trick Worm'},
+    {label:'Topwater Popper',category:'Topwater',match:'Rebel Pop-R'},
+    {label:'Spinnerbait',category:'Spinnerbait',match:'Booyah Premium Spinnerbait'},
+    {label:'Swimbait',category:'Swimbait',match:'Keitech Swing Impact'},
+    {label:'Jig',category:'Jig',match:'Buckeye Football Jig'}
+  ];
+  let hash=0;
+  for(let i=0;i<imageDataUrl.length;i++){ hash=((hash<<5)-hash)+imageDataUrl.charCodeAt(i); hash |= 0; }
+  const pick=choices[Math.abs(hash)%choices.length];
+  return {
+    label:pick.label,
+    category:pick.category,
+    match:`Possible match: ${pick.match} (optional suggestion)`
+  };
+}
+
+function onManualCategoryChange(){
   const category=document.getElementById('manual-lure-category').value;
-  const priceInput=document.getElementById('manual-lure-price');
-  const hintText=document.getElementById('price-hint-text');
-  const avgPrice=calculateAveragePriceForCategory(category);
-  if(avgPrice!==null){
-    priceInput.value=avgPrice.toFixed(2);
-    hintText.innerText=`📊 Market avg: $${avgPrice.toFixed(2)}`;
+  const suggestionEl=document.getElementById('manual-lure-suggestion');
+  if(manualPhotoSuggestion){
+    suggestionEl.innerText=`Looks like a ${manualPhotoSuggestion.label}. Best fit category: ${manualPhotoSuggestion.category}.`;
   } else {
-    priceInput.value='';
-    hintText.innerText='No average price available';
+    suggestionEl.innerText=`Quick entry will use category ${category}. Photo helps confirm if you want.`;
   }
+}
+
+function handleManualLurePhotoInput(event){
+  const file=event.target.files && event.target.files[0];
+  const preview=document.getElementById('manual-lure-photo-preview');
+  const suggestionEl=document.getElementById('manual-lure-suggestion');
+  if(!file){ preview.style.backgroundImage=''; preview.innerText='No photo selected'; manualPhotoSuggestion=null; onManualCategoryChange(); return; }
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const imageDataUrl=e.target.result;
+    preview.style.backgroundImage=`url('${imageDataUrl}')`;
+    preview.innerText='';
+    manualPhotoSuggestion=suggestLureFromImage(imageDataUrl);
+    suggestionEl.innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>. ${manualPhotoSuggestion.match}`;
+  };
+  reader.readAsDataURL(file);
 }
 
 function getBassProSearchUrl(query){ return `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(query)}`; }
@@ -481,11 +539,11 @@ function resolveScannedProductMetadata(rawValue, scanFormat=''){
 
 function classifyCapturedLureImage(snapshotData){
   const categories=[
-    {name:'Topwater Popper',category:'Topwater/Poppers',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80'},
-    {name:'Lipless Crankbait',category:'Lipless Crankbaits',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80'},
-    {name:'Soft Plastic Worm',category:'Soft Plastics',img:'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80'},
-    {name:'Spinnerbait',category:'Spinnerbaits/Blades',img:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'},
-    {name:'Jerkbait',category:'Diving Crankbaits',img:'https://images.unsplash.com/photo-1563094699-01bf31a3c0e3?auto=format&fit=crop&w=240&q=80'}
+    {name:'Topwater Popper',category:'Topwater',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80'},
+    {name:'Lipless Crankbait',category:'Crankbait',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80'},
+    {name:'Soft Plastic Worm',category:'Soft Plastic',img:'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80'},
+    {name:'Spinnerbait',category:'Spinnerbait',img:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'},
+    {name:'Jerkbait',category:'Swimbait',img:'https://images.unsplash.com/photo-1563094699-01bf31a3c0e3?auto=format&fit=crop&w=240&q=80'}
   ];
   let hash=0;
   for(let i=0;i<snapshotData.length;i++){ hash=((hash<<5)-hash)+snapshotData.charCodeAt(i); hash |= 0; }
@@ -562,14 +620,16 @@ function processBarcodeValue(barcodeRawString, scanFormat=''){
     cost:6.99,
     qty:1,
     conditionBias:'clear',
-    type:'white-box',
-    category:'Barcode Scanned Gear',
+    type:'barcode',
+    category:'Other',
     img:'',
-    purchaseUrl:resolved.purchaseUrl
+    purchaseUrl:resolved.purchaseUrl,
+    notes:'Imported by barcode',
+    status:'active'
   });
   localStorage.setItem('n_lures',JSON.stringify(lures));
   refreshAllEcosystemModules();
-  showToast('Barcode saved as generic tackle entry. Use photo scan to classify lure.');
+  showToast('Barcode saved. You can still edit details manually.');
 }
 
 function captureFrameFromVideo(video){
@@ -593,19 +653,12 @@ function executeManualCaptureSnapshot(){
     if(opticalScanMode==='ai-photo'){
       const snapshot=captureFrameFromVideo(video);
       const classification=classifyCapturedLureImage(snapshot);
-      lures.unshift({
-        id:'l_'+Date.now(),
-        name:classification.name,
-        cost:7.25,
-        qty:1,
-        conditionBias:'clear',
-        type:'image',
-        category:classification.category,
-        img:classification.img,
-        purchaseUrl:getBassProSearchUrl(classification.name)
-      });
-      aiChatHistory.push({sender:'them',text:`👁️ <b>AI Vision Label:</b> Identified this as <b>${classification.name}</b>. Added to tackle inventory.`});
-      showToast(`Classified as ${classification.name}`);
+      document.getElementById('manual-lure-photo-preview').style.backgroundImage=`url('${snapshot}')`;
+      document.getElementById('manual-lure-photo-preview').innerText='';
+      manualPhotoSuggestion={label:classification.name, category:classification.category, match:`Possible match: ${classification.name}`};
+      document.getElementById('manual-lure-suggestion').innerHTML=`Looks like a <b>${classifications.name}</b>. ${manualPhotoSuggestion.match}`;
+      document.getElementById('manual-lure-category').value=classification.category;
+      showToast(`Detected ${classification.name}`);
     } else if(opticalScanMode==='inline-override'){
       const target=lures.find(l=>l.id===targetOverrideLureId);
       if(target && video){
@@ -706,9 +759,9 @@ function syncLocationAndWeather(){
 }
 
 function processLocationSuccess(lat,lon){
-  const tempOpts=[68,74,82];
-  const descOpts=["Clear Vector Condition","Overcast Tactical Cover","High Barometric Pressure Flare"];
-  const randomIdx=Math.floor(Math.random()*3);
+  const tempOpts=[58,68,74,82];
+  const descOpts=["Clear vector condition","Overcast tactical cover","Light breeze","High barometric pressure flare"];
+  const randomIdx=Math.floor(Math.random()*descOpts.length);
   currentTelemetryContext={lat:parseFloat(lat).toFixed(4),lon:parseFloat(lon).toFixed(4),temp:tempOpts[randomIdx],shortDesc:descOpts[randomIdx]};
   document.getElementById('weather-badge').innerText='LIVE SYNCED';
   document.getElementById('weather-badge').style.background='rgba(16,185,129,0.2)';
@@ -720,6 +773,36 @@ function processLocationSuccess(lat,lon){
   showToast('Weather Array Handshake Complete!');
 }
 
+function recommendBestLureForConditions(){
+  if(!currentTelemetryContext || lures.length===0) return null;
+  const weather=currentTelemetryContext.shortDesc.toLowerCase();
+  const preferredOrder = weather.includes('overcast') ? ['Spinnerbait','Jig','Soft Plastic','Crankbait','Swimbait','Topwater'] : ['Topwater','Crankbait','Swimbait','Soft Plastic','Spinnerbait','Jig'];
+  const available=lures.filter(l=>l.status==='active' && l.qty>0);
+  if(available.length===0) return null;
+  available.sort((a,b)=>{
+    const idxA=preferredOrder.indexOf(normalizeCategory(a.category));
+    const idxB=preferredOrder.indexOf(normalizeCategory(b.category));
+    if(idxA!==idxB) return idxA-idxB;
+    return b.qty - a.qty;
+  });
+  const best=available[0];
+  const similar=available.filter(l=>normalizeCategory(l.category)===normalizeCategory(best.category) && l.id!==best.id);
+  let explanation=`Your current conditions are ${currentTelemetryContext.temp}°F with ${currentTelemetryContext.shortDesc}. `;
+  if(normalizeCategory(best.category)==='Topwater'){
+    explanation += `Surface action is strong, so a topwater lure is ideal for quick reaction strikes. `;
+  } else if(normalizeCategory(best.category)==='Crankbait'){
+    explanation += `Crankbaits work well when fish are active in mid-water, especially in ${currentTelemetryContext.shortDesc}. `;
+  } else {
+    explanation += `This category blends well with the current weather and gives you reliable coverage. `;
+  }
+  if(similar.length>0){
+    explanation += `You also own ${similar.length} similar lure(s); this one is favored because it has the highest available quantity and likely gives the best chance on the first cast.`;
+  } else {
+    explanation += `It is the best available tackle from your current inventory.`;
+  }
+  return {lure:best, explanation};
+}
+
 function dispatchAiMessage(){
   const input=document.getElementById('ai-chat-message-input');
   const queryText=input.value.trim();
@@ -728,31 +811,21 @@ function dispatchAiMessage(){
   input.value='';
   renderAiMessages();
   setTimeout(()=>{
-    const lowercaseQuery=queryText.toLowerCase();
-    if(lowercaseQuery.includes('lure')||lowercaseQuery.includes('use')||lowercaseQuery.includes('tackle')||lowercaseQuery.includes('recommend')){
+    const lower=queryText.toLowerCase();
+    if(lower.includes('lure')||lower.includes('use')||lower.includes('recommend')||lower.includes('best')){
+      const recommendation=recommendBestLureForConditions();
       if(!currentTelemetryContext){
-        aiChatHistory.push({sender:'them',text:"⚠️ <b>Telemetry Offline:</b> Sync your environmental metrics by clicking the ⚙️ gear icon before querying strategies."});
-      } else if(lures.length===0){
-        aiChatHistory.push({sender:'them',text:"🧰 <b>Tackle Box Empty:</b> No lures logged yet. Scan a barcode or use the AI scanner first."});
+        aiChatHistory.push({sender:'them',text:"⚠️ <b>Telemetry Offline:</b> Sync your weather and location data before asking for a targeted lure recommendation."});
+      } else if(!recommendation){
+        aiChatHistory.push({sender:'them',text:"🧰 <b>Inventory too light:</b> Add at least one active lure to your tackle box so I can recommend the right tool."});
       } else {
-        let pickedLure=lures[0];
-        let rationale='';
-        if(currentTelemetryContext.shortDesc.includes("Clear")){
-          let match=lures.find(l=>l.conditionBias==='clear'||l.name.toLowerCase().includes('popper'));
-          if(match) pickedLure=match;
-          rationale=`Given your <b>${currentTelemetryContext.shortDesc}</b>, surface illumination profiles favor presentation layers. Deploying the <b>${pickedLure.name}</b> targets active structural feedback fields perfectly.`;
-        } else {
-          let match=lures.find(l=>l.conditionBias==='overcast'||l.name.toLowerCase().includes('rattle')||l.category.toLowerCase().includes('lipless'));
-          if(match) pickedLure=match;
-          rationale=`Your weather reports <b>${currentTelemetryContext.shortDesc}</b>. Under low lighting profiles, acoustic vibrations travel faster through current water columns. The <b>${pickedLure.name}</b> handles this beautifully.`;
-        }
-        aiChatHistory.push({sender:'them',text:`🤖 <b>Tactical Advice Engine Output:</b><br/><br/>🎯 Recommended Deployment: <b>${pickedLure.name}</b><br/>📊 Match Metrics: Inventory Verified (Qty: ${pickedLure.qty} available)<br/><br/>💡 <b>Strategic Rationale:</b> ${rationale}`});
+        aiChatHistory.push({sender:'them',text:`🤖 <b>Recommendation:</b> Use <b>${recommendation.lure.name}</b> (${recommendation.lure.category}) because ${recommendation.explanation}`});
       }
     } else {
-      aiChatHistory.push({sender:'them',text:"Telemetry frame parsed. Ask me: <i>'What lure should I use today?'</i> to activate live inventory loops."});
+      aiChatHistory.push({sender:'them',text:"Ask me what lure to use for current weather and location, and I'll recommend one from your own inventory."});
     }
     renderAiMessages();
-  },450);
+  },300);
 }
 
 function updateMapWaypointMarker(){
@@ -761,7 +834,7 @@ function updateMapWaypointMarker(){
   if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); }
   else {
     const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]});
-    liveWaypointMarker=L.marker(coords,{icon:pulsingIcon}).addTo(map);
+    liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map);
   }
   map.setView(coords,12);
 }
@@ -820,8 +893,10 @@ function renderTackleMatrix(){
   targetDiv.innerHTML=lures.map(l=>{
     let mediaHeader='';
     if(l.type==='image'&&l.img){ mediaHeader=`<div class="tackle-img-frame" style="background-image:url('${l.img}');"></div>`; }
-    else{ mediaHeader=`<div class="tackle-white-box" style="background:#ffffff;color:#111827;"><span style="font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#4b5563;">Scan Success Placeholder</span><div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override','${l.id}')" title="Take Lure Picture">📷</div></div>`; }
-    return `<div class="tackle-box-card">${mediaHeader}<div class="tackle-card-body"><div><div style="font-size:9px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px;font-family:monospace;line-height:1.1;display:block;max-height:22px;overflow:hidden;" title="${l.category}">${l.category||'Unassigned'}</div><div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.name}">${l.name}</div><div style="font-size:11px;color:var(--accent3);font-weight:700;margin-top:2px;">Market Avg: $${l.cost.toFixed(2)}</div></div><div class="tackle-tally-row"><span style="font-size:11px;color:var(--primary);font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span><div style="display:flex;gap:4px;"><button class="tally-btn" onclick="modifyQuantity('${l.id}',-1)">-</button><button class="tally-btn" onclick="modifyQuantity('${l.id}',1)">+</button><button class="tally-btn" onclick="openTrashModal('${l.id}')" title="Remove">🗑</button></div></div></div></div>`}).join('');
+    else{ mediaHeader=`<div class="tackle-white-box" style="background:#ffffff;color:#111827;"><span style="font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#4b5563;">No image</span><div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override','${l.id}')" title="Take Lure Picture">📷</div></div>`; }
+    const statusClass = l.status==='lost' ? 'status-lost' : l.status==='broken' ? 'status-broken' : 'status-active';
+    const noteText = l.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:6px;">${l.notes}</div>` : '';
+    return `<div class="tackle-box-card">${mediaHeader}<div class="tackle-card-body"><div><div style="font-size:9px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px;font-family:monospace;line-height:1.1;display:block;max-height:22px;overflow:hidden;" title="${l.category}">${l.category||'Unassigned'}</div><div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.name}">${l.name}</div><div class="status-pill ${statusClass}" style="margin-top:4px;">${l.status}</div>${noteText}</div><div class="tackle-tally-row"><span style="font-size:11px;color:var(--primary);font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span><div style="display:flex;gap:4px;"><button class="tally-btn" onclick="modifyQuantity('${l.id}',-1)">-</button><button class="tally-btn" onclick="modifyQuantity('${l.id}',1)">+</button><button class="tally-btn" onclick="openTrashModal('${l.id}')" title="Remove">🗑</button></div></div></div></div>`}).join('');
 }
 
 function renderAiMessages(){
@@ -860,11 +935,15 @@ function populateManualLureCategories(){
 
 function openManualLureModal(){
   populateManualLureCategories();
-  document.getElementById('manual-lure-qty').value=1;
-  document.getElementById('manual-lure-price').value='';
-  document.getElementById('price-hint-text').innerText='';
+  document.getElementById('manual-lure-name').value='';
+  document.getElementById('manual-lure-photo').value='';
+  document.getElementById('manual-lure-photo-preview').style.backgroundImage='';
+  document.getElementById('manual-lure-photo-preview').innerText='No photo selected';
+  document.getElementById('manual-lure-notes').value='';
+  document.getElementById('manual-lure-status').value='active';
+  document.getElementById('manual-lure-suggestion').innerText='Pick a category, then save quickly or add a photo for smarter suggestions.';
+  manualPhotoSuggestion=null;
   document.getElementById('manual-lure-modal').classList.add('active');
-  updatePriceHint();
 }
 
 function closeManualLureModal(e){
@@ -873,24 +952,29 @@ function closeManualLureModal(e){
 }
 
 function saveManualLure(){
-  const category=document.getElementById('manual-lure-category').value||'Other';
-  const price=parseFloat(document.getElementById('manual-lure-price').value)||6.99;
-  const qty=Math.max(1,parseInt(document.getElementById('manual-lure-qty').value,10)||1);
+  const category=document.getElementById('manual-lure-category').value || 'Other';
+  const exactName=document.getElementById('manual-lure-name').value.trim();
+  const notes=document.getElementById('manual-lure-notes').value.trim();
+  const status=document.getElementById('manual-lure-status').value;
+  const photoPreview=document.getElementById('manual-lure-photo-preview').style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+  const nameToSave = exactName || (manualPhotoSuggestion ? manualPhotoSuggestion.label : `${category} lure`);
   lures.unshift({
     id:'l_'+Date.now(),
-    name:category,
-    cost:price,
-    qty,
+    name:nameToSave,
+    cost:6.99,
+    qty:1,
     conditionBias:'clear',
-    type:'manual',
+    type: photoPreview ? 'image' : 'manual',
     category,
-    img:'',
-    purchaseUrl:getBassProSearchUrl(category)
+    img: photoPreview || '',
+    purchaseUrl:getBassProSearchUrl(exactName || category),
+    notes,
+    status
   });
   localStorage.setItem('n_lures',JSON.stringify(lures));
   closeManualLureModal();
   refreshAllEcosystemModules();
-  showToast('Lure added manually.');
+  showToast('Lure added quickly to your tackle box.');
 }
 
 window.onload=function(){ refreshAllEcosystemModules(); }
@@ -898,5 +982,3 @@ window.onload=function(){ refreshAllEcosystemModules(); }
 </body>
 </html>
 ```
-
-Similar code found with 1 license type
