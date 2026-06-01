@@ -629,12 +629,12 @@ function repurchaseLure(){
   if(!pendingTrashLureId) return;
   const lure=lures.find(l=>l.id===pendingTrashLureId);
   if(!lure) return;
-  const searchTerm = lure.category || lure.name;
+  const searchTerm = lure.name || lure.category || 'Fishing Lure';
   const url = `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(searchTerm)}`;
   window.open(url,'_blank');
   pendingTrashLureId=null;
   document.getElementById('trash-modal').classList.remove('active');
-  showToast('Opening BassPro.com with the lure category pre-filled.');
+  showToast('Opening BassPro.com with the selected lure search pre-filled.');
 }
 
 function registerNewFriendById(){
