@@ -1,4 +1,5 @@
 ````html
+// ...existing code...
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,7 +88,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 @keyframes bar-laser-sweep{0%,100%{top:15%}50%{top:85%}}
 .capture-shutter-btn{width:68px;height:68px;border-radius:50%;background:#fff;border:6px solid rgba(6,182,212,0.4);cursor:pointer;box-shadow:0 0 15px rgba(255,255,255,0.4);z-index:5020}
 .capture-shutter-btn:active{transform:scale(0.92)}
-#auth-wrap{position:fixed;inset:0;z-index:1000;background:var(--bg);background-image:radial-gradient(circle at 50% 30%,rgba(6,182,212,0.15),transparent 60%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+#auth-wrap{position:fixed;inset:0;z-index:100000;pointer-events:auto;background:var(--bg);background-image:radial-gradient(circle at 50% 30%,rgba(6,182,212,0.15),transparent 60%);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .auth-container{position:relative;z-index:5;width:100%;max-width:350px;text-align:center;background:rgba(17,24,39,0.85)}
 .app-fish-logo-img{width:120px;height:120px;margin:0 auto 16px;object-fit:contain}
 .oauth-btn-stack{margin-top:26px;display:flex;flex-direction:column;gap:18px;align-items:center}
@@ -216,7 +217,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
     <div class="form-group">
       <label class="form-label">Photo (optional)</label>
-      <input type="file" id="manual-lure-photo" class="form-input" accept="image/*" onchange="handleManualLurePhotoInput(event)"/>
+      <input type="file" id="manual-lure-photo" class="form-input" accept="image/*" capture="environment" onchange="handleManualLurePhotoInput(event)"/>
       <div id="manual-lure-photo-preview" class="photo-preview">No photo selected</div>
       <div id="manual-lure-suggestion" class="suggestion-note"></div>
     </div>
@@ -251,13 +252,13 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div class="oauth-btn-stack">
       <div class="oauth-action-block">
         <p class="oauth-divider">Returning Members</p>
-        <button class="btn btn-primary" onclick="initAppCore()">Continue</button>
+        <button type="button" class="btn btn-primary" onclick="initAppCore()">Continue</button>
       </div>
       <div class="oauth-action-block">
         <p class="oauth-divider">New Angler Registration</p>
-        <button class="btn btn-secondary" onclick="initAppCore()">Register (demo)</button>
+        <button type="button" class="btn btn-secondary" onclick="initAppCore()">Register (demo)</button>
       </div>
-      <button class="btn btn-secondary" style="margin-top:18px;width:100%;" onclick="initAppCore()">Continue without Google</button>
+      <button type="button" class="btn btn-secondary" style="margin-top:18px;width:100%;" onclick="initAppCore()">Continue without Google</button>
     </div>
   </div>
 </div>
@@ -1060,4 +1061,1066 @@ window.onload=function(){ refreshAllEcosystemModules(); }
 </script>
 </body>
 </html>
-````
+```// filepath: c:\projects\catchlog\index.html
+// ...existing code...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CatchLog Pro – Integrated Tackle UI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+/* ...existing styles... (kept from original) */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0f1d; --bg2:#111827; --bg3:#1f2937; --bg4:#374151; --border:rgba(255,255,255,0.08);
+  --border-glow:rgba(0,180,216,0.3); --text:#f3f4f6; --text2:#9ca3af; --text3:#6b7280;
+  --primary:#06b6d4; --primary-glow:rgba(6,182,212,0.2); --primary-d:#0891b2;
+  --accent:#f97316; --accent2:#10b981; --accent3:#f59e0b; --card:rgba(17,24,39,0.7);
+  --radius:20px; --radius-sm:12px; --nav-h:76px; --hdr-h:64px; --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);background-image:radial-gradient(circle at top right,rgba(6,182,212,0.08),transparent 40%),radial-gradient(circle at bottom left,rgba(16,185,129,0.04),transparent 35%);}
+#app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:rgba(10,15,29,0.95);box-shadow:0 0 40px rgba(0,0,0,0.6);border-left:1px solid var(--border);border-right:1px solid var(--border);}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
+.screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
+.hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17,24,39,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#fff,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr-controls{display:flex;align-items:center;gap:12px}
+.settings-cog-btn{background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;transition:transform .3s cubic-bezier(0.4,0,0.2,1)}
+.settings-cog-btn svg{fill:var(--text2);transition:fill .2s}
+.settings-cog-btn:hover svg{fill:#fff}
+.settings-cog-btn:hover{transform:rotate(60deg)}
+.modal-overlay{position:fixed;inset:0;background:rgba(5,7,14,0.85);backdrop-filter:blur(10px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.modal-overlay.active{opacity:1;pointer-events:auto;}
+.modal-card{width:90%;max-width:380px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:0 20px 40px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform .3s ease;}
+.modal-overlay.active .modal-card{transform:translateY(0);}
+.map-weather-hud{position:absolute;top:16px;left:16px;right:16px;z-index:1000;background:rgba(17,24,39,0.85);backdrop-filter:blur(12px);border:1px solid rgba(6,182,212,0.25);border-radius:var(--radius-sm);padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between;}
+#bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:var(--nav-h);background:rgba(17,24,39,0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:8px;z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;cursor:pointer;color:var(--text3);transition:color .2s,transform .2s}
+.nav-item:active{transform:scale(0.9)}
+.nav-item.active{color:var(--primary);filter:drop-shadow(0 0 8px var(--primary-glow))}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px}
+.fab-wrap{position:relative;top:-12px}
+.fab{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 8px 20px rgba(6,182,212,0.4),inset 0 2px 4px rgba(255,255,255,0.3);transition:transform .2s}
+.fab:active{transform:scale(0.92)}
+.card{background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:0 16px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.25);transition:border-color .2s,box-shadow .2s}
+.section-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin:16px 22px 8px;display:flex;align-items:center;gap:6px}
+.form-group{margin-bottom:14px;padding:0 16px}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:.3px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;outline:none}
+.form-textarea{min-height:80px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px}
+.btn{display:flex;align-items:center;justify-content:center;padding:12px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;transition:transform .2s,filter .2s;letter-spacing:.3px}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;box-shadow:0 4px 14px rgba(6,182,212,0.3)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-accent{background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff}
+.leader-row{background:rgba(31,41,55,0.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;backdrop-filter:blur(4px)}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16,185,129,0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow:0 10px 25px rgba(16,185,129,0.3);transition:opacity .3s,top .3s;pointer-events:none}
+#toast.show{opacity:1;top:24px}
+.chat-window{display:flex;flex-direction:column;height:100%;background:rgba(17,24,39,0.6);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden}
+.chat-stream{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45}
+.msg-b.me{align-self:flex-end;background:linear-gradient(135deg,var(--primary),var(--primary-d));color:#fff;border-bottom-right-radius:4px}
+.msg-b.them{align-self:flex-start;background:var(--bg3);color:var(--text);border-bottom-left-radius:4px;border:1px solid var(--border)}
+.chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2);z-index:30}
+.chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none}
+.hw-item-card{display:flex;align-items:center;gap:14px;background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;position:relative}
+.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative}
+.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 200px);margin:0 16px;padding-bottom: calc(var(--nav-h) + 12px);}
+.split-species-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scan-actions-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.btn-scan{background:rgba(6,182,212,0.15);border:1px dashed var(--primary);color:#fff;font-size:11px;padding:10px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;transition:background .2s}
+.btn-scan:hover{background:rgba(6,182,212,0.3)}
+.tackle-box-card{background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.tackle-img-frame{height:90px;width:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative}
+.tackle-white-box{background:#1f2937;width:100%;height:90px;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);text-align:center;padding:8px}
+.tackle-cam-overlay{position:absolute;top:6px;right:6px;background:rgba(17,24,39,0.85);border:1px solid var(--primary);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+.tackle-card-body{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1;justify-content:space-between}
+.tackle-tally-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:20px}
+.tally-btn{background:var(--bg3);border:1px solid var(--border);color:#fff;font-size:14px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:bold}
+.camera-viewfinder-overlay{position:fixed;inset:0;background:#000;z-index:5000;display:none;flex-direction:column;justify-content:space-between}
+.viewfinder-hdr{padding:16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,0.9),transparent);position:absolute;top:0;left:0;right:0;z-index:5010}
+.viewfinder-video{width:100%;height:100%;object-fit:cover}
+.viewfinder-actions{position:absolute;bottom:0;left:0;right:0;padding:32px 24px;background:linear-gradient(to top,rgba(0,0,0,0.95),transparent);display:flex;flex-direction:column;align-items:center;gap:14px;z-index:5010}
+.barcode-target-box-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:160px;border:2px dashed rgba(255,255,255,0.4);border-radius:8px;box-shadow:0 0 0 4000px rgba(0,0,0,0.6);z-index:5002;display:none;pointer-events:none}
+.barcode-laser-line{position:absolute;top:50%;left:5%;right:5%;height:2px;background:#ff2a2a;box-shadow:0 0 14px #ff2a2a}
+.laser-active{animation:bar-laser-sweep 2.5s infinite ease-in-out}
+@keyframes bar-laser-sweep{0%,100%{top:15%}50%{top:85%}}
+.capture-shutter-btn{width:68px;height:68px;border-radius:50%;background:#fff;border:6px solid rgba(6,182,212,0.4);cursor:pointer;box-shadow:0 0 15px rgba(255,255,255,0.4);z-index:5020}
+.capture-shutter-btn:active{transform:scale(0.92)}
+#auth-wrap{position:fixed;inset:0;z-index:100000;pointer-events:auto;background:var(--bg);background-image:radial-gradient(circle at 50% 30%,rgba(6,182,212,0.15),transparent 60%);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.auth-container{position:relative;z-index:5;width:100%;max-width:350px;text-align:center;background:rgba(17,24,39,0.85)}
+.app-fish-logo-img{width:120px;height:120px;margin:0 auto 16px;object-fit:contain}
+.oauth-btn-stack{margin-top:26px;display:flex;flex-direction:column;gap:18px;align-items:center}
+.oauth-action-block{width:100%;display:flex;flex-direction:column;align-items:center}
+.oauth-divider{font-size:11px;margin-bottom:8px;font-weight:800;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase}
+.photo-preview{margin-top:10px;width:100%;height:120px;border:1px solid var(--border);border-radius:var(--radius-sm);background-size:cover;background-position:center center;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;text-align:center;padding:10px}
+.suggestion-note{font-size:12px;color:var(--accent2);line-height:1.4}
+.status-pill{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.status-active{background:rgba(16,185,129,0.18);color:#10b981}
+.status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
+.status-broken{background:rgba(248,113,113,0.18);color:#f87171}
+
+/* ADDED: ensure AI message stream never slides under the input row */
+#ai-chat-stream-box{
+  padding-bottom: calc(var(--nav-h) + 110px);
+}
+#ai-chat-input-row{
+  position:sticky;
+  bottom:calc(var(--nav-h) + 8px);
+  z-index:120;
+  background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));
+  border-top:1px solid var(--border);
+  padding:8px 12px;
+  gap:8px;
+  display:flex;
+  align-items:center;
+}
+#ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
+
+/* MOD: Make modal content scrollable on small screens so "Scan barcode" buttons are reachable */
+.modal-overlay {
+  /* keep center on desktop but allow top alignment on small screens via media query below */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+/* Constrain modal height and enable native momentum scrolling on mobile */
+.modal-overlay .modal-card {
+  width: 90%;
+  max-width: 420px;
+  box-sizing: border-box;
+  /* limit height so content can scroll inside the modal on short viewports */
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  margin: 20px auto;
+}
+
+/* Ensure tappable controls inside modal receive touch events */
+.modal-overlay .modal-card * {
+  touch-action: manipulation;
+}
+
+/* Mobile-specific: align modal near top and reduce max-height so user can scroll page if needed */
+@media (max-width: 600px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding-top: 18px;
+  }
+  .modal-overlay .modal-card {
+    max-height: calc(100vh - 80px);
+    margin: 12px;
+    border-radius: 14px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="camera-viewfinder-overlay" class="camera-viewfinder-overlay">
+  <div class="viewfinder-hdr">
+    <div id="viewfinder-title" style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--primary);">System Lens Active</div>
+    <button class="btn btn-secondary" style="width:auto;padding:6px 14px;font-size:11px;" onclick="shutdownCameraStream()">Cancel Scan</button>
+  </div>
+  <div id="barcode-target-box-frame" class="barcode-target-box-frame">
+    <div id="laser-element" class="barcode-laser-line"></div>
+    <div id="viewfinder-scan-label" style="position:absolute;bottom:-28px;left:0;width:100%;text-align:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 4px #000;">ALIGN TARGET</div>
+  </div>
+  <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted></video>
+  <div class="viewfinder-actions">
+    <p id="viewfinder-instructions-hint" style="font-size:11px;color:var(--text2);text-align:center;max-width:280px;margin-bottom:4px;">Position item clearly inside viewfinder matrix</p>
+    <button id="shutter-action-trigger" class="capture-shutter-btn" onclick="executeManualCaptureSnapshot()"></button>
+  </div>
+</div>
+
+<div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:12px;font-weight:800;display:flex;align-items:center;gap:8px;">⚙️ System Calibration</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.4;">Synchronize environmental telemetry arrays, pair satellite coordinates, and calibrate mesh channels.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <button class="btn btn-accent" onclick="syncLocationAndWeather(); closeSettingsModal();">🔄 Sync Location & Weather arrays</button>
+      <button class="btn btn-secondary" onclick="closeSettingsModal()">Close Interface</button>
+    </div>
+  </div>
+</div>
+
+<div id="trash-modal" class="modal-overlay" onclick="cancelTrashPrompt(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:12px;font-weight:800;">Remove or Repurchase</h3>
+    <p id="trash-modal-text" style="font-size:13px;color:var(--text2);line-height:1.5;"></p>
+    <div style="display:flex;gap:12px;margin-top:18px;">
+      <button class="btn btn-secondary" style="flex:1;" onclick="confirmRemoveLure()">Get Rid of Item</button>
+      <button class="btn btn-accent" style="flex:1;" onclick="repurchaseLure()">Repurchase at BassPro.com</button>
+    </div>
+    <button class="btn btn-secondary" style="margin-top:16px;width:100%;" onclick="cancelTrashPrompt()">Cancel</button>
+  </div>
+</div>
+
+<div id="manual-lure-modal" class="modal-overlay" onclick="closeManualLureModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:12px;font-weight:800;">Quick Add Lure</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;">
+      Fast entry: category first, exact name optional, photo encouraged.
+    </p>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select id="manual-lure-category" class="form-select" onchange="onManualCategoryChange()"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Exact lure name (optional)</label>
+      <input type="text" id="manual-lure-name" class="form-input" placeholder="Strike King Red Eye Shad 1/2oz Sexy Shad"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Photo (optional)</label>
+      <input type="file" id="manual-lure-photo" class="form-input" accept="image/*" capture="environment" onchange="handleManualLurePhotoInput(event)"/>
+      <div id="manual-lure-photo-preview" class="photo-preview">No photo selected</div>
+      <div id="manual-lure-suggestion" class="suggestion-note"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea id="manual-lure-notes" class="form-textarea" placeholder="Any extra details, conditions, or location tips..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select id="manual-lure-status" class="form-select">
+        <option value="active" selected>Active</option>
+        <option value="lost">Lost</option>
+        <option value="broken">Broken</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:18px;">
+      <button class="btn btn-primary" onclick="saveManualLure()">Save Lure</button>
+      <button class="btn btn-secondary" onclick="closeManualLureModal()">Cancel</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-scan" onclick="bootOpticalSystem('barcode')" style="flex:1;">📦 Scan barcode (optional)</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="bootOpticalSystem('ai-photo')">📷 Use camera</button>
+    </div>
+  </div>
+</div>
+
+<div id="auth-wrap">
+  <div class="auth-container card" style="padding:32px 24px;">
+    <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img"/>
+    <h2 style="margin-bottom:4px;font-weight:900;font-size:26px;letter-spacing:-0.75px;background:linear-gradient(135deg,#ffffff,#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CatchLog Pro</h2>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;letter-spacing:.5px;">Tactical Ecosystem Gateway</p>
+    <div class="oauth-btn-stack">
+      <div class="oauth-action-block">
+        <p class="oauth-divider">Returning Members</p>
+        <button type="button" class="btn btn-primary" onclick="initAppCore()">Continue</button>
+      </div>
+      <div class="oauth-action-block">
+        <p class="oauth-divider">New Angler Registration</p>
+        <button type="button" class="btn btn-secondary" onclick="initAppCore()">Register (demo)</button>
+      </div>
+      <button type="button" class="btn btn-secondary" style="margin-top:18px;width:100%;" onclick="initAppCore()">Continue without Google</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="hdr">
+    <div class="hdr-title">CatchLog Tactical</div>
+    <div class="hdr-controls">
+      <div style="font-size:10px;font-weight:800;background:rgba(16,185,129,0.15);color:var(--accent2);border:1px solid rgba(16,185,129,0.3);padding:4px 10px;border-radius:20px;letter-spacing:.5px;">🟢 ONLINE</div>
+      <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.40-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main style="flex:1;position:relative;">
+    <div id="screen-dashboard" class="screen active">
+      <div class="section-label" style="margin-top:8px;">🏆 Global Daily Leaderboard</div>
+      <div style="padding:0 16px;" id="global-leaderboard-deck"></div>
+      <div class="section-label">⚡ Active Custom Tournaments</div>
+      <div style="padding:0 16px;" id="tournament-deck"></div>
+      <div style="padding:0 16px;margin-top:6px;">
+        <button class="btn btn-secondary" onclick="switchScreen('tourney-manager')">🛠️ Tournament Design Center</button>
+      </div>
+      <div class="section-label">Recent Catch Stream</div>
+      <div id="dashboard-catch-list" style="padding:0 16px;"></div>
+    </div>
+
+    <div id="screen-tourney-manager" class="screen">
+      <div class="section-label">Design Custom Tournament Arena</div>
+      <div class="card">
+        <div style="margin-bottom:14px;">
+          <label class="form-label">Tournament Arena Label</label>
+          <input type="text" id="t-name-input" class="form-input" value="Weekend Bass Brawl"/>
+        </div>
+        <button class="btn btn-primary" onclick="createNewTournament()">Launch Tournament Structure</button>
+      </div>
+      <div style="padding:0 16px;">
+         <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back to Dashboard</button>
+      </div>
+    </div>
+
+    <div id="screen-log" class="screen">
+      <form id="catch-form" onsubmit="commitCatchLog(event)">
+        <div class="form-group">
+          <label class="form-label">Target Species Profile</label>
+          <div class="split-species-row">
+            <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" required/>
+            <select id="form-species-dropdown" class="form-select" onchange="document.getElementById('form-species').value = this.value">
+              <option value="none">None</option>
+              <option value="Largemouth Bass" selected>Largemouth Bass</option>
+              <option value="Smallmouth Bass">Smallmouth Bass</option>
+              <option value="Bluegill">Bluegill</option>
+              <option value="Crappie">Crappie</option>
+              <option value="Walleye">Walleye</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rarity Tier Multiplier</label>
+          <select id="form-rarity" class="form-select">
+            <option value="Common">Common Tier (1x Multiplier)</option>
+            <option value="Uncommon">Uncommon Tier (2x Multiplier)</option>
+            <option value="Rare">Rare Tier (3x Multiplier)</option>
+          </select>
+        </div>
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="form-group" style="padding:0;"><label class="form-label">Weight (lbs)</label><input type="number" id="form-weight" step="0.01" class="form-input" placeholder="0.00" required/></div>
+          <div class="form-group" style="padding:0;"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deployable Tackle Rig</label>
+          <select id="form-lure-link" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Inject Catch to Tournament Context</label>
+          <select id="form-tourney-link" class="form-select">
+            <option value="global">Global Marketplace Standings Only</option>
+          </select>
+        </div>
+        <div style="padding:0 16px;">
+           <button type="submit" class="btn btn-primary">Publish Certified Entry Logs</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="screen-friends" class="screen">
+      <div class="card" style="background:linear-gradient(135deg,rgba(6,182,212,0.1),transparent);text-align:center;">
+        <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your Unique Tactical ID</div>
+        <div id="my-unique-id-badge" style="font-size:22px;font-weight:900;color:var(--primary);letter-spacing:1px;margin:4px 0 2px;">CL-XXXXX</div>
+      </div>
+      <div class="section-label">Link Angler ID Token</div>
+      <div class="card">
+        <div style="display:flex;gap:10px;" onkeydown="if(event.key==='Enter'){event.preventDefault();registerNewFriendById();}">
+          <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase;font-weight:700;"/>
+          <button class="btn btn-primary" style="width:auto;padding:0 20px;" onclick="registerNewFriendById()">Sync</button>
+        </div>
+      </div>
+      <div class="section-label">Peer Array</div>
+      <div style="padding:0 16px;margin-bottom:16px;" id="friends-list-container"></div>
+      <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
+      <div class="card" style="padding:10px;">
+        <div style="font-size:12px;margin-bottom:8px;font-weight:700;color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
+        <div class="chat-window">
+          <div class="chat-stream" id="chat-stream-box"></div>
+          <div class="chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchMessage();}">
+            <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
+            <button class="btn btn-primary" style="width:auto;border-radius:0;padding:0 20px;" onclick="dispatchMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-tackle" class="screen">
+      <div class="financial-tab" style="padding:16px;">
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:700;">💼 Total Active Tackle Value</div>
+        <div style="font-size:26px;font-weight:900;color:var(--accent2);" id="fin-active-val">$0.00</div>
+      </div>
+      <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
+      <div style="padding:0 16px;margin-bottom:12px;">
+        <div class="hw-item-card">
+          <div class="hw-svg-thumb">
+            <svg viewBox="0 0 64 64" width="40" height="40">
+              <circle cx="32" cy="32" r="22" fill="#ef4444"/>
+              <path d="M10 32h44A22 22 0 0 1 10 32z" fill="#ffffff"/>
+              <circle cx="32" cy="12" r="3" fill="#f59e0b"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;color:#fff;">Smart Bobber Pro Node</div>
+            <div style="font-size:11px;color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('bobber')">Pair Link</button>
+        </div>
+
+        <div class="hw-item-card" style="margin-bottom:4px;">
+          <div class="hw-svg-thumb">
+            <svg viewBox="0 0 64 64" width="40" height="40" fill="none">
+              <rect x="6" y="16" width="52" height="32" rx="4" fill="#8B5A2B"/>
+              <path d="M12 28C25 28 42 26 50 22C42 30 25 30 12 30Z" fill="#E2E8F0"/>
+            </svg>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;color:#fff;">Smart Fillet Board Pro</div>
+            <div style="font-size:11px;color:var(--text3);" id="hw-fillet-status">Status: Disconnected</div>
+          </div>
+          <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('fillet')">Pair Link</button>
+        </div>
+
+        <div class="scan-actions-grid">
+          <button class="btn-scan" onclick="openManualLureModal()">
+            ✍️ <span>Add Lure Manually</span>
+          </button>
+        </div>
+      </div>
+      <div class="section-label">Your Tackle Box Inventory</div>
+      <div id="tackle-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;"></div>
+    </div>
+
+    <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
+      <div class="section-label">🤖 AI Inventory Advisor</div>
+      <div class="card" style="margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--text2);line-height:1.5;">Inventory is the source of truth. The AI only recommends from lures you already own, and will tell you when your current box doesn't have a strong option.</div>
+      </div>
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-size:13px;font-weight:800;color:#fff;">📡 Environmental Sensors Telemetry</div>
+          <span id="weather-badge" style="font-size:10px;font-weight:800;background:rgba(245,158,11,0.2);color:var(--accent3);padding:2px 8px;border-radius:10px;">STANDBY</span>
+        </div>
+        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.4;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
+      </div>
+
+      <div class="ai-chat-window card" id="ai-chat-card">
+        <div class="chat-window" style="height:100%; display:flex; flex-direction:column;">
+          <div class="chat-stream" id="ai-chat-stream-box"></div>
+        </div>
+
+        <div class="chat-input-row" id="ai-chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchAiMessage();}">
+          <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What should I throw from my tackle box?'" />
+          <button class="btn btn-primary" style="width:auto;border-radius:10px;padding:10px 16px;" onclick="dispatchAiMessage()">Query</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-map" class="screen" style="padding-top:0;padding-bottom:0;">
+      <div class="map-weather-hud">
+        <div style="display:flex;flex-direction:column;">
+          <div style="font-size:10px;font-weight:800;color:var(--primary);letter-spacing:.5px;">WEATHER HUD MATRIX</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;" id="map-hud-desc">Standby – No Telemetry</div>
+        </div>
+        <div style="font-size:20px;font-weight:900;color:var(--accent2);" id="map-hud-temp">--°</div>
+      </div>
+      <div id="full-map" style="position:absolute;inset:0;"></div>
+    </div>
+  </main>
+
+  <nav id="bottom-nav">
+    <div class="nav-item active" onclick="switchScreen('dashboard')"><div class="nav-icon">📊</div><div class="nav-label">Home</div></div>
+    <div class="nav-item" onclick="switchScreen('map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+    <div class="nav-item fab-wrap" onclick="switchScreen('log')"><div class="fab">＋</div></div>
+    <div class="nav-item" onclick="switchScreen('friends')"><div class="nav-icon">👥</div><div class="nav-label">Friends</div></div>
+    <div class="nav-item" onclick="switchScreen('tackle')"><div class="nav-icon">🧰</div><div class="nav-label">Tackle</div></div>
+    <div class="nav-item" onclick="switchScreen('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI</div></div>
+  </nav>
+</div>
+
+<!-- ZXing library for fallback barcode decoding -->
+<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+
+<!-- Barcode detection + integration (uses native BarcodeDetector when available, otherwise ZXing) -->
+<script>
+let _barcodeDetector = null;
+let _zxingReader = null;
+let _barcodeScanInterval = null;
+let _barcodeScanningActive = false;
+
+async function startBarcodeScanLoop() {
+  if (_barcodeScanningActive) return;
+  _barcodeScanningActive = true;
+  const video = document.getElementById('viewfinder-video');
+  try {
+    if (!activeMediaStream) {
+      activeMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }, audio:false });
+      video.srcObject = activeMediaStream;
+      video.play().catch(()=>{});
+    }
+
+    if ('BarcodeDetector' in window) {
+      try {
+        const supported = await BarcodeDetector.getSupportedFormats();
+        const formats = ['ean_13','ean_8','upc_e','upc_a','code_128','code_39'].filter(f => supported.includes(f));
+        _barcodeDetector = new BarcodeDetector({ formats: formats.length ? formats : supported });
+      } catch (e) {
+        _barcodeDetector = null;
+      }
+    }
+
+    if (_barcodeDetector) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      _barcodeScanInterval = setInterval(async () => {
+        if (!video.videoWidth || !video.videoHeight) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        try {
+          const bitmap = await createImageBitmap(canvas);
+          const barcodes = await _barcodeDetector.detect(bitmap);
+          bitmap.close();
+          if (barcodes && barcodes.length) {
+            const code = barcodes[0].rawValue || barcodes[0].rawdata || barcodes[0].displayValue;
+            if (code) {
+              stopBarcodeScanLoop();
+              processBarcodeValue(String(code));
+            }
+          }
+        } catch (err) {
+          // ignore frame errors
+        }
+      }, 200);
+      return;
+    }
+
+    if (window.ZXing && !_zxingReader) {
+      _zxingReader = new ZXing.BrowserMultiFormatReader();
+    }
+    if (_zxingReader) {
+      _zxingReader.decodeFromVideoElementContinuously(video, (result, err) => {
+        if (result && result.text) {
+          stopBarcodeScanLoop();
+          processBarcodeValue(result.text);
+        }
+      });
+      return;
+    }
+
+    _barcodeScanInterval = setInterval(() => {}, 500);
+  } catch (err) {
+    console.warn('startBarcodeScanLoop error', err);
+    _barcodeScanningActive = false;
+  }
+}
+
+function stopBarcodeScanLoop() {
+  try {
+    if (_barcodeScanInterval) { clearInterval(_barcodeScanInterval); _barcodeScanInterval = null; }
+    if (_zxingReader && _zxingReader.reset) { try { _zxingReader.reset(); } catch(e){} }
+    _barcodeScanningActive = false;
+  } catch (e) {}
+}
+</script>
+
+<script>
+// ...existing main app script...
+const lureCategories=['Crankbait','Swimbait','Jig','Spinnerbait','Topwater','Soft Plastic','Other'];
+let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
+let lures=JSON.parse(localStorage.getItem('n_lures'))||[
+  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Crankbait',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',notes:'Great for cloudy days',status:'active'},
+  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',notes:'Use in calm water',status:'active'}
+];
+let friends=JSON.parse(localStorage.getItem('n_friends'))||[{id:'CL-81042',name:'BassMaster_Jim',totalWeight:14.82,score:150}];
+let myUniqueTacticalId=localStorage.getItem('my_unique_id')||('CL-'+Math.floor(10000+Math.random()*90000));
+localStorage.setItem('my_unique_id',myUniqueTacticalId);
+let tournaments=JSON.parse(localStorage.getItem('n_tourneys'))||[{id:'t_default',name:'Pro Angler Summer Open',leaderboard:[{name:'You',points:0},{name:'BassMaster_Jim',points:45}]}];
+let chatHistories={};
+let aiChatHistory=[{sender:'them',text:"Welcome to your AI Tactical Advisory Node. If you want a strategy setup recommendation, ask me: <b>'What should I throw from my tackle box?'</b>"}];
+let selectedFriendId='CL-81042';
+let activeMediaStream=null;
+let opticalScanMode=null;
+let targetOverrideLureId=null;
+let pendingTrashLureId=null;
+let map=null;
+let liveWaypointMarker=null;
+let currentTelemetryContext=null;
+let manualPhotoSuggestion=null;
+
+function showToast(m){ const t=document.getElementById('toast'); t.innerHTML=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function initAppCore(){ document.getElementById('auth-wrap').style.display='none'; showToast('Ecosystem Gateway Unlocked'); refreshAllEcosystemModules(); }
+function openSettingsModal(){ document.getElementById('settings-modal').classList.add('active'); }
+function closeSettingsModal(e){ document.getElementById('settings-modal').classList.remove('active'); }
+function switchScreen(screenId){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const target=document.getElementById('screen-'+screenId);
+  if(target) target.classList.add('active');
+  if(screenId==='dashboard') document.querySelectorAll('.nav-item')[0].classList.add('active');
+  if(screenId==='map') { document.querySelectorAll('.nav-item')[1].classList.add('active'); setTimeout(initMapSystem,200); }
+  if(screenId==='log') document.querySelectorAll('.nav-item')[2].classList.add('active');
+  if(screenId==='friends') document.querySelectorAll('.nav-item')[3].classList.add('active');
+  if(screenId==='tackle') document.querySelectorAll('.nav-item')[4].classList.add('active');
+  if(screenId==='ai'){ document.querySelectorAll('.nav-item')[5].classList.add('active'); renderAiMessages(); }
+}
+
+function normalizeCategory(category){
+  if(!category) return 'Other';
+  const normalized=category.toLowerCase();
+  if(normalized.includes('crank')) return 'Crankbait';
+  if(normalized.includes('swim')) return 'Swimbait';
+  if(normalized.includes('jig')) return 'Jig';
+  if(normalized.includes('spinner')) return 'Spinnerbait';
+  if(normalized.includes('top')) return 'Topwater';
+  if(normalized.includes('soft')) return 'Soft Plastic';
+  return 'Other';
+}
+
+function getDominantColorFromImage(url, sampleStep = 6, maxSize = 220) {
+  return new Promise((resolve) => {
+    if (!url) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      canvas.width = Math.max(12, Math.floor(img.width * scale));
+      canvas.height = Math.max(12, Math.floor(img.height * scale));
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      const palette = {
+        red: [220, 40, 40],
+        orange: [235, 130, 45],
+        yellow: [230, 205, 55],
+        green: [60, 160, 65],
+        teal: [35, 145, 145],
+        blue: [50, 110, 205],
+        purple: [145, 75, 185],
+        brown: [150, 95, 55],
+        gray: [125, 125, 125],
+        black: [25, 25, 25],
+        white: [245, 245, 245]
+      };
+
+      const counts = Object.fromEntries(Object.keys(palette).map((key) => [key, 0]));
+      let total = 0;
+
+      for (let y = 0; y < canvas.height; y += sampleStep) {
+        for (let x = 0; x < canvas.width; x += sampleStep) {
+          const idx = (y * canvas.width + x) * 4;
+          const alpha = data[idx + 3];
+          if (alpha < 120) continue;
+
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+
+          let bestName = null;
+          let bestDist = Infinity;
+          for (const [name, rgb] of Object.entries(palette)) {
+            const dr = r - rgb[0];
+            const dg = g - rgb[1];
+            const db = b - rgb[2];
+            const dist = dr * dr + dg * dg + db * db;
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestName = name;
+            }
+          }
+
+          if (bestName) {
+            counts[bestName]++;
+            total++;
+          }
+        }
+      }
+
+      if (total === 0) { resolve(null); return; }
+
+      const sorted = Object.entries(counts)
+        .filter(([, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1]);
+
+      const [topName, topCount] = sorted[0];
+      const second = sorted[1];
+      let color = topName;
+      if (second && second[1] / topCount >= 0.35 && topName !== second[0]) {
+        color = `${topName}/${second[0]}`;
+      }
+
+      const brightness = sorted.reduce((sum, [name, count]) => {
+        const rgb = palette[name];
+        const lum = (rgb[0] + rgb[1] + rgb[2]) / 3;
+        return sum + lum * count;
+      }, 0) / total;
+
+      resolve({ color, brightness, counts, total });
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+async function scoreLureSuitabilityAsync(lure, context){
+  if(!lure || lure.status !== 'active' || lure.qty <= 0) return -1;
+  const category = normalizeCategory(lure.category);
+  const desc = (context.shortDesc || '').toLowerCase();
+  const temp = parseFloat(context.temp) || 70;
+  let score = 0;
+
+  if(desc.includes('overcast')){
+    if(category === 'Spinnerbait') score += 28;
+    if(category === 'Jig') score += 24;
+    if(category === 'Soft Plastic') score += 20;
+    if(category === 'Crankbait') score += 16;
+    if(category === 'Swimbait') score += 12;
+    if(category === 'Topwater') score += 10;
+  } else if(desc.includes('clear')){
+    if(category === 'Topwater') score += 28;
+    if(category === 'Crankbait') score += 24;
+    if(category === 'Swimbait') score += 20;
+    if(category === 'Soft Plastic') score += 16;
+    if(category === 'Spinnerbait') score += 12;
+    if(category === 'Jig') score += 10;
+  } else {
+    if(category === 'Crankbait') score += 22;
+    if(category === 'Soft Plastic') score += 18;
+    if(category === 'Jig') score += 16;
+    if(category === 'Spinnerbait') score += 14;
+    if(category === 'Swimbait') score += 12;
+    if(category === 'Topwater') score += 10;
+  }
+
+  if(temp <= 60){
+    if(category === 'Jig') score += 8;
+    if(category === 'Soft Plastic') score += 6;
+  }
+  if(temp >= 70){
+    if(category === 'Topwater') score += 8;
+    if(category === 'Swimbait') score += 6;
+  }
+
+  if((lure.conditionBias || '').toLowerCase().includes('overcast') && desc.includes('overcast')) score += 6;
+  score += Math.min(lure.qty, 3) * 2;
+
+  if(lure.img){
+    const colorInfo = await getDominantColorFromImage(lure.img);
+    if(colorInfo && colorInfo.color){
+      const c = colorInfo.color;
+      if(desc.includes('overcast')){
+        if(c.includes('white') || c.includes('chartreuse') || c.includes('orange') || c.includes('red')) score += 10;
+        if(c.includes('green') || c.includes('blue')) score += 4;
+      } else if(desc.includes('clear')){
+        if(c.includes('brown') || c.includes('green') || c.includes('blue')) score += 10;
+        if(c.includes('white') || c.includes('chartreuse')) score += 2;
+      } else {
+        if(c.includes('chartreuse') || c.includes('white') || c.includes('green')) score += 6;
+      }
+      if(colorInfo.brightness > 200 && desc.includes('overcast')) score += 3;
+      if(colorInfo.brightness < 80 && desc.includes('clear')) score += 3;
+    }
+  } else {
+    score -= 6;
+  }
+
+  return score;
+}
+
+async function recommendBestLureForConditions(){
+  if(!currentTelemetryContext) return null;
+  const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
+  if(inventory.length === 0){
+    return {
+      best: null,
+      explanation: "Add a few lures from your tackle box to get personalized recommendations. Start with general types like a moving bait, soft plastic, or topwater for today’s conditions.",
+      top3: []
+    };
+  }
+
+  const missingImgCount = inventory.reduce((acc,l)=>acc + (!l.img ? 1:0), 0);
+  if(missingImgCount>0){
+    return {
+      best: null,
+      explanation: `1 or more lures image is not being displayed. Please take a picture of the lure(s) so the AI can scan them.`,
+      missingCount: missingImgCount,
+      missingList: inventory.filter(l=>!l.img).map(l=>({id:l.id,name:l.name,category:l.category}))
+    };
+  }
+
+  const scoredPromises = inventory.map(async (lure)=>{
+    const score = await scoreLureSuitabilityAsync(lure, currentTelemetryContext);
+    return {lure,score};
+  });
+  const scored = (await Promise.all(scoredPromises)).sort((a,b)=>b.score - a.score || b.lure.qty - a.lure.qty);
+
+  const best = scored[0];
+  if(!best || best.score <= 0){
+    return {
+      best: null,
+      explanation: "You don’t currently have a good option for these conditions. Add a few more tackle types to your box and I'll recommend the best one you own.",
+      top3: scored.slice(0,3).map(item=>item.lure)
+    };
+  }
+
+  const top3 = scored.slice(0,3).map(item=>item.lure);
+  let explanation = `This is the strongest option from your current tackle box, based on ${currentTelemetryContext.temp}°F and ${currentTelemetryContext.shortDesc}.`;
+  if(top3.length>1) explanation += ` Nearby alternatives in your box are ${top3.slice(1).map(l=>l.name).join(', ')}.`;
+  const colorInfo = await getDominantColorFromImage(best.lure.img);
+  if(colorInfo && colorInfo.color){
+    explanation += ` The lure's visible color is ${colorInfo.color}, which matches today's conditions.`;
+  }
+
+  return {best: best.lure, explanation, top3};
+}
+
+async function dispatchAiMessage(){
+  const input=document.getElementById('ai-chat-message-input');
+  const queryText=input.value.trim();
+  if(!queryText) return;
+  aiChatHistory.push({sender:'me',text:queryText});
+  input.value='';
+  renderAiMessages();
+
+  setTimeout(async ()=>{
+    const lower = queryText.toLowerCase();
+    if(lower.includes('throw') || lower.includes('use') || lower.includes('recommend') || lower.includes('best')){
+      if(!currentTelemetryContext){
+        aiChatHistory.push({sender:'them',text:"⚠️ Inventory AI is ready, but weather/location sync is required. Sync your telemetry to get a recommendation from the lures you already own."});
+        renderAiMessages();
+        return;
+      }
+
+      const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
+      const missing = inventory.filter(l => !l.img);
+      if(missing.length > 0){
+        aiChatHistory.push({sender:'them',text:`📷 1 or more lures image is not being displayed. Please take a photo so I can scan them. (${missing.length} missing).`});
+        renderAiMessages();
+        const firstMissing = missing[0];
+        setTimeout(()=>{ bootOpticalSystem('inline-override', firstMissing.id); },350);
+        return;
+      }
+
+      const recommendation = await recommendBestLureForConditions();
+      if(!recommendation || !recommendation.best){
+        aiChatHistory.push({sender:'them',text:`📦 <b>Inventory-first advice:</b> ${recommendation ? recommendation.explanation : 'No recommendation available.'}`});
+      } else {
+        let message = `📦 <b>Best lure you own for today:</b> ${recommendation.best.name} (${recommendation.best.category}).<br/>Reason: ${recommendation.explanation}`;
+        if(recommendation.top3 && recommendation.top3.length > 1){
+          const extras = recommendation.top3.slice(1).map(l => `${l.name} (${l.category})`).join(', ');
+          message += `<br/><small style="color:var(--text2)">Also strong from your box: ${extras}.</small>`;
+        }
+        aiChatHistory.push({sender:'them',text:message});
+      }
+    } else {
+      aiChatHistory.push({sender:'them',text:"Ask the AI what you should throw from your tackle box today, and I’ll choose only from the gear you already own."});
+    }
+    renderAiMessages();
+  },300);
+}
+
+async function bootOpticalSystem(mode,optionalLureId=null){
+  opticalScanMode=mode;
+  targetOverrideLureId=optionalLureId;
+  const viewfinder=document.getElementById('camera-viewfinder-overlay');
+  const title=document.getElementById('viewfinder-title');
+  const targetBox=document.getElementById('barcode-target-box-frame');
+  const laserLine=document.getElementById('laser-element');
+  const hint=document.getElementById('viewfinder-instructions-hint');
+  const scanLabel=document.getElementById('viewfinder-scan-label');
+  if(mode==='barcode'){
+    title.innerText="UPC + QR Scan Matrix";
+    hint.innerText="Align barcode or QR inside the red framing area.";
+    scanLabel.innerText="ALIGN SCAN TARGET";
+    targetBox.style.display='block';
+    laserLine.style.display='block';
+    laserLine.classList.add('laser-active');
+  } else if(mode==='inline-override'){
+    title.innerText="Macro Framing Capture";
+    hint.innerText="Hold camera directly above the lure layout box. Photo will attach to the selected inventory slot.";
+    scanLabel.innerText="CENTER OBJECT";
+    targetBox.style.display='none';
+    laserLine.style.display='none';
+    laserLine.classList.remove('laser-active');
+  } else {
+    title.innerText="AI Vision Scan";
+    hint.innerText="Take a photo of the lure to classify its type.";
+    scanLabel.innerText="PHOTO CLASSIFIER";
+    targetBox.style.display='none';
+    laserLine.style.display='none';
+    laserLine.classList.remove('laser-active');
+  }
+  viewfinder.style.display='flex';
+  try{
+    activeMediaStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
+    const video=document.getElementById('viewfinder-video');
+    video.srcObject=activeMediaStream;
+    video.play().catch(()=>{});
+    if(mode === 'barcode') {
+      startBarcodeScanLoop();
+    }
+  }catch(err){
+    console.warn("Camera pipeline unavailable or permission rejected",err);
+    showToast("⚠️ Camera stream offline. Verify permissions.");
+  }
+}
+
+function shutdownCameraStream(){ 
+  stopBarcodeScanLoop();
+  if(activeMediaStream){
+    activeMediaStream.getTracks().forEach(track=>track.stop()); activeMediaStream=null; 
+  } 
+  document.getElementById('camera-viewfinder-overlay').style.display='none'; 
+}
+
+function captureFrameFromVideo(video){
+  const canvas=document.createElement('canvas');
+  canvas.width=video.videoWidth||640;
+  canvas.height=video.videoHeight||480;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  return canvas.toDataURL('image/jpeg',0.85);
+}
+
+function executeManualCaptureSnapshot(){
+  showToast('💾 Capturing camera frame...');
+  setTimeout(()=>{
+    const video=document.getElementById('viewfinder-video');
+    if(!video) { showToast('No camera feed'); shutdownCameraStream(); return; }
+    stopBarcodeScanLoop();
+    if(opticalScanMode==='inline-override' && targetOverrideLureId){
+      const snapshot=captureFrameFromVideo(video);
+      const target=lures.find(l=>l.id===targetOverrideLureId);
+      if(target){
+        target.type='image';
+        target.img=snapshot;
+        localStorage.setItem('n_lures',JSON.stringify(lures));
+        showToast('Photo linked to your inventory slot.');
+        refreshAllEcosystemModules();
+      } else {
+        showToast('Target slot not found.');
+      }
+      shutdownCameraStream();
+      return;
+    }
+    if(opticalScanMode==='ai-photo'){
+      const snapshot=captureFrameFromVideo(video);
+      document.getElementById('manual-lure-photo-preview').style.backgroundImage=`url('${snapshot}')`;
+      document.getElementById('manual-lure-photo-preview').innerText='';
+      manualPhotoSuggestion={label:'Detected Lure',category:'Other',match:'Auto-classified (manual review recommended)'};
+      document.getElementById('manual-lure-suggestion').innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>. ${manualPhotoSuggestion.match}`;
+      document.getElementById('manual-lure-category').value='Other';
+      showToast('Photo captured for quick entry.');
+      shutdownCameraStream();
+      return;
+    }
+
+    if(opticalScanMode === 'barcode') {
+      (async () => {
+        try {
+          if ('BarcodeDetector' in window) {
+            const canvas=document.createElement('canvas');
+            canvas.width=video.videoWidth || 640; canvas.height=video.videoHeight || 480;
+            const ctx=canvas.getContext('2d'); ctx.drawImage(video,0,0,canvas.width,canvas.height);
+            const bitmap = await createImageBitmap(canvas);
+            const detector = new BarcodeDetector();
+            const found = await detector.detect(bitmap);
+            bitmap.close();
+            if(found && found.length) {
+              processBarcodeValue(found[0].rawValue || found[0].displayValue);
+              shutdownCameraStream();
+              return;
+            }
+          } else if (window.ZXing) {
+            const reader = new ZXing.BrowserMultiFormatReader();
+            try {
+              const result = await reader.decodeFromVideoElementOnce(video);
+              if (result && result.text) {
+                processBarcodeValue(result.text);
+                shutdownCameraStream();
+                return;
+              }
+            } catch(e) {}
+          }
+        } catch(e) {}
+        const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
+        processBarcodeValue(simulatedBarcode);
+        shutdownCameraStream();
+      })();
+      return;
+    }
+
+    const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
+    processBarcodeValue(simulatedBarcode);
+  },400);
+}
+
+function processBarcodeValue(barcodeRawString, scanFormat=''){
+  showToast('Storing barcode entry...');
+  const resolved={productName:'Scanned Tackle Lure',purchaseUrl:`https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(barcodeRawString)}`};
+  shutdownCameraStream();
+  lures.unshift({
+    id:'l_'+Date.now(),
+    name:resolved.productName || 'Scanned Tackle Lure',
+    cost:6.99,
+    qty:1,
+    conditionBias:'clear',
+    type:'barcode',
+    category:'Other',
+    img:'',
+    purchaseUrl:resolved.purchaseUrl,
+    notes:'Imported by barcode',
+    status:'active'
+  });
+  localStorage.setItem('n_lures',JSON.stringify(lures));
+  refreshAllEcosystemModules();
+  showToast('Barcode saved. You can still edit details manually.');
+}
+
+function modifyQuantity(lureId,change){ const t=lures.find(l=>l.id===lureId); if(t){ t.qty+=change; if(t.qty<0) t.qty=0; localStorage.setItem('n_lures',JSON.stringify(lures)); refreshAllEcosystemModules(); } }
+function openTrashModal(lureId){ pendingTrashLureId=lureId; const lure=lures.find(l=>l.id===lureId); const text=lure?`Would you like to remove "${lure.name}" from your tackle box or repurchase it at BassPro.com?`:'Would you like to remove this item?'; document.getElementById('trash-modal-text').innerText=text; document.getElementById('trash-modal').classList.add('active'); }
+function cancelTrashPrompt(e){ if(e && e.target !== e.currentTarget) return; pendingTrashLureId=null; document.getElementById('trash-modal').classList.remove('active'); }
+function confirmRemoveLure(){ if(!pendingTrashLureId) return; lures=lures.filter(l=>l.id!==pendingTrashLureId); pendingTrashLureId=null; localStorage.setItem('n_lures',JSON.stringify(lures)); document.getElementById('trash-modal').classList.remove('active'); showToast('Item removed from tackle box.'); refreshAllEcosystemModules(); }
+function repurchaseLure(){ if(!pendingTrashLureId) return; window.open('https://www.basspro.com', '_blank'); pendingTrashLureId=null; document.getElementById('trash-modal').classList.remove('active'); showToast('Opening BassPro home page.'); }
+
+function registerNewFriendById(){ const input=document.getElementById('new-friend-id'); const lookupId=input.value.trim().toUpperCase(); if(!lookupId) return; if(lookupId===myUniqueTacticalId) return showToast("Cannot link routing node to yourself."); if(friends.find(f=>f.id===lookupId)) return showToast("Mesh channel active."); const newPeer={id:lookupId,name:'Angler_'+Math.floor(10+Math.random()*89),totalWeight:8.5,score:40}; friends.push(newPeer); input.value=''; showToast('Linked Peer Node Successfully!'); selectedFriendId=lookupId; localStorage.setItem('n_friends',JSON.stringify(friends)); refreshAllEcosystemModules(); }
+function renderFriendsSystem(){ document.getElementById('my-unique-id-badge').innerText=myUniqueTacticalId; const container=document.getElementById('friends-list-container'); if(!container) return; container.innerHTML=friends.map(f=>`<div class="leader-row" style="cursor:pointer;border-color:${f.id===selectedFriendId?'var(--primary)': 'var(--border)'}" onclick="selectedFriendId='${f.id}'; renderFriendsSystem();"><div>🟢 <b>${f.name}</b> <span style="font-size:10px;color:var(--text3);">[${f.id}]</span></div><div style="font-size:11px;color:var(--primary);font-weight:600;">Chat</div></div>`).join(''); const activeF=friends.find(f=>f.id===selectedFriendId); if(activeF){ document.getElementById('active-chat-target-lbl').innerText=`Target Node: @${activeF.name}`; renderChatMessages(); } }
+function renderChatMessages(){ const box=document.getElementById('chat-stream-box'); const history=chatHistories[selectedFriendId]||[{sender:'them',text:'Telemetry linked.'}]; box.innerHTML=history.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight; }
+function dispatchMessage(){ const input=document.getElementById('chat-message-input'); if(!input.value.trim()) return; if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId]=[]; chatHistories[selectedFriendId].push({sender:'me',text:input.value}); input.value=''; renderChatMessages(); }
+
+function syncLocationAndWeather(){ showToast('Pinging tracking arrays...'); navigator.geolocation.getCurrentPosition(pos=>processLocationSuccess(pos.coords.latitude,pos.coords.longitude),()=>processLocationSuccess(38.6270,-90.1994)); }
+function processLocationSuccess(lat,lon){ const tempOpts=[58,68,74,82]; const descOpts=["Clear vector condition","Overcast tactical cover","Light breeze","High barometric pressure flare"]; const randomIdx=Math.floor(Math.random()*descOpts.length); currentTelemetryContext={lat:parseFloat(lat).toFixed(4),lon:parseFloat(lon).toFixed(4),temp:tempOpts[randomIdx],shortDesc:descOpts[randomIdx]}; document.getElementById('weather-badge').innerText='LIVE SYNCED'; document.getElementById('weather-badge').style.background='rgba(16,185,129,0.2)'; document.getElementById('weather-diagnostics').innerHTML=`📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: ${currentTelemetryContext.shortDesc}`; document.getElementById('map-hud-desc').innerText=currentTelemetryContext.shortDesc; document.getElementById('map-hud-temp').innerText=`${currentTelemetryContext.temp}°F`; aiChatHistory.push({sender:'them',text:`📡 <b>Ecosystem Matrix Sync:</b> Parameters aligned to coordinates with profile: <i>${currentTelemetryContext.shortDesc}</i>.`}); updateMapWaypointMarker(); showToast('Weather Array Handshake Complete!'); }
+
+function renderTackleMatrix(){
+  let val=lures.reduce((acc,l)=>acc+(l.cost*l.qty),0);
+  const gridEl=document.getElementById('fin-active-val'); if(gridEl) gridEl.innerText=`$${val.toFixed(2)}`;
+  const targetDiv=document.getElementById('tackle-grid'); if(!targetDiv) return;
+  targetDiv.innerHTML=lures.map(l=>{
+    let mediaHeader='';
+    if(l.type==='image'&&l.img){ mediaHeader=`<div class="tackle-img-frame" style="background-image:url('${l.img}');"></div>`; }
+    else{ mediaHeader=`<div class="tackle-white-box"><span style="font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#9ca3af;">No image</span><div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override','${l.id}')" title="Take Lure Picture">📷</div></div>`; }
+    const statusClass = l.status==='lost' ? 'status-lost' : l.status==='broken' ? 'status-broken' : 'status-active';
+    const noteText = l.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:6px;">${l.notes}</div>` : '';
+    const imgMissingBadge = (!l.img && l.status==='active') ? `<div style="position:absolute;top:8px;left:8px;background:rgba(244,63,94,0.12);color:#f43f5e;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:800;">Image missing</div>` : '';
+    return `<div class="tackle-box-card" style="position:relative;">${imgMissingBadge}${mediaHeader}<div class="tackle-card-body"><div><div style="font-size:9px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px;font-family:monospace;line-height:1.1;display:block;max-height:22px;overflow:hidden;" title="${l.category}">${l.category||'Unassigned'}</div><div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.name}">${l.name}</div><div class="status-pill ${statusClass}" style="margin-top:4px;">${l.status}</div>${noteText}</div><div class="tackle-tally-row"><span style="font-size:11px;color:var(--primary);font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span><div style="display:flex;gap:4px;"><button class="tally-btn" onclick="modifyQuantity('${l.id}',-1)">-</button><button class="tally-btn" onclick="modifyQuantity('${l.id}',1)">+</button><button class="tally-btn" onclick="openTrashModal('${l.id}')" title="Remove">🗑</button></div></div></div></div>`}).join('');
+}
+
+function renderAiMessages(){ const box=document.getElementById('ai-chat-stream-box'); if(box){ box.innerHTML=aiChatHistory.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight; } }
+
+function populateManualLureCategories(){ const select=document.getElementById('manual-lure-category'); if(!select) return; select.innerHTML=lureCategories.map(cat=>`<option value="${cat}">${cat}</option>`).join(''); }
+function openManualLureModal(){ populateManualLureCategories(); document.getElementById('manual-lure-name').value=''; document.getElementById('manual-lure-photo').value=''; document.getElementById('manual-lure-photo-preview').style.backgroundImage=''; document.getElementById('manual-lure-photo-preview').innerText='No photo selected'; document.getElementById('manual-lure-notes').value=''; document.getElementById('manual-lure-status').value='active'; document.getElementById('manual-lure-suggestion').innerText='Pick a category, then save quickly or add a photo for smarter suggestions.'; manualPhotoSuggestion=null; document.getElementById('manual-lure-modal').classList.add('active'); }
+function closeManualLureModal(e){ if(e&&e.target!==e.currentTarget) return; document.getElementById('manual-lure-modal').classList.remove('active'); }
+function onManualCategoryChange(){ const category=document.getElementById('manual-lure-category').value; const suggestionEl=document.getElementById('manual-lure-suggestion'); if(manualPhotoSuggestion){ suggestionEl.innerText=`Looks like a ${manualPhotoSuggestion.label}. Best fit category: ${manualPhotoSuggestion.category}.`; } else { suggestionEl.innerText=`Quick entry will use category ${category}. Save fast and your box becomes smarter for recommendations.`; } }
+function handleManualLurePhotoInput(event){ const file=event.target.files && event.target.files[0]; const preview=document.getElementById('manual-lure-photo-preview'); const suggestionEl=document.getElementById('manual-lure-suggestion'); if(!file){ preview.style.backgroundImage=''; preview.innerText='No photo selected'; manualPhotoSuggestion=null; onManualCategoryChange(); return; } const reader=new FileReader(); reader.onload=function(e){ const imageDataUrl=e.target.result; preview.style.backgroundImage=`url('${imageDataUrl}')`; preview.innerText=''; manualPhotoSuggestion={label:'Photo Lure',category:document.getElementById('manual-lure-category').value||'Other',match:'Auto-scan available'}; suggestionEl.innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>. ${manualPhotoSuggestion.match}`; }; reader.readAsDataURL(file); }
+function saveManualLure(){ const category=document.getElementById('manual-lure-category').value || 'Other'; const exactName=document.getElementById('manual-lure-name').value.trim(); const notes=document.getElementById('manual-lure-notes').value.trim(); const status=document.getElementById('manual-lure-status').value; const photoPreview=document.getElementById('manual-lure-photo-preview').style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''); const nameToSave = exactName || (manualPhotoSuggestion ? manualPhotoSuggestion.label : `${category} lure`); lures.unshift({ id:'l_'+Date.now(), name:nameToSave, cost:6.99, qty:1, conditionBias:'clear', type: photoPreview ? 'image' : 'manual', category, img: photoPreview || '', purchaseUrl:`https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(exactName || category)}`, notes, status }); localStorage.setItem('n_lures',JSON.stringify(lures)); closeManualLureModal(); refreshAllEcosystemModules(); showToast('Lure added quickly to your tackle box.'); }
+
+function updateMapWaypointMarker(){ if(!map||!currentTelemetryContext) return; const coords=[currentTelemetryContext.lat,currentTelemetryContext.lon]; if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); } else { const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]}); liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map); } map.setView(coords,12); }
+function initMapSystem(){ if(map){ updateMapWaypointMarker(); return; } map=L.map('full-map',{zoomControl:false}).setView([38.6270,-90.1994],11); L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map); updateMapWaypointMarker(); }
+
+function connectHardware(type){ showToast(`Bluetooth syncing ${type}...`); setTimeout(()=>{ const elId=type==='bobber'?'hw-bobber-status':'hw-fillet-status'; document.getElementById(elId).innerHTML='🟢 Connected & Mapped'; showToast('Hardware Sync Confirmed!'); },400); }
+
+function refreshAllEcosystemModules(){ renderGlobalLeaderboard(); renderTournaments(); renderCatchHistory(); renderTackleMatrix(); renderFriendsSystem(); const lureSelect=document.getElementById('form-lure-link'); if(lureSelect) lureSelect.innerHTML=lures.map(l=>`<option value="${l.id}">${l.name}</option>`).join(''); renderAiMessages(); }
+
+function renderGlobalLeaderboard(){ let myWeight=catches.reduce((acc,c)=>acc+parseFloat(c.weight||0),0); let boardList=[{name:'You (Node)',w:myWeight},...friends.map(f=>({name:f.name,w:f.totalWeight}))].sort((a,b)=>b.w-a.w); document.getElementById('global-leaderboard-deck').innerHTML=boardList.map((p,idx)=>`<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800;color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join(''); }
+function renderTournaments(){ document.getElementById('tournament-deck').innerHTML=tournaments.map(t=>`<div class="card" style="margin:0 0 10px 0;background:rgba(31,41,55,0.45)"><div style="font-size:13px;font-weight:800;color:#fff;">🏆 ${t.name}</div></div>`).join(''); }
+function createNewTournament(){ const name=document.getElementById('t-name-input').value.trim()||'Untitled Tournament'; tournaments.push({id:'t_'+Date.now(),name,leaderboard:[{name:'You',points:0}]}); localStorage.setItem('n_tourneys',JSON.stringify(tournaments)); showToast('Tournament created.'); refreshAllEcosystemModules(); switchScreen('dashboard'); }
+
+function commitCatchLog(e){ e.preventDefault(); const spec=document.getElementById('form-species').value; const w=parseFloat(document.getElementById('form-weight').value)||0; catches.unshift({species:spec,weight:w}); document.getElementById('catch-form').reset(); showToast('Entry Logged!'); localStorage.setItem('n_catches',JSON.stringify(catches)); refreshAllEcosystemModules(); switchScreen('dashboard'); }
+function renderCatchHistory(){ const el=document.getElementById('dashboard-catch-list'); if(!el) return; el.innerHTML=catches.map(c=>`<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div>${(c.weight||0).toFixed(2)} lbs</div></div>`).join(''); }
+
+window.onload=function(){ refreshAllEcosystemModules(); }
+</script>
+</body>
+</html>
