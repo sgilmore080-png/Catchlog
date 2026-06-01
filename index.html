@@ -426,7 +426,94 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   </nav>
 </div>
 
+<!-- ZXing library for fallback barcode decoding -->
+<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+
+<!-- Barcode detection + integration (uses native BarcodeDetector when available, otherwise ZXing) -->
 <script>
+let _barcodeDetector = null;
+let _zxingReader = null;
+let _barcodeScanInterval = null;
+let _barcodeScanningActive = false;
+
+async function startBarcodeScanLoop() {
+  if (_barcodeScanningActive) return;
+  _barcodeScanningActive = true;
+  const video = document.getElementById('viewfinder-video');
+  try {
+    if (!activeMediaStream) {
+      activeMediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }, audio:false });
+      video.srcObject = activeMediaStream;
+      video.play().catch(()=>{});
+    }
+
+    if ('BarcodeDetector' in window) {
+      try {
+        const supported = await BarcodeDetector.getSupportedFormats();
+        const formats = ['ean_13','ean_8','upc_e','upc_a','code_128','code_39'].filter(f => supported.includes(f));
+        _barcodeDetector = new BarcodeDetector({ formats: formats.length ? formats : supported });
+      } catch (e) {
+        _barcodeDetector = null;
+      }
+    }
+
+    if (_barcodeDetector) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      _barcodeScanInterval = setInterval(async () => {
+        if (!video.videoWidth || !video.videoHeight) return;
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        try {
+          const bitmap = await createImageBitmap(canvas);
+          const barcodes = await _barcodeDetector.detect(bitmap);
+          bitmap.close();
+          if (barcodes && barcodes.length) {
+            const code = barcodes[0].rawValue || barcodes[0].rawdata || barcodes[0].displayValue;
+            if (code) {
+              stopBarcodeScanLoop();
+              processBarcodeValue(String(code));
+            }
+          }
+        } catch (err) {
+          // ignore frame errors
+        }
+      }, 200);
+      return;
+    }
+
+    if (window.ZXing && !_zxingReader) {
+      _zxingReader = new ZXing.BrowserMultiFormatReader();
+    }
+    if (_zxingReader) {
+      _zxingReader.decodeFromVideoElementContinuously(video, (result, err) => {
+        if (result && result.text) {
+          stopBarcodeScanLoop();
+          processBarcodeValue(result.text);
+        }
+      });
+      return;
+    }
+
+    _barcodeScanInterval = setInterval(() => {}, 500);
+  } catch (err) {
+    console.warn('startBarcodeScanLoop error', err);
+    _barcodeScanningActive = false;
+  }
+}
+
+function stopBarcodeScanLoop() {
+  try {
+    if (_barcodeScanInterval) { clearInterval(_barcodeScanInterval); _barcodeScanInterval = null; }
+    if (_zxingReader && _zxingReader.reset) { try { _zxingReader.reset(); } catch(e){} }
+    _barcodeScanningActive = false;
+  } catch (e) {}
+}
+</script>
+
+<script>
+// ...existing main app script...
 const lureCategories=['Crankbait','Swimbait','Jig','Spinnerbait','Topwater','Soft Plastic','Other'];
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
 let lures=JSON.parse(localStorage.getItem('n_lures'))||[
@@ -758,13 +845,23 @@ async function bootOpticalSystem(mode,optionalLureId=null){
     activeMediaStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
     const video=document.getElementById('viewfinder-video');
     video.srcObject=activeMediaStream;
+    video.play().catch(()=>{});
+    if(mode === 'barcode') {
+      startBarcodeScanLoop();
+    }
   }catch(err){
     console.warn("Camera pipeline unavailable or permission rejected",err);
     showToast("⚠️ Camera stream offline. Verify permissions.");
   }
 }
 
-function shutdownCameraStream(){ if(activeMediaStream){ activeMediaStream.getTracks().forEach(track=>track.stop()); activeMediaStream=null; } document.getElementById('camera-viewfinder-overlay').style.display='none'; }
+function shutdownCameraStream(){ 
+  stopBarcodeScanLoop();
+  if(activeMediaStream){
+    activeMediaStream.getTracks().forEach(track=>track.stop()); activeMediaStream=null; 
+  } 
+  document.getElementById('camera-viewfinder-overlay').style.display='none'; 
+}
 
 function captureFrameFromVideo(video){
   const canvas=document.createElement('canvas');
@@ -780,6 +877,7 @@ function executeManualCaptureSnapshot(){
   setTimeout(()=>{
     const video=document.getElementById('viewfinder-video');
     if(!video) { showToast('No camera feed'); shutdownCameraStream(); return; }
+    stopBarcodeScanLoop();
     if(opticalScanMode==='inline-override' && targetOverrideLureId){
       const snapshot=captureFrameFromVideo(video);
       const target=lures.find(l=>l.id===targetOverrideLureId);
@@ -806,6 +904,42 @@ function executeManualCaptureSnapshot(){
       shutdownCameraStream();
       return;
     }
+
+    if(opticalScanMode === 'barcode') {
+      (async () => {
+        try {
+          if ('BarcodeDetector' in window) {
+            const canvas=document.createElement('canvas');
+            canvas.width=video.videoWidth || 640; canvas.height=video.videoHeight || 480;
+            const ctx=canvas.getContext('2d'); ctx.drawImage(video,0,0,canvas.width,canvas.height);
+            const bitmap = await createImageBitmap(canvas);
+            const detector = new BarcodeDetector();
+            const found = await detector.detect(bitmap);
+            bitmap.close();
+            if(found && found.length) {
+              processBarcodeValue(found[0].rawValue || found[0].displayValue);
+              shutdownCameraStream();
+              return;
+            }
+          } else if (window.ZXing) {
+            const reader = new ZXing.BrowserMultiFormatReader();
+            try {
+              const result = await reader.decodeFromVideoElementOnce(video);
+              if (result && result.text) {
+                processBarcodeValue(result.text);
+                shutdownCameraStream();
+                return;
+              }
+            } catch(e) {}
+          }
+        } catch(e) {}
+        const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
+        processBarcodeValue(simulatedBarcode);
+        shutdownCameraStream();
+      })();
+      return;
+    }
+
     const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
     processBarcodeValue(simulatedBarcode);
   },400);
