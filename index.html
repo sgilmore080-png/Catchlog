@@ -55,7 +55,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .leader-row{background:rgba(31,41,55,0.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;backdrop-filter:blur(4px)}
 #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16,185,129,0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow:0 10px 25px rgba(16,185,129,0.3);transition:opacity .3s,top .3s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
 #toast.show{opacity:1;top:24px}
-#toast.error{background:rgba(244,63,94,0.95);box-shadow:0 10px 25px rgba(244,63,94,0.3);}
+#toast.error{background:rgba(244,63,94,0.95);}
 .chat-window{display:flex;flex-direction:column;height:100%;background:rgba(17,24,39,0.6);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden}
 .chat-stream{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
 .msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45}
@@ -71,106 +71,55 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .btn-scan{background:rgba(6,182,212,0.15);border:1px dashed var(--primary);color:#fff;font-size:11px;padding:10px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;transition:background .2s}
 .btn-scan:hover{background:rgba(6,182,212,0.3)}
 .tackle-box-card{background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;overflow:hidden;position:relative}
-.tackle-img-frame{height:90px;width:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative}
+.tackle-img-frame{height:90px;width:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;}
 .tackle-white-box{background:#1f2937;width:100%;height:90px;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);text-align:center;padding:8px}
-.tackle-cam-overlay{position:absolute;top:6px;right:6px;background:rgba(17,24,39,0.85);border:1px solid var(--primary);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+.tackle-cam-overlay{position:absolute;top:6px;right:6px;background:rgba(17,24,39,0.85);border:1px solid var(--primary);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;z-index:10;}
 .tackle-card-body{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1;justify-content:space-between}
 .tackle-tally-row{display:flex;align-items:center;justify-content:space-between;margin-top:6px;background:rgba(0,0,0,0.2);padding:4px 8px;border-radius:20px}
 .tally-btn{background:var(--bg3);border:1px solid var(--border);color:#fff;font-size:14px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:bold}
-.camera-viewfinder-overlay{position:fixed;inset:0;background:#000;z-index:5000;display:none;flex-direction:column;justify-content:space-between}
+.camera-viewfinder-overlay{position:fixed;inset:0;background:#000;z-index:5000;display:none;flex-direction:column;}
 .viewfinder-hdr{padding:16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,0.9),transparent);position:absolute;top:0;left:0;right:0;z-index:5010}
 .viewfinder-video{width:100%;height:100%;object-fit:cover}
 .viewfinder-actions{position:absolute;bottom:0;left:0;right:0;padding:32px 24px;background:linear-gradient(to top,rgba(0,0,0,0.95),transparent);display:flex;flex-direction:column;align-items:center;gap:14px;z-index:5010}
-.barcode-target-box-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:160px;border-radius:8px;box-shadow:0 0 0 4000px rgba(0,0,0,0.6);z-index:5002;display:none;pointer-events:none}
-.barcode-corner{position:absolute;width:24px;height:24px;border-color:var(--primary);border-style:solid;}
-.barcode-corner.tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
-.barcode-corner.tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
-.barcode-corner.bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
-.barcode-corner.br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
-.barcode-laser-line{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,#ff2a2a,transparent);box-shadow:0 0 14px #ff2a2a,0 0 6px #ff2a2a;border-radius:2px;}
-.laser-active{animation:bar-laser-sweep 2s infinite ease-in-out}
-@keyframes bar-laser-sweep{0%,100%{top:15%}50%{top:82%}}
-#viewfinder-scan-label{position:absolute;bottom:-30px;left:0;width:100%;text-align:center;color:var(--primary);font-size:11px;font-weight:800;letter-spacing:1px;text-shadow:0 1px 4px #000;}
 .capture-shutter-btn{width:68px;height:68px;border-radius:50%;background:#fff;border:6px solid rgba(6,182,212,0.4);cursor:pointer;box-shadow:0 0 15px rgba(255,255,255,0.4);z-index:5020}
-.capture-shutter-btn:active{transform:scale(0.92)}
-#scan-result-panel{position:absolute;bottom:130px;left:16px;right:16px;background:rgba(17,24,39,0.96);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:14px;z-index:5020;display:none;animation:slideUp .3s ease;}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-#scan-result-panel .scan-product-name{font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;}
-#scan-result-panel .scan-price-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
-#scan-result-panel .scan-price{font-size:20px;font-weight:900;color:var(--accent2);}
-#scan-result-panel .scan-price-label{font-size:11px;color:var(--text2);font-weight:600;}
-#scan-result-panel .scan-barcode-raw{font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px;}
-#scan-result-panel .scan-actions{display:flex;gap:8px;margin-top:12px;}
-.price-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:800;}
-.price-badge.live{background:rgba(16,185,129,0.2);color:var(--accent2);border:1px solid rgba(16,185,129,0.3);}
-.price-badge.loading{background:rgba(245,158,11,0.15);color:var(--accent3);}
-.price-badge.error{background:rgba(244,63,94,0.15);color:#f43f5e;}
 .tackle-price-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px;padding-top:4px;border-top:1px solid var(--border);}
 .tackle-price-val{font-size:12px;font-weight:800;color:var(--accent2);}
 .tackle-price-btn{font-size:10px;padding:4px 8px;border-radius:8px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:var(--primary);cursor:pointer;font-weight:700;white-space:nowrap;}
-.tackle-price-btn:active{transform:scale(0.95);}
 #auth-wrap{position:fixed;inset:0;z-index:1000;background:var(--bg);background-image:radial-gradient(circle at 50% 30%,rgba(6,182,212,0.15),transparent 60%);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .auth-container{position:relative;z-index:5;width:100%;max-width:350px;text-align:center;background:rgba(17,24,39,0.85)}
 .app-fish-logo-img{width:120px;height:120px;margin:0 auto 16px;object-fit:contain}
 .oauth-btn-stack{margin-top:26px;display:flex;flex-direction:column;gap:18px;align-items:center}
 .oauth-action-block{width:100%;display:flex;flex-direction:column;align-items:center}
 .oauth-divider{font-size:11px;margin-bottom:8px;font-weight:800;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase}
-.photo-preview{margin-top:10px;width:100%;height:120px;border:1px solid var(--border);border-radius:var(--radius-sm);background-size:cover;background-position:center center;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;text-align:center;padding:10px}
+.photo-preview{margin-top:10px;width:100%;height:120px;border:1px solid var(--border);border-radius:var(--radius-sm);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;text-align:center;padding:10px}
 .suggestion-note{font-size:12px;color:var(--accent2);line-height:1.4}
 .status-pill{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
 .status-active{background:rgba(16,185,129,0.18);color:#10b981}
 .status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
 .status-broken{background:rgba(248,113,113,0.18);color:#f87171}
 #ai-chat-stream-box{padding-bottom:calc(var(--nav-h) + 110px);}
-#ai-chat-input-row{position:sticky;bottom:calc(var(--nav-h) + 8px);z-index:120;background:linear-gradient(180deg,rgba(17,24,39,0.98),rgba(17,24,39,0.98));border-top:1px solid var(--border);padding:8px 12px;gap:8px;display:flex;align-items:center;}
+#ai-chat-input-row{position:sticky;bottom:calc(var(--nav-h) + 8px);z-index:120;background:rgba(17,24,39,0.98);border-top:1px solid var(--border);padding:8px 12px;gap:8px;display:flex;align-items:center;}
 #ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
 #ai-chat-input-row button{padding:10px 14px;border-radius:10px}
-#zxing-scanning-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-200%);z-index:5015;background:rgba(6,182,212,0.15);border:1px solid var(--primary);border-radius:30px;padding:6px 16px;font-size:11px;font-weight:800;color:var(--primary);letter-spacing:1px;display:none;}
-#zxing-scanning-indicator.visible{display:block;}
 </style>
 </head>
 <body>
 <div id="toast"></div>
+
+<!-- Camera viewfinder (for lure photos only, NOT barcode) -->
 <div id="camera-viewfinder-overlay" class="camera-viewfinder-overlay">
   <div class="viewfinder-hdr">
-    <div id="viewfinder-title" style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--primary);">Barcode Scanner Active</div>
+    <div id="viewfinder-title" style="font-size:13px;font-weight:800;color:var(--primary);">📷 Camera</div>
     <button class="btn btn-secondary" style="width:auto;padding:6px 14px;font-size:11px;" onclick="shutdownCameraStream()">✕ Close</button>
   </div>
   <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted></video>
-  <div id="barcode-target-box-frame" class="barcode-target-box-frame">
-    <div class="barcode-corner tl"></div>
-    <div class="barcode-corner tr"></div>
-    <div class="barcode-corner bl"></div>
-    <div class="barcode-corner br"></div>
-    <div id="laser-element" class="barcode-laser-line laser-active"></div>
-    <div id="viewfinder-scan-label">ALIGN BARCODE IN FRAME</div>
-  </div>
-  <div id="zxing-scanning-indicator">🔍 SCANNING…</div>
-  <div id="scan-result-panel">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-      <div style="flex:1;">
-        <div style="font-size:10px;font-weight:800;color:var(--primary);letter-spacing:1px;margin-bottom:4px;">PRODUCT IDENTIFIED</div>
-        <div class="scan-product-name" id="scan-name-display">—</div>
-        <div class="scan-barcode-raw" id="scan-barcode-display">UPC: —</div>
-      </div>
-      <span id="scan-price-badge" class="price-badge loading">⏳ Fetching…</span>
-    </div>
-    <div class="scan-price-row">
-      <div>
-        <div class="scan-price" id="scan-price-display">—</div>
-        <div class="scan-price-label" id="scan-store-display">Bass Pro Shops</div>
-      </div>
-    </div>
-    <div class="scan-actions">
-      <button class="btn btn-primary" style="flex:1;font-size:12px;padding:10px;" onclick="confirmScanAndSave()">✅ Add to Tackle Box</button>
-      <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:10px;" onclick="resetScannerForNextScan()">🔄 Scan Again</button>
-    </div>
-  </div>
-  <div class="viewfinder-actions" id="viewfinder-actions-bar">
-    <p id="viewfinder-instructions-hint" style="font-size:11px;color:var(--text2);text-align:center;max-width:300px;line-height:1.5;">Hold camera over the barcode. Scanner detects automatically.</p>
-    <button id="shutter-action-trigger" class="capture-shutter-btn" onclick="executeManualCaptureSnapshot()" style="display:none;"></button>
+  <div class="viewfinder-actions">
+    <p id="viewfinder-instructions-hint" style="font-size:11px;color:var(--text2);text-align:center;max-width:300px;">Hold camera above lure then tap capture.</p>
+    <button id="shutter-action-trigger" class="capture-shutter-btn" onclick="executeManualCaptureSnapshot()"></button>
   </div>
 </div>
+
+<!-- Settings Modal -->
 <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px;font-weight:800;">⚙️ Settings</h3>
@@ -180,6 +129,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
   </div>
 </div>
+
+<!-- Trash Modal -->
 <div id="trash-modal" class="modal-overlay" onclick="cancelTrashPrompt(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px;font-weight:800;">Remove or Repurchase</h3>
@@ -191,6 +142,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <button class="btn btn-secondary" style="margin-top:16px;width:100%;" onclick="cancelTrashPrompt()">Cancel</button>
   </div>
 </div>
+
+<!-- Manual Lure Modal -->
 <div id="manual-lure-modal" class="modal-overlay" onclick="closeManualLureModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px;font-weight:800;">Add Lure</h3>
@@ -225,11 +178,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <button class="btn btn-secondary" onclick="closeManualLureModal()">Cancel</button>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="btn btn-scan" onclick="bootOpticalSystem('barcode')" style="flex:1;">📦 Scan Barcode</button>
+      <label class="btn btn-scan" for="barcode-file-input-modal" style="flex:1;cursor:pointer;">📦 Scan Barcode</label>
+      <input type="file" id="barcode-file-input-modal" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeImageFile(event)"/>
       <button class="btn btn-secondary" style="flex:1;" onclick="bootOpticalSystem('ai-photo')">📷 Camera</button>
     </div>
   </div>
 </div>
+
+<!-- Auth Screen -->
 <div id="auth-wrap">
   <div class="auth-container card" style="padding:32px 24px;">
     <img src="logo.png" alt="CatchLog Pro" class="app-fish-logo-img"/>
@@ -248,6 +204,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
   </div>
 </div>
+
+<!-- Main App -->
 <div id="app">
   <header class="hdr">
     <div class="hdr-title">CatchLog Tactical</div>
@@ -259,6 +217,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
   </header>
   <main style="flex:1;position:relative;">
+
     <div id="screen-dashboard" class="screen active">
       <div class="section-label" style="margin-top:8px;">🏆 Leaderboard</div>
       <div style="padding:0 16px;" id="global-leaderboard-deck"></div>
@@ -270,6 +229,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div class="section-label">Recent Catches</div>
       <div id="dashboard-catch-list" style="padding:0 16px;"></div>
     </div>
+
     <div id="screen-tourney-manager" class="screen">
       <div class="section-label">Create Tournament</div>
       <div class="card">
@@ -283,6 +243,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back</button>
       </div>
     </div>
+
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         <div class="form-group">
@@ -322,6 +283,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <div style="padding:0 16px;"><button type="submit" class="btn btn-primary">Log Catch</button></div>
       </form>
     </div>
+
     <div id="screen-friends" class="screen">
       <div class="card" style="background:linear-gradient(135deg,rgba(6,182,212,0.1),transparent);text-align:center;">
         <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your ID</div>
@@ -348,6 +310,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         </div>
       </div>
     </div>
+
     <div id="screen-tackle" class="screen">
       <div style="padding:16px;">
         <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:700;">💼 Total Tackle Value</div>
@@ -366,13 +329,17 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('fillet')">Pair</button>
         </div>
         <div class="scan-actions-grid">
-          <button class="btn-scan" style="padding:14px;" onclick="bootOpticalSystem('barcode')">📦 <span style="font-size:13px;">Scan Barcode → Auto ID + Price</span></button>
+          <label class="btn-scan" style="padding:14px;cursor:pointer;" for="barcode-file-input">
+            📦 <span style="font-size:13px;">Scan Barcode → Auto ID + Price</span>
+          </label>
+          <input type="file" id="barcode-file-input" accept="image/*" capture="environment" style="display:none;" onchange="handleBarcodeImageFile(event)"/>
           <button class="btn-scan" onclick="openManualLureModal()">✍️ <span>Add Lure Manually</span></button>
         </div>
       </div>
       <div class="section-label">Tackle Box</div>
       <div id="tackle-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;"></div>
     </div>
+
     <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
       <div class="section-label">🤖 AI Advisor</div>
       <div class="card" style="margin-bottom:10px;"><div style="font-size:12px;color:var(--text2);line-height:1.5;">Recommends only from lures you already own.</div></div>
@@ -383,7 +350,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         </div>
         <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.4;">Tap ⚙️ to sync location and weather.</p>
       </div>
-      <div class="ai-chat-window card" id="ai-chat-card">
+      <div class="ai-chat-window card">
         <div class="chat-window" style="height:100%;display:flex;flex-direction:column;">
           <div class="chat-stream" id="ai-chat-stream-box"></div>
         </div>
@@ -393,6 +360,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         </div>
       </div>
     </div>
+
     <div id="screen-map" class="screen" style="padding-top:0;padding-bottom:0;">
       <div class="map-weather-hud">
         <div><div style="font-size:10px;font-weight:800;color:var(--primary);letter-spacing:.5px;">WEATHER</div><div style="font-size:13px;font-weight:700;color:#fff;" id="map-hud-desc">Standby</div></div>
@@ -400,6 +368,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       </div>
       <div id="full-map" style="position:absolute;inset:0;"></div>
     </div>
+
   </main>
   <nav id="bottom-nav">
     <div class="nav-item active" onclick="switchScreen('dashboard')"><div>📊</div><div class="nav-label">Home</div></div>
@@ -410,6 +379,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div class="nav-item" onclick="switchScreen('ai')"><div>🤖</div><div class="nav-label">AI</div></div>
   </nav>
 </div>
+
 <script>
 const lureCategories=['Crankbait','Swimbait','Jig','Spinnerbait','Topwater','Soft Plastic','Other'];
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
@@ -433,7 +403,6 @@ let liveWaypointMarker=null;
 let currentTelemetryContext=null;
 let manualPhotoSuggestion=null;
 let zxingReader=null;
-let zxingScanActive=false;
 let pendingScannedLure=null;
 
 function showToast(m,isError=false){const t=document.getElementById('toast');t.innerHTML=m;t.classList.toggle('error',isError);t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
@@ -451,103 +420,88 @@ function switchScreen(screenId){
   if(screenId==='ai')renderAiMessages();
 }
 
-async function bootOpticalSystem(mode,optionalLureId=null){
-  opticalScanMode=mode;targetOverrideLureId=optionalLureId;
-  const title=document.getElementById('viewfinder-title');
-  const targetBox=document.getElementById('barcode-target-box-frame');
-  const hint=document.getElementById('viewfinder-instructions-hint');
-  const shutter=document.getElementById('shutter-action-trigger');
-  document.getElementById('scan-result-panel').style.display='none';
-  document.getElementById('zxing-scanning-indicator').classList.remove('visible');
-  if(mode==='barcode'){title.innerText='📦 Barcode Scanner';hint.innerText='Aim camera at barcode. Hold steady — detects automatically.';targetBox.style.display='block';shutter.style.display='none';}
-  else if(mode==='inline-override'){title.innerText='📷 Lure Photo';hint.innerText='Hold camera above lure then tap the button.';targetBox.style.display='none';shutter.style.display='flex';}
-  else{title.innerText='📷 Camera';hint.innerText='Tap button to capture.';targetBox.style.display='none';shutter.style.display='flex';}
-  document.getElementById('camera-viewfinder-overlay').style.display='flex';
+// ══ IMAGE-BASED BARCODE SCANNING ══
+// User taps "Scan Barcode" → iPhone native camera opens → photo taken → barcode read from image
+async function handleBarcodeImageFile(event){
+  const file=event.target.files&&event.target.files[0];
+  event.target.value='';
+  if(!file){showToast('No image selected.',true);return;}
+  showToast('📷 Reading barcode…');
+
+  // Loading overlay
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(10,15,29,0.95);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+  overlay.innerHTML='<div style="font-size:40px;">📦</div><div style="font-size:15px;font-weight:800;color:#06b6d4;letter-spacing:1px;">READING BARCODE…</div><div style="font-size:12px;color:#9ca3af;">Searching Bass Pro for price</div>';
+  document.body.appendChild(overlay);
+
+  const removeOverlay=()=>{if(overlay.parentNode)overlay.parentNode.removeChild(overlay);};
+
   try{
-    activeMediaStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false});
-    const video=document.getElementById('viewfinder-video');
-    video.srcObject=activeMediaStream;
-    if(mode==='barcode')startBarcodeScanner(video);
-  }catch(err){showToast('Camera unavailable. Check permissions.',true);shutdownCameraStream();}
-}
+    let barcode=null;
 
-// ── SCANNER: tries native BarcodeDetector first, falls back to ZXing ──
-function startBarcodeScanner(video){
-  if('BarcodeDetector' in window){
-    console.log('Using native BarcodeDetector (iOS/Chrome)');
-    startNativeBarcodeDetector(video);
-  } else {
-    console.log('Using ZXing fallback');
-    startZxingLibrary(video);
-  }
-}
-
-function startNativeBarcodeDetector(video){
-  zxingScanActive=true;
-  document.getElementById('zxing-scanning-indicator').classList.add('visible');
-  const detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','code_93','qr_code','data_matrix','itf','codabar']});
-  let rafId=null;
-  let lastScan=0;
-  async function scanFrame(){
-    if(!zxingScanActive){cancelAnimationFrame(rafId);return;}
-    const now=Date.now();
-    if(now-lastScan>120){
-      lastScan=now;
+    // Try native BarcodeDetector on image (works great on iOS 17+)
+    if('BarcodeDetector' in window){
       try{
-        if(video.readyState===video.HAVE_ENOUGH_DATA){
-          const barcodes=await detector.detect(video);
-          if(barcodes&&barcodes.length>0){
-            zxingScanActive=false;cancelAnimationFrame(rafId);
-            document.getElementById('zxing-scanning-indicator').classList.remove('visible');
-            handleBarcodeDecoded(barcodes[0].rawValue);return;
-          }
-        }
-      }catch(e){}
+        const detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','code_93','qr_code','data_matrix','itf','codabar']});
+        const bitmap=await createImageBitmap(file);
+        const barcodes=await detector.detect(bitmap);
+        if(barcodes&&barcodes.length>0) barcode=barcodes[0].rawValue;
+      }catch(e){console.warn('Native detector failed:',e);}
     }
-    rafId=requestAnimationFrame(scanFrame);
+
+    // Fallback: ZXing on canvas
+    if(!barcode&&window.ZXing){
+      try{
+        const dataUrl=await new Promise(resolve=>{const r=new FileReader();r.onload=e=>resolve(e.target.result);r.readAsDataURL(file);});
+        const img=new Image();img.src=dataUrl;
+        await new Promise(r=>{img.onload=r;img.onerror=r;});
+        const canvas=document.createElement('canvas');
+        canvas.width=img.width;canvas.height=img.height;
+        canvas.getContext('2d').drawImage(img,0,0);
+        const reader2=new ZXing.BrowserMultiFormatReader();
+        const result=await reader2.decodeFromCanvas(canvas);
+        if(result)barcode=result.getText();
+      }catch(e){console.warn('ZXing failed:',e);}
+    }
+
+    removeOverlay();
+
+    // If still no barcode, ask user to type it
+    if(!barcode){
+      const manual=prompt('Could not read barcode automatically.\nType the number from the packaging (or leave blank to cancel):');
+      if(!manual||!manual.trim()){showToast('Scan cancelled.',true);return;}
+      barcode=manual.trim();
+    }
+
+    // Now look up product + price
+    await handleBarcodeDecoded(barcode);
+
+  }catch(e){
+    removeOverlay();
+    console.error('Barcode scan error:',e);
+    showToast('Error reading barcode. Try again.',true);
   }
-  if(video.readyState>=3){rafId=requestAnimationFrame(scanFrame);}
-  else{video.addEventListener('canplay',()=>{rafId=requestAnimationFrame(scanFrame);},{once:true});}
 }
-
-function startZxingLibrary(video){
-  if(!window.ZXing){showToast('Barcode library not loaded.',true);return;}
-  try{
-    zxingReader=new ZXing.BrowserMultiFormatReader();
-    zxingScanActive=true;
-    document.getElementById('zxing-scanning-indicator').classList.add('visible');
-    zxingReader.decodeFromVideoElement(video,(result,err)=>{
-      if(!zxingScanActive)return;
-      if(result){zxingScanActive=false;document.getElementById('zxing-scanning-indicator').classList.remove('visible');handleBarcodeDecoded(result.getText());}
-    });
-  }catch(e){showToast('Scanner error.',true);}
-}
-
-function stopZxing(){zxingScanActive=false;if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}}
-function shutdownCameraStream(){stopZxing();if(activeMediaStream){activeMediaStream.getTracks().forEach(t=>t.stop());activeMediaStream=null;}document.getElementById('camera-viewfinder-overlay').style.display='none';document.getElementById('scan-result-panel').style.display='none';document.getElementById('zxing-scanning-indicator').classList.remove('visible');}
 
 async function handleBarcodeDecoded(barcode){
-  showToast('✅ Barcode read! Looking up product…');
-  document.getElementById('scan-result-panel').style.display='block';
-  document.getElementById('scan-name-display').innerText='Looking up…';
-  document.getElementById('scan-barcode-display').innerText='UPC: '+barcode;
-  document.getElementById('scan-price-display').innerText='—';
-  document.getElementById('scan-price-badge').className='price-badge loading';
-  document.getElementById('scan-price-badge').innerText='⏳ Fetching…';
+  showToast('✅ Barcode: '+barcode+' — searching…');
+  showScanResultCard(barcode,'Searching Bass Pro…',null,barcode);
+
+  // Try UPCitemdb for name
   let productName=null;
   try{
     const upcUrl=`https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(barcode)}`;
     const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(upcUrl)}`;
-    const res=await fetch(proxyUrl);
+    const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(5000)});
     const outer=await res.json();
     const data=JSON.parse(outer.contents);
-    if(data&&data.items&&data.items.length>0){productName=data.items[0].title||data.items[0].description||null;document.getElementById('scan-name-display').innerText=productName||'Unknown Product';}
-    else{document.getElementById('scan-name-display').innerText='Not found in UPC database';}
-  }catch(e){document.getElementById('scan-name-display').innerText='UPC lookup failed';}
-  await fetchBassProPrice(productName||barcode,barcode,productName);
-}
+    if(data&&data.items&&data.items.length>0) productName=data.items[0].title||data.items[0].description||null;
+  }catch(e){}
 
-async function fetchBassProPrice(searchQuery,barcode,resolvedName){
+  const searchQuery=productName||barcode;
+
+  // Search Bass Pro for price
+  let price=null;
   try{
     const bpUrl=`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(searchQuery)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch&resultCatEntryType=2&showResultsPage=true&pageSize=10`;
     const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(bpUrl)}`;
@@ -555,32 +509,63 @@ async function fetchBassProPrice(searchQuery,barcode,resolvedName){
     const outer=await res.json();
     const html=outer.contents||'';
     const priceMatch=html.match(/\$\s*([\d,]+\.\d{2})/);
-    const price=priceMatch?parseFloat(priceMatch[1].replace(',','')):null;
-    displayScanResult(barcode,resolvedName||searchQuery,price,searchQuery);
-  }catch(e){displayScanResult(barcode,resolvedName||searchQuery,null,searchQuery);}
-}
+    if(priceMatch) price=parseFloat(priceMatch[1].replace(',',''));
+    const nameMatch=html.match(/"name"\s*:\s*"([^"]{5,80})"/);
+    if(nameMatch&&!productName) productName=nameMatch[1];
+  }catch(e){}
 
-function displayScanResult(barcode,productName,price,searchQuery){
-  document.getElementById('scan-name-display').innerText=productName||'Unknown Product';
-  document.getElementById('scan-barcode-display').innerText='UPC: '+barcode;
-  if(price){document.getElementById('scan-price-display').innerText='$'+price.toFixed(2);document.getElementById('scan-store-display').innerText='Bass Pro Shops (live)';document.getElementById('scan-price-badge').className='price-badge live';document.getElementById('scan-price-badge').innerText='✅ Live Price';}
-  else{document.getElementById('scan-price-display').innerText='Price unavailable';document.getElementById('scan-store-display').innerText='Bass Pro Shops';document.getElementById('scan-price-badge').className='price-badge error';document.getElementById('scan-price-badge').innerText='⚠️ Not found';}
+  // Update the result card
+  const nameEl=document.getElementById('src-name');
+  const nameInput=document.getElementById('src-name-input');
+  const priceEl=document.getElementById('src-price');
+  if(nameEl) nameEl.innerText=productName||'Unknown Product';
+  if(nameInput&&!nameInput.value) nameInput.value=productName||'';
+  if(priceEl){
+    priceEl.innerText=price?'$'+price.toFixed(2):'Price not found';
+    priceEl.style.color=price?'#10b981':'#f43f5e';
+  }
+
   pendingScannedLure={barcode,name:productName||('Scanned Lure – '+barcode),cost:price||6.99,purchaseUrl:`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(searchQuery)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch`};
 }
 
-function confirmScanAndSave(){
-  if(!pendingScannedLure)return;
-  const l=pendingScannedLure;
-  lures.unshift({id:'l_'+Date.now(),name:l.name,cost:l.cost,qty:1,conditionBias:'clear',type:'barcode',category:guessCategory(l.name),img:'',purchaseUrl:l.purchaseUrl,notes:'Barcode: '+l.barcode,status:'active',bassProPrice:l.cost,bassProUrl:l.purchaseUrl});
-  localStorage.setItem('n_lures',JSON.stringify(lures));
-  pendingScannedLure=null;shutdownCameraStream();refreshAllEcosystemModules();
-  showToast('✅ '+l.name+' added!');switchScreen('tackle');
+function showScanResultCard(barcode,name,price,searchQuery){
+  const existing=document.getElementById('scan-result-card-modal');
+  if(existing)existing.remove();
+  const card=document.createElement('div');
+  card.id='scan-result-card-modal';
+  card.style.cssText='position:fixed;inset:0;background:rgba(5,7,14,0.9);z-index:8000;display:flex;align-items:flex-end;justify-content:center;padding-bottom:24px;';
+  card.innerHTML=`
+    <div style="width:92%;max-width:420px;background:#111827;border:1px solid rgba(6,182,212,0.4);border-radius:20px;padding:22px;box-shadow:0 20px 40px rgba(0,0,0,0.7);">
+      <div style="font-size:10px;font-weight:800;color:#06b6d4;letter-spacing:1px;margin-bottom:8px;">📦 PRODUCT IDENTIFIED</div>
+      <div id="src-name" style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px;">${name||'Looking up…'}</div>
+      <div style="font-size:10px;color:#6b7280;font-family:monospace;margin-bottom:14px;">UPC: ${barcode}</div>
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:4px;">Bass Pro Shops Price</div>
+      <div id="src-price" style="font-size:30px;font-weight:900;color:#10b981;margin-bottom:16px;">${price?'$'+price.toFixed(2):'—'}</div>
+      <div style="margin-bottom:14px;">
+        <div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">Edit name if wrong:</div>
+        <input id="src-name-input" type="text" value="" placeholder="Enter lure name..." style="width:100%;background:#1f2937;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 13px;color:#fff;font-size:13px;outline:none;"/>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="confirmScanResultCard('${barcode}','${(searchQuery||barcode).replace(/'/g,"\\'")}');" style="flex:1;background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none;border-radius:12px;padding:14px;font-size:13px;font-weight:800;cursor:pointer;">✅ Add to Tackle Box</button>
+        <button onclick="document.getElementById('scan-result-card-modal').remove();" style="flex:1;background:#1f2937;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px;font-size:13px;font-weight:700;cursor:pointer;">✕ Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(card);
 }
 
-function resetScannerForNextScan(){
-  document.getElementById('scan-result-panel').style.display='none';pendingScannedLure=null;
-  const video=document.getElementById('viewfinder-video');
-  if(video&&activeMediaStream)startBarcodeScanner(video);
+function confirmScanResultCard(barcode,searchQuery){
+  const nameInput=document.getElementById('src-name-input');
+  const priceEl=document.getElementById('src-price');
+  const name=(nameInput&&nameInput.value.trim())||(pendingScannedLure&&pendingScannedLure.name)||('Scanned Lure – '+barcode);
+  const priceText=priceEl?priceEl.innerText:'';
+  const price=priceText.startsWith('$')?parseFloat(priceText.replace('$','')):6.99;
+  const purchaseUrl=`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(searchQuery)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch`;
+  lures.unshift({id:'l_'+Date.now(),name,cost:price,qty:1,conditionBias:'clear',type:'barcode',category:guessCategory(name),img:'',purchaseUrl,notes:'Barcode: '+barcode,status:'active',bassProPrice:price,bassProUrl:purchaseUrl});
+  localStorage.setItem('n_lures',JSON.stringify(lures));
+  document.getElementById('scan-result-card-modal').remove();
+  refreshAllEcosystemModules();
+  showToast('✅ '+name+' added!');
+  switchScreen('tackle');
 }
 
 async function checkPriceForLure(lureId){
@@ -610,11 +595,19 @@ async function checkPriceForLure(lureId){
 
 function guessCategory(name){if(!name)return'Other';const n=name.toLowerCase();if(n.includes('crank')||n.includes('rattle')||n.includes('shad'))return'Crankbait';if(n.includes('swim'))return'Swimbait';if(n.includes('jig')||n.includes('football'))return'Jig';if(n.includes('spinner')||n.includes('willow'))return'Spinnerbait';if(n.includes('topwater')||n.includes('popper')||n.includes('frog')||n.includes('buzzbait'))return'Topwater';if(n.includes('worm')||n.includes('creature')||n.includes('soft')||n.includes('grub')||n.includes('tube'))return'Soft Plastic';return'Other';}
 
+// Camera for lure photos (not barcode)
+async function bootOpticalSystem(mode,optionalLureId=null){
+  opticalScanMode=mode;targetOverrideLureId=optionalLureId;
+  document.getElementById('camera-viewfinder-overlay').style.display='flex';
+  try{
+    activeMediaStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false});
+    document.getElementById('viewfinder-video').srcObject=activeMediaStream;
+  }catch(err){showToast('Camera unavailable.',true);shutdownCameraStream();}
+}
+function shutdownCameraStream(){if(activeMediaStream){activeMediaStream.getTracks().forEach(t=>t.stop());activeMediaStream=null;}document.getElementById('camera-viewfinder-overlay').style.display='none';}
 function captureFrameFromVideo(video){const canvas=document.createElement('canvas');canvas.width=video.videoWidth||640;canvas.height=video.videoHeight||480;canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);return canvas.toDataURL('image/jpeg',0.85);}
-
 function executeManualCaptureSnapshot(){
-  const video=document.getElementById('viewfinder-video');
-  if(!video){shutdownCameraStream();return;}
+  const video=document.getElementById('viewfinder-video');if(!video){shutdownCameraStream();return;}
   setTimeout(()=>{
     if(opticalScanMode==='inline-override'&&targetOverrideLureId){
       const snapshot=captureFrameFromVideo(video);
