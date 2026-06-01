@@ -94,6 +94,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .oauth-divider{font-size:11px;margin-bottom:8px;font-weight:800;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase}
 .manual-form-group{margin-bottom:12px;padding:0 16px}
 .manual-form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:.3px}
+.price-hint{font-size:10px;color:var(--accent2);font-style:italic;margin-top:2px;display:block}
 </style>
 </head>
 <body>
@@ -144,7 +145,12 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <h3 style="margin-bottom:12px;font-weight:800;">Add Lure Manually</h3>
     <div class="manual-form-group">
       <label class="manual-form-label">Lure Category</label>
-      <select id="manual-lure-category" class="form-select"></select>
+      <select id="manual-lure-category" class="form-select" onchange="updatePriceHint()"></select>
+    </div>
+    <div class="manual-form-group">
+      <label class="manual-form-label">Price</label>
+      <input type="number" id="manual-lure-price" class="form-input" step="0.01" min="0.01" placeholder="0.00"/>
+      <span class="price-hint" id="price-hint-text"></span>
     </div>
     <div class="manual-form-group">
       <label class="manual-form-label">Quantity</label>
@@ -427,6 +433,27 @@ function switchScreen(screenId){
   if(screenId==='friends') document.querySelectorAll('.nav-item')[3].classList.add('active');
   if(screenId==='tackle') document.querySelectorAll('.nav-item')[4].classList.add('active');
   if(screenId==='ai'){ document.querySelectorAll('.nav-item')[5].classList.add('active'); renderAiMessages(); }
+}
+
+function calculateAveragePriceForCategory(category){
+  const matchingLures=lures.filter(l=>l.category===category);
+  if(matchingLures.length===0) return null;
+  const total=matchingLures.reduce((sum,l)=>sum+l.cost,0);
+  return total/matchingLures.length;
+}
+
+function updatePriceHint(){
+  const category=document.getElementById('manual-lure-category').value;
+  const priceInput=document.getElementById('manual-lure-price');
+  const hintText=document.getElementById('price-hint-text');
+  const avgPrice=calculateAveragePriceForCategory(category);
+  if(avgPrice!==null){
+    priceInput.value=avgPrice.toFixed(2);
+    hintText.innerText=`📊 Market avg: $${avgPrice.toFixed(2)}`;
+  } else {
+    priceInput.value='';
+    hintText.innerText='No average price available';
+  }
 }
 
 function getBassProSearchUrl(query){ return `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(query)}`; }
@@ -734,7 +761,7 @@ function updateMapWaypointMarker(){
   if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); }
   else {
     const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]});
-    liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map);
+    liveWaypointMarker=L.marker(coords,{icon:pulsingIcon}).addTo(map);
   }
   map.setView(coords,12);
 }
@@ -834,7 +861,10 @@ function populateManualLureCategories(){
 function openManualLureModal(){
   populateManualLureCategories();
   document.getElementById('manual-lure-qty').value=1;
+  document.getElementById('manual-lure-price').value='';
+  document.getElementById('price-hint-text').innerText='';
   document.getElementById('manual-lure-modal').classList.add('active');
+  updatePriceHint();
 }
 
 function closeManualLureModal(e){
@@ -844,11 +874,12 @@ function closeManualLureModal(e){
 
 function saveManualLure(){
   const category=document.getElementById('manual-lure-category').value||'Other';
+  const price=parseFloat(document.getElementById('manual-lure-price').value)||6.99;
   const qty=Math.max(1,parseInt(document.getElementById('manual-lure-qty').value,10)||1);
   lures.unshift({
     id:'l_'+Date.now(),
     name:category,
-    cost:6.99,
+    cost:price,
     qty,
     conditionBias:'clear',
     type:'manual',
@@ -867,3 +898,5 @@ window.onload=function(){ refreshAllEcosystemModules(); }
 </body>
 </html>
 ```
+
+Similar code found with 1 license type
