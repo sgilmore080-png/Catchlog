@@ -116,7 +116,45 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   align-items:center;
 }
 #ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
-#ai-chat-input-row button{padding:10px 14px;border-radius:10px}
+
+/* MOD: Make modal content scrollable on small screens so "Scan barcode" buttons are reachable */
+.modal-overlay {
+  /* keep center on desktop but allow top alignment on small screens via media query below */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+/* Constrain modal height and enable native momentum scrolling on mobile */
+.modal-overlay .modal-card {
+  width: 90%;
+  max-width: 420px;
+  box-sizing: border-box;
+  /* limit height so content can scroll inside the modal on short viewports */
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  margin: 20px auto;
+}
+
+/* Ensure tappable controls inside modal receive touch events */
+.modal-overlay .modal-card * {
+  touch-action: manipulation;
+}
+
+/* Mobile-specific: align modal near top and reduce max-height so user can scroll page if needed */
+@media (max-width: 600px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding-top: 18px;
+  }
+  .modal-overlay .modal-card {
+    max-height: calc(100vh - 80px);
+    margin: 12px;
+    border-radius: 14px;
+  }
+}
 </style>
 </head>
 <body>
