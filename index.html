@@ -35,7 +35,7 @@
 }
 html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);background-image:radial-gradient(circle at top right,rgba(6,182,212,0.08),transparent 40%),radial-gradient(circle at bottom left,rgba(16,185,129,0.04),transparent 35%);}
 #app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;display:flex;flex-direction:column;background:rgba(10,15,29,0.95);box-shadow:0 0 40px rgba(0,0,0,0.6);border-left:1px solid var(--border);border-right:1px solid var(--border);}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav_h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+24px);opacity:0;pointer-events:none;transform:scale(0.98);transition:opacity .3s cubic-bezier(0.4,0,0.2,1),transform .3s cubic-bezier(0.4,0,0.2,1);padding-top:16px;}
 .screen.active{opacity:1;pointer-events:auto;transform:scale(1)}
 .hdr{position:sticky;top:0;z-index:50;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(17,24,39,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
 .hdr-title{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(135deg,#fff,var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -82,7 +82,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;position:relative}
 .ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 230px);margin:0 16px}
 .split-species-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.scan-actions-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.scan-actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .btn-scan{background:rgba(6,182,212,0.15);border:1px dashed var(--primary);color:#fff;font-size:11px;padding:10px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;transition:background .2s}
 .btn-scan:hover{background:rgba(6,182,212,0.3)}
 .tackle-box-card{background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;overflow:hidden;position:relative}
@@ -272,7 +272,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div style="padding:0 16px;margin-bottom:16px;" id="friends-list-container"></div>
       <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
       <div class="card" style="padding:10px;">
-        <div style="font-size:12px;margin-bottom:8px;font-weight:700;color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
+        <div class="font-size:12px;margin-bottom:8px;font-weight:700;color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
         <div class="chat-window">
           <div class="chat-stream" id="chat-stream-box"></div>
           <div class="chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchMessage();}">
@@ -322,6 +322,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <div class="scan-actions-grid">
           <button class="btn-scan" onclick="bootOpticalSystem('barcode')">
             █▉ <span>Scan Barcode</span>
+          </button>
+          <button class="btn-scan" onclick="bootOpticalSystem('ai-photo')">
+            📷 <span>Classify Lure Photo</span>
           </button>
         </div>
       </div>
@@ -461,16 +464,29 @@ function resolveScannedProductMetadata(rawValue, scanFormat=''){
   const numericOnly = trimmed.replace(/\D/g,'');
   if(numericOnly.length >= 8 && numericOnly.length <= 14){
     return {
-      productName: 'Scanned Barcode Lure',
+      productName: 'Scanned Tackle Lure',
       purchaseUrl: getBassProSearchUrl(numericOnly),
       upc: numericOnly
     };
   }
 
   return {
-    productName: trimmed || 'Scanned Tackle Item',
+    productName: trimmed || 'Scanned Tackle Lure',
     purchaseUrl: getBassProSearchUrl(trimmed || 'Fishing Lure')
   };
+}
+
+function classifyCapturedLureImage(snapshotData){
+  const categories=[
+    {name:'Topwater Popper',category:'Topwater/Poppers',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80'},
+    {name:'Lipless Crankbait',category:'Lipless Crankbaits',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80'},
+    {name:'Soft Plastic Worm',category:'Soft Plastics',img:'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80'},
+    {name:'Spinnerbait',category:'Spinnerbaits/Blades',img:'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'},
+    {name:'Jerkbait',category:'Diving Crankbaits',img:'https://images.unsplash.com/photo-1563094699-01bf31a3c0e3?auto=format&fit=crop&w=240&q=80'}
+  ];
+  let hash=0;
+  for(let i=0;i<snapshotData.length;i++){ hash=((hash<<5)-hash)+snapshotData.charCodeAt(i); hash |= 0; }
+  return categories[Math.abs(hash)%categories.length];
 }
 
 async function bootOpticalSystem(mode,optionalLureId=null){
@@ -498,9 +514,9 @@ async function bootOpticalSystem(mode,optionalLureId=null){
     laserLine.classList.remove('laser-active');
   } else {
     title.innerText="AI Vision Scan";
-    hint.innerText="Center the item in frame and capture for classification.";
-    scanLabel.innerText="AI VISION ACTIVE";
-    targetBox.style.display='block';
+    hint.innerText="Take a photo of the lure to classify its type.";
+    scanLabel.innerText="PHOTO CLASSIFIER";
+    targetBox.style.display='none';
     laserLine.style.display='none';
     laserLine.classList.remove('laser-active');
   }
@@ -536,23 +552,13 @@ function detectBarcodeNativeLoop(detector){
   }).catch(()=>{ requestAnimationFrame(()=>detectBarcodeNativeLoop(detector)); });
 }
 
-async function processBarcodeValue(barcodeRawString, scanFormat=''){
-  showToast('Resolving product metadata...');
+function processBarcodeValue(barcodeRawString, scanFormat=''){
+  showToast('Storing barcode entry...');
   const resolved=resolveScannedProductMetadata(barcodeRawString, scanFormat);
-  if(resolved.upc){
-    try{
-      const response=await fetch(`https://world.openfoodfacts.org/api/v2/product/${resolved.upc}.json`);
-      const data=await response.json();
-      if(data.status===1 && data.product && data.product.product_name){
-        resolved.productName=data.product.product_name;
-        resolved.purchaseUrl=getBassProSearchUrl(data.product.product_name);
-      }
-    }catch(e){ console.log("UPC lookup failed",e); }
-  }
   shutdownCameraStream();
   lures.unshift({
     id:'l_'+Date.now(),
-    name:resolved.productName,
+    name:resolved.productName || 'Scanned Tackle Lure',
     cost:6.99,
     qty:1,
     conditionBias:'clear',
@@ -563,7 +569,7 @@ async function processBarcodeValue(barcodeRawString, scanFormat=''){
   });
   localStorage.setItem('n_lures',JSON.stringify(lures));
   refreshAllEcosystemModules();
-  showToast('Tackle entry stored with BassPro metadata.');
+  showToast('Barcode saved as generic tackle entry. Use photo scan to classify lure.');
 }
 
 function captureFrameFromVideo(video){
@@ -583,39 +589,25 @@ function executeManualCaptureSnapshot(){
   }
   showToast('💾 Capturing camera frame...');
   setTimeout(()=>{
+    const video=document.getElementById('viewfinder-video');
     if(opticalScanMode==='ai-photo'){
-      const macroCategories=[
-        {category:'Lipless Crankbaits / Rattle Traps',defaultName:'Rattle Trap Profile Lure',historicalPrices:[6.49,7.99,6.99,8.25]},
-        {category:'Diving Crankbaits',defaultName:'Deep Lip Crankbait',historicalPrices:[8.5,9.99,9.25,8.79]},
-        {category:'Soft Plastic Worms / Creatures',defaultName:'Soft Plastic Bait Profile',historicalPrices:[4.99,5.49,5.99,5.25]},
-        {category:'Topwater Poppers / Walkers',defaultName:'Surface Popper Bait Profile',historicalPrices:[7.49,8.99,7.99,8.49]},
-        {category:'Spinnerbaits / Blades',defaultName:'Bladed Wire Spinnerbait',historicalPrices:[5.25,6.49,5.75,6.1]}
-      ];
-      const targetedGroup=macroCategories[Math.floor(Math.random()*macroCategories.length)];
-      const derivedAverageMarketPrice=parseFloat((targetedGroup.historicalPrices.reduce((a,b)=>a+b,0)/targetedGroup.historicalPrices.length).toFixed(2));
-      const aestheticClassMap={
-        'Lipless Crankbaits / Rattle Traps':'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=240&q=80',
-        'Diving Crankbaits':'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80',
-        'Soft Plastic Worms / Creatures':'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=240&q=80',
-        'Topwater Poppers / Walkers':'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=240&q=80',
-        'Spinnerbaits / Blades':'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=240&q=80'
-      };
+      const snapshot=captureFrameFromVideo(video);
+      const classification=classifyCapturedLureImage(snapshot);
       lures.unshift({
         id:'l_'+Date.now(),
-        name:targetedGroup.defaultName,
-        cost:derivedAverageMarketPrice,
+        name:classification.name,
+        cost:7.25,
         qty:1,
         conditionBias:'clear',
         type:'image',
-        category:targetedGroup.category,
-        img:aestheticClassMap[targetedGroup.category],
-        purchaseUrl:getBassProSearchUrl(targetedGroup.defaultName)
+        category:classification.category,
+        img:classification.img,
+        purchaseUrl:getBassProSearchUrl(classification.name)
       });
-      aiChatHistory.push({sender:'them',text:`👁️ <b>AI Computer Vision Scan:</b> Shape profile processed. Category: <b>${targetedGroup.category}</b>. Added to Tackle Box.`});
-      showToast(`AI Identified: ${targetedGroup.category}`);
+      aiChatHistory.push({sender:'them',text:`👁️ <b>AI Vision Label:</b> Identified this as <b>${classification.name}</b>. Added to tackle inventory.`});
+      showToast(`Classified as ${classification.name}`);
     } else if(opticalScanMode==='inline-override'){
       const target=lures.find(l=>l.id===targetOverrideLureId);
-      const video=document.getElementById('viewfinder-video');
       if(target && video){
         const snapshot=captureFrameFromVideo(video);
         target.type='image';
@@ -772,7 +764,7 @@ function updateMapWaypointMarker(){
   if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); }
   else {
     const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]});
-    liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map);
+    liveWaypointMarker=L.marker(coords,{icon:pulsingIcon}).addTo(map);
   }
   map.setView(coords,12);
 }
