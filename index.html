@@ -1,4 +1,5 @@
-```html
+````html
+<!-- ...existing code... -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,7 +38,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;cursor:pointer;color:var(--text3);transition:color .2s,transform .2s}
 .nav-item:active{transform:scale(0.9)}
 .nav-item.active{color:var(--primary);filter:drop-shadow(0 0 8px var(--primary-glow))}
-.nav-label{font-size:10px;font-weight:700;letter-spacing:.3px}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:1.5px}
 .fab-wrap{position:relative;top:-12px}
 .fab{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-d));display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 8px 20px rgba(6,182,212,0.4),inset 0 2px 4px rgba(255,255,255,0.3);transition:transform .2s}
 .fab:active{transform:scale(0.92)}
@@ -99,6 +100,25 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .status-active{background:rgba(16,185,129,0.18);color:#10b981}
 .status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
 .status-broken{background:rgba(248,113,113,0.18);color:#f87171}
+
+/* ADDED: ensure AI message stream never slides under the input row */
+#ai-chat-stream-box{
+  padding-bottom: calc(var(--nav-h) + 110px); /* safe space for sticky input + nav */
+}
+/* ensure the input sits above the stream and is visually separate */
+#ai-chat-input-row{
+  position:sticky;
+  bottom:calc(var(--nav-h) + 8px);
+  z-index:120;
+  background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));
+  border-top:1px solid var(--border);
+  padding:8px 12px;
+  gap:8px;
+  display:flex;
+  align-items:center;
+}
+#ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
+#ai-chat-input-row button{padding:10px 14px;border-radius:10px}
 </style>
 </head>
 <body>
@@ -378,14 +398,15 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
       <!-- AI chat panel -->
       <div class="ai-chat-window card" id="ai-chat-card">
-        <div class="chat-window" style="height:100%;">
+        <!-- chat window is scrollable area only -->
+        <div class="chat-window" style="height:100%; display:flex; flex-direction:column;">
           <div class="chat-stream" id="ai-chat-stream-box"></div>
+        </div>
 
-          <!-- input row is sticky above bottom nav so it won't be obscured -->
-          <div class="chat-input-row" id="ai-chat-input-row" style="position:sticky;bottom:calc(var(--nav-h) + 8px);">
-            <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What should I throw from my tackle box?'" />
-            <button class="btn btn-primary" style="width:auto;border-radius:0;padding:0 20px;" onclick="dispatchAiMessage()">Query</button>
-          </div>
+        <!-- input moved OUTSIDE the scrollable stream so messages always remain above it -->
+        <div class="chat-input-row" id="ai-chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchAiMessage();}">
+          <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What should I throw from my tackle box?'" />
+          <button class="btn btn-primary" style="width:auto;border-radius:10px;padding:10px 16px;" onclick="dispatchAiMessage()">Query</button>
         </div>
       </div>
     </div>
@@ -413,6 +434,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 </div>
 
 <script>
+/* ...existing code... */
 /* Core state (mostly unchanged) */
 const lureCategories=['Crankbait','Swimbait','Jig','Spinnerbait','Topwater','Soft Plastic','Other'];
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
@@ -492,7 +514,6 @@ function getDominantColorFromImage(url, sampleStep=8, maxSize=240){
       }
       if(count===0){ resolve(null); return; }
       r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count);
-      // map to simple names by HSV-like heuristics
       const max=Math.max(r,g,b), min=Math.min(r,g,b);
       const chroma=max-min;
       const brightness=(r+g+b)/3;
@@ -514,7 +535,6 @@ function getDominantColorFromImage(url, sampleStep=8, maxSize=240){
     };
     img.onerror=()=>resolve(null);
     img.src=url;
-    // if data url or crossOrigin issues may still work
   });
 }
 
@@ -526,7 +546,6 @@ async function scoreLureSuitabilityAsync(lure, context){
   const temp = parseFloat(context.temp) || 70;
   let score = 0;
 
-  // base category heuristics (preserve earlier weights)
   if(desc.includes('overcast')){
     if(category === 'Spinnerbait') score += 28;
     if(category === 'Jig') score += 24;
@@ -550,7 +569,6 @@ async function scoreLureSuitabilityAsync(lure, context){
     if(category === 'Topwater') score += 10;
   }
 
-  // temp modifiers
   if(temp <= 60){
     if(category === 'Jig') score += 8;
     if(category === 'Soft Plastic') score += 6;
@@ -560,18 +578,14 @@ async function scoreLureSuitabilityAsync(lure, context){
     if(category === 'Swimbait') score += 6;
   }
 
-  // conditionBias match
   if((lure.conditionBias || '').toLowerCase().includes('overcast') && desc.includes('overcast')) score += 6;
 
-  // quantity as tie-breaker
   score += Math.min(lure.qty, 3) * 2;
 
-  // image-based boosts (dominant color)
   if(lure.img){
     const colorInfo = await getDominantColorFromImage(lure.img);
     if(colorInfo && colorInfo.color){
       const c = colorInfo.color;
-      // heuristics: overcast -> bright colors, clear -> natural colors
       if(desc.includes('overcast')){
         if(c==='white' || c==='chartreuse' || c==='orange' || c==='red') score += 10;
         if(c==='green' || c==='blue') score += 4;
@@ -581,12 +595,10 @@ async function scoreLureSuitabilityAsync(lure, context){
       } else {
         if(c==='chartreuse' || c==='white' || c==='green') score += 6;
       }
-      // brightness tweak
       if(colorInfo.brightness > 200 && desc.includes('overcast')) score += 3;
       if(colorInfo.brightness < 80 && desc.includes('clear')) score += 3;
     }
   } else {
-    // no image: neutral penalty (we prefer lures with images because AI can analyze them)
     score -= 6;
   }
 
@@ -605,7 +617,6 @@ async function recommendBestLureForConditions(){
     };
   }
 
-  // Count missing images
   const missingImgCount = inventory.reduce((acc,l)=>acc + (!l.img ? 1:0), 0);
   if(missingImgCount>0){
     return {
@@ -616,7 +627,6 @@ async function recommendBestLureForConditions(){
     };
   }
 
-  // Score all lures asynchronously using image-aware scoring
   const scoredPromises = inventory.map(async (lure)=>{
     const score = await scoreLureSuitabilityAsync(lure, currentTelemetryContext);
     return {lure,score};
@@ -635,7 +645,6 @@ async function recommendBestLureForConditions(){
   const top3 = scored.slice(0,3).map(item=>item.lure);
   let explanation = `This is the strongest option from your current tackle box, based on ${currentTelemetryContext.temp}°F and ${currentTelemetryContext.shortDesc}.`;
   if(top3.length>1) explanation += ` Nearby alternatives in your box are ${top3.slice(1).map(l=>l.name).join(', ')}.`;
-  // provide color rationale when image available
   const colorInfo = await getDominantColorFromImage(best.lure.img);
   if(colorInfo && colorInfo.color){
     explanation += ` The lure's visible color is ${colorInfo.color}, which matches today's conditions.`;
@@ -662,20 +671,16 @@ async function dispatchAiMessage(){
         return;
       }
 
-      // First quick check: any active lure lacking image?
       const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
       const missing = inventory.filter(l => !l.img);
       if(missing.length > 0){
-        // push message and open camera to capture first missing lure
         aiChatHistory.push({sender:'them',text:`📷 1 or more lures image is not being displayed. Please take a photo so I can scan them. (${missing.length} missing).`});
         renderAiMessages();
-        // automatically boot the inline override camera for the first missing lure so user can capture fast
         const firstMissing = missing[0];
         setTimeout(()=>{ bootOpticalSystem('inline-override', firstMissing.id); },350);
         return;
       }
 
-      // No missing images, run full recommendation (async)
       const recommendation = await recommendBestLureForConditions();
       if(!recommendation || !recommendation.best){
         aiChatHistory.push({sender:'them',text:`📦 <b>Inventory-first advice:</b> ${recommendation ? recommendation.explanation : 'No recommendation available.'}`});
@@ -753,7 +758,6 @@ function executeManualCaptureSnapshot(){
   setTimeout(()=>{
     const video=document.getElementById('viewfinder-video');
     if(!video) { showToast('No camera feed'); shutdownCameraStream(); return; }
-    // inline-override: attach photo to selected inventory slot (for missing images)
     if(opticalScanMode==='inline-override' && targetOverrideLureId){
       const snapshot=captureFrameFromVideo(video);
       const target=lures.find(l=>l.id===targetOverrideLureId);
@@ -780,7 +784,6 @@ function executeManualCaptureSnapshot(){
       shutdownCameraStream();
       return;
     }
-    // fallback simulated barcode capture
     const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
     processBarcodeValue(simulatedBarcode);
   },400);
@@ -876,4 +879,5 @@ window.onload=function(){ refreshAllEcosystemModules(); }
 </script>
 </body>
 </html>
-```
+...existing code...
+````
