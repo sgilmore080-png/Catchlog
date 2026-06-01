@@ -1,4 +1,4 @@
-```html
+````html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+/* ...existing styles... (kept from original) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0f1d; --bg2:#111827; --bg3:#1f2937; --bg4:#374151; --border:rgba(255,255,255,0.08);
@@ -63,14 +64,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2);z-index:30}
 .chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none}
 .hw-item-card{display:flex;align-items:center;gap:14px;background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;position:relative}
-.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-color:#090f18;position:relative}
+.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative}
 .ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 200px);margin:0 16px;padding-bottom: calc(var(--nav-h) + 12px);}
 .split-species-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .scan-actions-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
 .btn-scan{background:rgba(6,182,212,0.15);border:1px dashed var(--primary);color:#fff;font-size:11px;padding:10px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;transition:background .2s}
 .btn-scan:hover{background:rgba(6,182,212,0.3)}
 .tackle-box-card{background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;flex-direction:column;overflow:hidden;position:relative}
-.tackle-img-frame{height:90px;width:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;position:relative}
+.tackle-img-frame{height:90px;width:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative}
 .tackle-white-box{background:#1f2937;width:100%;height:90px;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);text-align:center;padding:8px}
 .tackle-cam-overlay{position:absolute;top:6px;right:6px;background:rgba(17,24,39,0.85);border:1px solid var(--primary);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
 .tackle-card-body{padding:10px;display:flex;flex-direction:column;gap:4px;flex:1;justify-content:space-between}
@@ -98,8 +99,22 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .status-active{background:rgba(16,185,129,0.18);color:#10b981}
 .status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
 .status-broken{background:rgba(248,113,113,0.18);color:#f87171}
-#ai-chat-stream-box{padding-bottom: calc(var(--nav-h) + 110px);}
-#ai-chat-input-row{position:sticky;bottom:calc(var(--nav-h) + 8px);z-index:120;background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));border-top:1px solid var(--border);padding:8px 12px;gap:8px;display:flex;align-items:center}
+
+/* ADDED: ensure AI message stream never slides under the input row */
+#ai-chat-stream-box{
+  padding-bottom: calc(var(--nav-h) + 110px);
+}
+#ai-chat-input-row{
+  position:sticky;
+  bottom:calc(var(--nav-h) + 8px);
+  z-index:120;
+  background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));
+  border-top:1px solid var(--border);
+  padding:8px 12px;
+  gap:8px;
+  display:flex;
+  align-items:center;
+}
 #ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
 #ai-chat-input-row button{padding:10px 14px;border-radius:10px}
 </style>
@@ -367,11 +382,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
       <div class="section-label">🤖 AI Inventory Advisor</div>
       <div class="card" style="margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--text2);line-height:1.5;">Inventory is the source of truth. The AI only recommends from lures you already own, and will tell you when your current box doesn't have a strong option.</div>
+      </div>
+      <div class="card" style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div style="font-size:13px;font-weight:800;color:#fff;">📡 Environmental Sensors Telemetry</div>
           <span id="weather-badge" style="font-size:10px;font-weight:800;background:rgba(245,158,11,0.2);color:var(--accent3);padding:2px 8px;border-radius:10px;">STANDBY</span>
         </div>
-        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.5;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
+        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.4;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
       </div>
 
       <div class="ai-chat-window card" id="ai-chat-card">
@@ -594,13 +612,13 @@ async function scoreLureSuitabilityAsync(lure, context){
     if(colorInfo && colorInfo.color){
       const c = colorInfo.color;
       if(desc.includes('overcast')){
-        if(c.includes('white')||c.includes('chartreuse')||c.includes('orange')||c.includes('red')) score += 10;
-        if(c.includes('green')||c.includes('blue')) score += 4;
+        if(c.includes('white') || c.includes('chartreuse') || c.includes('orange') || c.includes('red')) score += 10;
+        if(c.includes('green') || c.includes('blue')) score += 4;
       } else if(desc.includes('clear')){
-        if(c.includes('brown')||c.includes('green')||c.includes('blue')) score += 10;
-        if(c.includes('white')||c.includes('chartreuse')) score += 2;
+        if(c.includes('brown') || c.includes('green') || c.includes('blue')) score += 10;
+        if(c.includes('white') || c.includes('chartreuse')) score += 2;
       } else {
-        if(c.includes('chartreuse')||c.includes('white')||c.includes('green')) score += 6;
+        if(c.includes('chartreuse') || c.includes('white') || c.includes('green')) score += 6;
       }
       if(colorInfo.brightness > 200 && desc.includes('overcast')) score += 3;
       if(colorInfo.brightness < 80 && desc.includes('clear')) score += 3;
@@ -668,8 +686,8 @@ async function dispatchAiMessage(){
   renderAiMessages();
 
   setTimeout(async ()=>{
-    const lower=queryText.toLowerCase();
-    if(lower.includes('throw')||lower.includes('use')||lower.includes('recommend')||lower.includes('best')){
+    const lower = queryText.toLowerCase();
+    if(lower.includes('throw') || lower.includes('use') || lower.includes('recommend') || lower.includes('best')){
       if(!currentTelemetryContext){
         aiChatHistory.push({sender:'them',text:"⚠️ Inventory AI is ready, but weather/location sync is required. Sync your telemetry to get a recommendation from the lures you already own."});
         renderAiMessages();
@@ -687,12 +705,12 @@ async function dispatchAiMessage(){
       }
 
       const recommendation = await recommendBestLureForConditions();
-      if(!recommendation||!recommendation.best){
+      if(!recommendation || !recommendation.best){
         aiChatHistory.push({sender:'them',text:`📦 <b>Inventory-first advice:</b> ${recommendation ? recommendation.explanation : 'No recommendation available.'}`});
       } else {
         let message = `📦 <b>Best lure you own for today:</b> ${recommendation.best.name} (${recommendation.best.category}).<br/>Reason: ${recommendation.explanation}`;
-        if(recommendation.top3&&recommendation.top3.length>1){
-          const extras = recommendation.top3.slice(1).map(l=>`${l.name} (${l.category})`).join(', ');
+        if(recommendation.top3 && recommendation.top3.length > 1){
+          const extras = recommendation.top3.slice(1).map(l => `${l.name} (${l.category})`).join(', ');
           message += `<br/><small style="color:var(--text2)">Also strong from your box: ${extras}.</small>`;
         }
         aiChatHistory.push({sender:'them',text:message});
@@ -870,4 +888,4 @@ window.onload=function(){ refreshAllEcosystemModules(); }
 </script>
 </body>
 </html>
-```
+````
