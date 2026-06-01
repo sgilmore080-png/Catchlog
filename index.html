@@ -1,5 +1,4 @@
 ```html
-// ...existing code...
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,6 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-/* ...existing CSS... */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0f1d; --bg2:#111827; --bg3:#1f2937; --bg4:#374151; --border:rgba(255,255,255,0.08);
@@ -378,7 +376,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 </div>
 
 <script>
-/* ...existing JS... */
 const lureCategories = [
   'Topwater/Poppers',
   'Lipless Crankbaits',
@@ -628,35 +625,12 @@ function confirmRemoveLure(){
   refreshAllEcosystemModules();
 }
 
-// updated repurchaseLure — prefers product URL when present, otherwise normalizes and opens BassPro search
 function repurchaseLure(){
   if(!pendingTrashLureId) return;
-  const lure = lures.find(l=>l.id===pendingTrashLureId);
-  if(!lure) return;
-
-  // prefer an existing purchaseUrl if it points to BassPro
-  let url = '';
-  if(lure.purchaseUrl){
-    try{
-      const parsed = new URL(lure.purchaseUrl);
-      if(parsed.hostname.includes('basspro.com')) url = lure.purchaseUrl;
-    }catch(e){}
-  }
-
-  // normalize search term (remove slashes, collapse whitespace)
-  const term = (lure.name || lure.category || 'Fishing Lure').replace(/\//g,' ').replace(/\s+/g,' ').trim();
-
-  // default BassPro search URL
-  if(!url){
-    url = `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(term)}`;
-  }
-
-  // open result in new tab
-  window.open(url,'_blank');
-
-  pendingTrashLureId=null;
+  window.open('https://www.basspro.com', '_blank');
+  pendingTrashLureId = null;
   document.getElementById('trash-modal').classList.remove('active');
-  showToast('Opening BassPro.com with the selected lure search pre-filled.');
+  showToast('Opening BassPro home page.');
 }
 
 function registerNewFriendById(){
@@ -760,7 +734,7 @@ function updateMapWaypointMarker(){
   if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); }
   else {
     const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]});
-    liveWaypointMarker=L.marker(coords,{icon:pulsingIcon}).addTo(map);
+    liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map);
   }
   map.setView(coords,12);
 }
