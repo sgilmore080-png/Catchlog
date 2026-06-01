@@ -6,8 +6,8 @@
 <title>CatchLog Pro – Integrated Tackle UI</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <style>
-/* ...existing styles... (kept from original) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0f1d; --bg2:#111827; --bg3:#1f2937; --bg4:#374151; --border:rgba(255,255,255,0.08);
@@ -53,8 +53,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
 .btn-accent{background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff}
 .leader-row{background:rgba(31,41,55,0.4);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;backdrop-filter:blur(4px)}
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16,185,129,0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow:0 10px 25px rgba(16,185,129,0.3);transition:opacity .3s,top .3s;pointer-events:none}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(16,185,129,0.95);backdrop-filter:blur(8px);color:#fff;border-radius:30px;padding:10px 22px;font-size:13px;font-weight:700;z-index:99999;opacity:0;box-shadow:0 10px 25px rgba(16,185,129,0.3);transition:opacity .3s,top .3s;pointer-events:none;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
 #toast.show{opacity:1;top:24px}
+#toast.error{background:rgba(244,63,94,0.95);box-shadow:0 10px 25px rgba(244,63,94,0.3);}
 .chat-window{display:flex;flex-direction:column;height:100%;background:rgba(17,24,39,0.6);border-radius:var(--radius-sm);border:1px solid var(--border);overflow:hidden}
 .chat-stream{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
 .msg-b{max-width:82%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45}
@@ -63,8 +64,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2);z-index:30}
 .chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none}
 .hw-item-card{display:flex;align-items:center;gap:14px;background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;position:relative}
-.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-repeat:no-repeat;position:relative}
-.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 200px);margin:0 16px;padding-bottom: calc(var(--nav-h) + 12px);}
+.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;}
+.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 200px);margin:0 16px;padding-bottom:calc(var(--nav-h) + 12px);}
 .split-species-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .scan-actions-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
 .btn-scan{background:rgba(6,182,212,0.15);border:1px dashed var(--primary);color:#fff;font-size:11px;padding:10px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;transition:background .2s}
@@ -80,12 +81,34 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .viewfinder-hdr{padding:16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(0,0,0,0.9),transparent);position:absolute;top:0;left:0;right:0;z-index:5010}
 .viewfinder-video{width:100%;height:100%;object-fit:cover}
 .viewfinder-actions{position:absolute;bottom:0;left:0;right:0;padding:32px 24px;background:linear-gradient(to top,rgba(0,0,0,0.95),transparent);display:flex;flex-direction:column;align-items:center;gap:14px;z-index:5010}
-.barcode-target-box-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:160px;border:2px dashed rgba(255,255,255,0.4);border-radius:8px;box-shadow:0 0 0 4000px rgba(0,0,0,0.6);z-index:5002;display:none;pointer-events:none}
-.barcode-laser-line{position:absolute;top:50%;left:5%;right:5%;height:2px;background:#ff2a2a;box-shadow:0 0 14px #ff2a2a}
-.laser-active{animation:bar-laser-sweep 2.5s infinite ease-in-out}
-@keyframes bar-laser-sweep{0%,100%{top:15%}50%{top:85%}}
+.barcode-target-box-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:160px;border-radius:8px;box-shadow:0 0 0 4000px rgba(0,0,0,0.6);z-index:5002;display:none;pointer-events:none}
+.barcode-corner{position:absolute;width:24px;height:24px;border-color:var(--primary);border-style:solid;}
+.barcode-corner.tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
+.barcode-corner.tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
+.barcode-corner.bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
+.barcode-corner.br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
+.barcode-laser-line{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,#ff2a2a,transparent);box-shadow:0 0 14px #ff2a2a,0 0 6px #ff2a2a;border-radius:2px;}
+.laser-active{animation:bar-laser-sweep 2s infinite ease-in-out}
+@keyframes bar-laser-sweep{0%,100%{top:15%}50%{top:82%}}
+#viewfinder-scan-label{position:absolute;bottom:-30px;left:0;width:100%;text-align:center;color:var(--primary);font-size:11px;font-weight:800;letter-spacing:1px;text-shadow:0 1px 4px #000;}
 .capture-shutter-btn{width:68px;height:68px;border-radius:50%;background:#fff;border:6px solid rgba(6,182,212,0.4);cursor:pointer;box-shadow:0 0 15px rgba(255,255,255,0.4);z-index:5020}
 .capture-shutter-btn:active{transform:scale(0.92)}
+#scan-result-panel{position:absolute;bottom:130px;left:16px;right:16px;background:rgba(17,24,39,0.96);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:14px;z-index:5020;display:none;animation:slideUp .3s ease;}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#scan-result-panel .scan-product-name{font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;}
+#scan-result-panel .scan-price-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+#scan-result-panel .scan-price{font-size:20px;font-weight:900;color:var(--accent2);}
+#scan-result-panel .scan-price-label{font-size:11px;color:var(--text2);font-weight:600;}
+#scan-result-panel .scan-barcode-raw{font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px;}
+#scan-result-panel .scan-actions{display:flex;gap:8px;margin-top:12px;}
+.price-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:800;}
+.price-badge.live{background:rgba(16,185,129,0.2);color:var(--accent2);border:1px solid rgba(16,185,129,0.3);}
+.price-badge.loading{background:rgba(245,158,11,0.15);color:var(--accent3);}
+.price-badge.error{background:rgba(244,63,94,0.15);color:#f43f5e;}
+.tackle-price-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px;padding-top:4px;border-top:1px solid var(--border);}
+.tackle-price-val{font-size:12px;font-weight:800;color:var(--accent2);}
+.tackle-price-btn{font-size:10px;padding:4px 8px;border-radius:8px;background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.3);color:var(--primary);cursor:pointer;font-weight:700;white-space:nowrap;}
+.tackle-price-btn:active{transform:scale(0.95);}
 #auth-wrap{position:fixed;inset:0;z-index:1000;background:var(--bg);background-image:radial-gradient(circle at 50% 30%,rgba(6,182,212,0.15),transparent 60%);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .auth-container{position:relative;z-index:5;width:100%;max-width:350px;text-align:center;background:rgba(17,24,39,0.85)}
 .app-fish-logo-img{width:120px;height:120px;margin:0 auto 16px;object-fit:contain}
@@ -98,82 +121,87 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .status-active{background:rgba(16,185,129,0.18);color:#10b981}
 .status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
 .status-broken{background:rgba(248,113,113,0.18);color:#f87171}
-
-/* ADDED: ensure AI message stream never slides under the input row */
-#ai-chat-stream-box{
-  padding-bottom: calc(var(--nav-h) + 110px);
-}
-#ai-chat-input-row{
-  position:sticky;
-  bottom:calc(var(--nav-h) + 8px);
-  z-index:120;
-  background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));
-  border-top:1px solid var(--border);
-  padding:8px 12px;
-  gap:8px;
-  display:flex;
-  align-items:center;
-}
+#ai-chat-stream-box{padding-bottom:calc(var(--nav-h) + 110px);}
+#ai-chat-input-row{position:sticky;bottom:calc(var(--nav-h) + 8px);z-index:120;background:linear-gradient(180deg,rgba(17,24,39,0.98),rgba(17,24,39,0.98));border-top:1px solid var(--border);padding:8px 12px;gap:8px;display:flex;align-items:center;}
 #ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
 #ai-chat-input-row button{padding:10px 14px;border-radius:10px}
+#zxing-scanning-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-200%);z-index:5015;background:rgba(6,182,212,0.15);border:1px solid var(--primary);border-radius:30px;padding:6px 16px;font-size:11px;font-weight:800;color:var(--primary);letter-spacing:1px;display:none;}
+#zxing-scanning-indicator.visible{display:block;}
 </style>
 </head>
 <body>
-
 <div id="toast"></div>
-
 <div id="camera-viewfinder-overlay" class="camera-viewfinder-overlay">
   <div class="viewfinder-hdr">
-    <div id="viewfinder-title" style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--primary);">System Lens Active</div>
-    <button class="btn btn-secondary" style="width:auto;padding:6px 14px;font-size:11px;" onclick="shutdownCameraStream()">Cancel Scan</button>
-  </div>
-  <div id="barcode-target-box-frame" class="barcode-target-box-frame">
-    <div id="laser-element" class="barcode-laser-line"></div>
-    <div id="viewfinder-scan-label" style="position:absolute;bottom:-28px;left:0;width:100%;text-align:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.5px;text-shadow:0 1px 4px #000;">ALIGN TARGET</div>
+    <div id="viewfinder-title" style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--primary);">Barcode Scanner Active</div>
+    <button class="btn btn-secondary" style="width:auto;padding:6px 14px;font-size:11px;" onclick="shutdownCameraStream()">✕ Close</button>
   </div>
   <video id="viewfinder-video" class="viewfinder-video" autoplay playsinline muted></video>
-  <div class="viewfinder-actions">
-    <p id="viewfinder-instructions-hint" style="font-size:11px;color:var(--text2);text-align:center;max-width:280px;margin-bottom:4px;">Position item clearly inside viewfinder matrix</p>
-    <button id="shutter-action-trigger" class="capture-shutter-btn" onclick="executeManualCaptureSnapshot()"></button>
+  <div id="barcode-target-box-frame" class="barcode-target-box-frame">
+    <div class="barcode-corner tl"></div>
+    <div class="barcode-corner tr"></div>
+    <div class="barcode-corner bl"></div>
+    <div class="barcode-corner br"></div>
+    <div id="laser-element" class="barcode-laser-line laser-active"></div>
+    <div id="viewfinder-scan-label">ALIGN BARCODE IN FRAME</div>
+  </div>
+  <div id="zxing-scanning-indicator">🔍 SCANNING…</div>
+  <div id="scan-result-panel">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div style="flex:1;">
+        <div style="font-size:10px;font-weight:800;color:var(--primary);letter-spacing:1px;margin-bottom:4px;">PRODUCT IDENTIFIED</div>
+        <div class="scan-product-name" id="scan-name-display">—</div>
+        <div class="scan-barcode-raw" id="scan-barcode-display">UPC: —</div>
+      </div>
+      <span id="scan-price-badge" class="price-badge loading">⏳ Fetching price…</span>
+    </div>
+    <div class="scan-price-row">
+      <div>
+        <div class="scan-price" id="scan-price-display">—</div>
+        <div class="scan-price-label" id="scan-store-display">Bass Pro Shops</div>
+      </div>
+    </div>
+    <div class="scan-actions">
+      <button class="btn btn-primary" style="flex:1;font-size:12px;padding:10px;" onclick="confirmScanAndSave()">✅ Add to Tackle Box</button>
+      <button class="btn btn-secondary" style="flex:1;font-size:12px;padding:10px;" onclick="resetScannerForNextScan()">🔄 Scan Again</button>
+    </div>
+  </div>
+  <div class="viewfinder-actions" id="viewfinder-actions-bar">
+    <p id="viewfinder-instructions-hint" style="font-size:11px;color:var(--text2);text-align:center;max-width:300px;line-height:1.5;">Hold camera over the barcode on your lure/tackle packaging. Scanner detects automatically.</p>
+    <button id="shutter-action-trigger" class="capture-shutter-btn" onclick="executeManualCaptureSnapshot()" style="display:none;"></button>
   </div>
 </div>
-
 <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
-    <h3 style="margin-bottom:12px;font-weight:800;display:flex;align-items:center;gap:8px;">⚙️ System Calibration</h3>
+    <h3 style="margin-bottom:12px;font-weight:800;">⚙️ System Calibration</h3>
     <p style="font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.4;">Synchronize environmental telemetry arrays, pair satellite coordinates, and calibrate mesh channels.</p>
     <div style="display:flex;flex-direction:column;gap:12px;">
-      <button class="btn btn-accent" onclick="syncLocationAndWeather(); closeSettingsModal();">🔄 Sync Location & Weather arrays</button>
-      <button class="btn btn-secondary" onclick="closeSettingsModal()">Close Interface</button>
+      <button class="btn btn-accent" onclick="syncLocationAndWeather();closeSettingsModal();">🔄 Sync Location & Weather</button>
+      <button class="btn btn-secondary" onclick="closeSettingsModal()">Close</button>
     </div>
   </div>
 </div>
-
 <div id="trash-modal" class="modal-overlay" onclick="cancelTrashPrompt(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px;font-weight:800;">Remove or Repurchase</h3>
     <p id="trash-modal-text" style="font-size:13px;color:var(--text2);line-height:1.5;"></p>
     <div style="display:flex;gap:12px;margin-top:18px;">
-      <button class="btn btn-secondary" style="flex:1;" onclick="confirmRemoveLure()">Get Rid of Item</button>
-      <button class="btn btn-accent" style="flex:1;" onclick="repurchaseLure()">Repurchase at BassPro.com</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="confirmRemoveLure()">Remove Item</button>
+      <button class="btn btn-accent" style="flex:1;" onclick="repurchaseLure()">Repurchase at BassPro</button>
     </div>
     <button class="btn btn-secondary" style="margin-top:16px;width:100%;" onclick="cancelTrashPrompt()">Cancel</button>
   </div>
 </div>
-
 <div id="manual-lure-modal" class="modal-overlay" onclick="closeManualLureModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px;font-weight:800;">Quick Add Lure</h3>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;">
-      Fast entry: category first, exact name optional, photo encouraged.
-    </p>
     <div class="form-group">
       <label class="form-label">Category</label>
       <select id="manual-lure-category" class="form-select" onchange="onManualCategoryChange()"></select>
     </div>
     <div class="form-group">
       <label class="form-label">Exact lure name (optional)</label>
-      <input type="text" id="manual-lure-name" class="form-input" placeholder="Strike King Red Eye Shad 1/2oz Sexy Shad"/>
+      <input type="text" id="manual-lure-name" class="form-input" placeholder="Strike King Red Eye Shad..."/>
     </div>
     <div class="form-group">
       <label class="form-label">Photo (optional)</label>
@@ -183,7 +211,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
     <div class="form-group">
       <label class="form-label">Notes (optional)</label>
-      <textarea id="manual-lure-notes" class="form-textarea" placeholder="Any extra details, conditions, or location tips..."></textarea>
+      <textarea id="manual-lure-notes" class="form-textarea" placeholder="Any extra details..."></textarea>
     </div>
     <div class="form-group">
       <label class="form-label">Status</label>
@@ -198,15 +226,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <button class="btn btn-secondary" onclick="closeManualLureModal()">Cancel</button>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px;">
-      <button class="btn btn-scan" onclick="bootOpticalSystem('barcode')" style="flex:1;">📦 Scan barcode (optional)</button>
-      <button class="btn btn-secondary" style="flex:1;" onclick="bootOpticalSystem('ai-photo')">📷 Use camera</button>
+      <button class="btn btn-scan" onclick="bootOpticalSystem('barcode')" style="flex:1;">📦 Scan Barcode</button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="bootOpticalSystem('ai-photo')">📷 Use Camera</button>
     </div>
   </div>
 </div>
-
 <div id="auth-wrap">
   <div class="auth-container card" style="padding:32px 24px;">
-    <img src="logo.png" alt="CatchLog Pro Badge" class="app-fish-logo-img"/>
+    <img src="logo.png" alt="CatchLog Pro" class="app-fish-logo-img"/>
     <h2 style="margin-bottom:4px;font-weight:900;font-size:26px;letter-spacing:-0.75px;background:linear-gradient(135deg,#ffffff,#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CatchLog Pro</h2>
     <p style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;letter-spacing:.5px;">Tactical Ecosystem Gateway</p>
     <div class="oauth-btn-stack">
@@ -222,18 +249,16 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
   </div>
 </div>
-
 <div id="app">
   <header class="hdr">
     <div class="hdr-title">CatchLog Tactical</div>
     <div class="hdr-controls">
       <div style="font-size:10px;font-weight:800;background:rgba(16,185,129,0.15);color:var(--accent2);border:1px solid rgba(16,185,129,0.3);padding:4px 10px;border-radius:20px;letter-spacing:.5px;">🟢 ONLINE</div>
-      <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="System Settings">
+      <button class="settings-cog-btn" onclick="openSettingsModal()" aria-label="Settings">
         <svg width="22" height="22" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.40-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l-.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
       </button>
     </div>
   </header>
-
   <main style="flex:1;position:relative;">
     <div id="screen-dashboard" class="screen active">
       <div class="section-label" style="margin-top:8px;">🏆 Global Daily Leaderboard</div>
@@ -246,28 +271,26 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
       <div class="section-label">Recent Catch Stream</div>
       <div id="dashboard-catch-list" style="padding:0 16px;"></div>
     </div>
-
     <div id="screen-tourney-manager" class="screen">
-      <div class="section-label">Design Custom Tournament Arena</div>
+      <div class="section-label">Design Custom Tournament</div>
       <div class="card">
         <div style="margin-bottom:14px;">
-          <label class="form-label">Tournament Arena Label</label>
+          <label class="form-label">Tournament Name</label>
           <input type="text" id="t-name-input" class="form-input" value="Weekend Bass Brawl"/>
         </div>
-        <button class="btn btn-primary" onclick="createNewTournament()">Launch Tournament Structure</button>
+        <button class="btn btn-primary" onclick="createNewTournament()">Launch Tournament</button>
       </div>
       <div style="padding:0 16px;">
-         <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back to Dashboard</button>
+        <button class="btn btn-secondary" onclick="switchScreen('dashboard')">◀ Back</button>
       </div>
     </div>
-
     <div id="screen-log" class="screen">
       <form id="catch-form" onsubmit="commitCatchLog(event)">
         <div class="form-group">
-          <label class="form-label">Target Species Profile</label>
+          <label class="form-label">Target Species</label>
           <div class="split-species-row">
             <input type="text" id="form-species" class="form-input" placeholder="Type fish name..." value="Largemouth Bass" required/>
-            <select id="form-species-dropdown" class="form-select" onchange="document.getElementById('form-species').value = this.value">
+            <select id="form-species-dropdown" class="form-select" onchange="document.getElementById('form-species').value=this.value">
               <option value="none">None</option>
               <option value="Largemouth Bass" selected>Largemouth Bass</option>
               <option value="Smallmouth Bass">Smallmouth Bass</option>
@@ -278,11 +301,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Rarity Tier Multiplier</label>
+          <label class="form-label">Rarity Tier</label>
           <select id="form-rarity" class="form-select">
-            <option value="Common">Common Tier (1x Multiplier)</option>
-            <option value="Uncommon">Uncommon Tier (2x Multiplier)</option>
-            <option value="Rare">Rare Tier (3x Multiplier)</option>
+            <option value="Common">Common (1x)</option>
+            <option value="Uncommon">Uncommon (2x)</option>
+            <option value="Rare">Rare (3x)</option>
           </select>
         </div>
         <div class="form-row" style="margin-bottom:14px;">
@@ -290,154 +313,136 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
           <div class="form-group" style="padding:0;"><label class="form-label">Length (in)</label><input type="number" id="form-length" step="0.01" class="form-input" placeholder="0.00"/></div>
         </div>
         <div class="form-group">
-          <label class="form-label">Deployable Tackle Rig</label>
+          <label class="form-label">Tackle Used</label>
           <select id="form-lure-link" class="form-select"></select>
         </div>
         <div class="form-group">
-          <label class="form-label">Inject Catch to Tournament Context</label>
+          <label class="form-label">Tournament</label>
           <select id="form-tourney-link" class="form-select">
-            <option value="global">Global Marketplace Standings Only</option>
+            <option value="global">Global Standings Only</option>
           </select>
         </div>
         <div style="padding:0 16px;">
-           <button type="submit" class="btn btn-primary">Publish Certified Entry Logs</button>
+          <button type="submit" class="btn btn-primary">Log Catch</button>
         </div>
       </form>
     </div>
-
     <div id="screen-friends" class="screen">
       <div class="card" style="background:linear-gradient(135deg,rgba(6,182,212,0.1),transparent);text-align:center;">
-        <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your Unique Tactical ID</div>
+        <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your Unique ID</div>
         <div id="my-unique-id-badge" style="font-size:22px;font-weight:900;color:var(--primary);letter-spacing:1px;margin:4px 0 2px;">CL-XXXXX</div>
       </div>
-      <div class="section-label">Link Angler ID Token</div>
+      <div class="section-label">Add Friend</div>
       <div class="card">
         <div style="display:flex;gap:10px;" onkeydown="if(event.key==='Enter'){event.preventDefault();registerNewFriendById();}">
           <input type="text" id="new-friend-id" class="form-input" placeholder="Enter ID (e.g. CL-48192)..." style="text-transform:uppercase;font-weight:700;"/>
-          <button class="btn btn-primary" style="width:auto;padding:0 20px;" onclick="registerNewFriendById()">Sync</button>
+          <button class="btn btn-primary" style="width:auto;padding:0 20px;" onclick="registerNewFriendById()">Add</button>
         </div>
       </div>
-      <div class="section-label">Peer Array</div>
+      <div class="section-label">Friends</div>
       <div style="padding:0 16px;margin-bottom:16px;" id="friends-list-container"></div>
-      <div class="section-label">📟 Hyperlink Secure Mesh Messenger</div>
+      <div class="section-label">💬 Messenger</div>
       <div class="card" style="padding:10px;">
-        <div style="font-size:12px;margin-bottom:8px;font-weight:700;color:var(--primary)" id="active-chat-target-lbl">Target Link: No Friend Selected</div>
+        <div style="font-size:12px;margin-bottom:8px;font-weight:700;color:var(--primary)" id="active-chat-target-lbl">No Friend Selected</div>
         <div class="chat-window">
           <div class="chat-stream" id="chat-stream-box"></div>
           <div class="chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchMessage();}">
-            <input type="text" id="chat-message-input" placeholder="Transmit telemetry packet..."/>
+            <input type="text" id="chat-message-input" placeholder="Send message..."/>
             <button class="btn btn-primary" style="width:auto;border-radius:0;padding:0 20px;" onclick="dispatchMessage()">Send</button>
           </div>
         </div>
       </div>
     </div>
-
     <div id="screen-tackle" class="screen">
-      <div class="financial-tab" style="padding:16px;">
-        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:700;">💼 Total Active Tackle Value</div>
+      <div style="padding:16px;">
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;font-weight:700;">💼 Total Tackle Value</div>
         <div style="font-size:26px;font-weight:900;color:var(--accent2);" id="fin-active-val">$0.00</div>
       </div>
-      <div class="section-label">📡 Bluetooth Smart Hardware Sync</div>
+      <div class="section-label">📡 Bluetooth Hardware</div>
       <div style="padding:0 16px;margin-bottom:12px;">
         <div class="hw-item-card">
           <div class="hw-svg-thumb">
-            <svg viewBox="0 0 64 64" width="40" height="40">
-              <circle cx="32" cy="32" r="22" fill="#ef4444"/>
-              <path d="M10 32h44A22 22 0 0 1 10 32z" fill="#ffffff"/>
-              <circle cx="32" cy="12" r="3" fill="#f59e0b"/>
-            </svg>
+            <svg viewBox="0 0 64 64" width="40" height="40"><circle cx="32" cy="32" r="22" fill="#ef4444"/><path d="M10 32h44A22 22 0 0 1 10 32z" fill="#ffffff"/><circle cx="32" cy="12" r="3" fill="#f59e0b"/></svg>
           </div>
           <div style="flex:1;">
-            <div style="font-size:13px;font-weight:700;color:#fff;">Smart Bobber Pro Node</div>
+            <div style="font-size:13px;font-weight:700;color:#fff;">Smart Bobber Pro</div>
             <div style="font-size:11px;color:var(--text3);" id="hw-bobber-status">Status: Disconnected</div>
           </div>
-          <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('bobber')">Pair Link</button>
+          <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('bobber')">Pair</button>
         </div>
-
         <div class="hw-item-card" style="margin-bottom:4px;">
           <div class="hw-svg-thumb">
-            <svg viewBox="0 0 64 64" width="40" height="40" fill="none">
-              <rect x="6" y="16" width="52" height="32" rx="4" fill="#8B5A2B"/>
-              <path d="M12 28C25 28 42 26 50 22C42 30 25 30 12 30Z" fill="#E2E8F0"/>
-            </svg>
+            <svg viewBox="0 0 64 64" width="40" height="40" fill="none"><rect x="6" y="16" width="52" height="32" rx="4" fill="#8B5A2B"/><path d="M12 28C25 28 42 26 50 22C42 30 25 30 12 30Z" fill="#E2E8F0"/></svg>
           </div>
           <div style="flex:1;">
-            <div style="font-size:13px;font-weight:700;color:#fff;">Smart Fillet Board Pro</div>
+            <div style="font-size:13px;font-weight:700;color:#fff;">Smart Fillet Board</div>
             <div style="font-size:11px;color:var(--text3);" id="hw-fillet-status">Status: Disconnected</div>
           </div>
-          <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('fillet')">Pair Link</button>
+          <button class="btn btn-primary" style="width:auto;font-size:11px;padding:6px 12px;" onclick="connectHardware('fillet')">Pair</button>
         </div>
-
         <div class="scan-actions-grid">
-          <button class="btn-scan" onclick="openManualLureModal()">
-            ✍️ <span>Add Lure Manually</span>
-          </button>
+          <button class="btn-scan" style="padding:14px;" onclick="bootOpticalSystem('barcode')">📦 <span style="font-size:13px;">Scan Barcode → Auto ID + Price</span></button>
+          <button class="btn-scan" onclick="openManualLureModal()">✍️ <span>Add Lure Manually</span></button>
         </div>
       </div>
-      <div class="section-label">Your Tackle Box Inventory</div>
+      <div class="section-label">Tackle Box</div>
       <div id="tackle-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;"></div>
     </div>
-
     <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
-      <div class="section-label">🤖 AI Inventory Advisor</div>
+      <div class="section-label">🤖 AI Advisor</div>
       <div class="card" style="margin-bottom:10px;">
-        <div style="font-size:12px;color:var(--text2);line-height:1.5;">Inventory is the source of truth. The AI only recommends from lures you already own, and will tell you when your current box doesn't have a strong option.</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.5;">Recommends only from lures you already own.</div>
       </div>
       <div class="card" style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <div style="font-size:13px;font-weight:800;color:#fff;">📡 Environmental Sensors Telemetry</div>
+          <div style="font-size:13px;font-weight:800;color:#fff;">📡 Weather</div>
           <span id="weather-badge" style="font-size:10px;font-weight:800;background:rgba(245,158,11,0.2);color:var(--accent3);padding:2px 8px;border-radius:10px;">STANDBY</span>
         </div>
-        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.4;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
+        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.4;">Tap ⚙️ to sync location and weather.</p>
       </div>
-
       <div class="ai-chat-window card" id="ai-chat-card">
-        <div class="chat-window" style="height:100%; display:flex; flex-direction:column;">
+        <div class="chat-window" style="height:100%;display:flex;flex-direction:column;">
           <div class="chat-stream" id="ai-chat-stream-box"></div>
         </div>
-
         <div class="chat-input-row" id="ai-chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchAiMessage();}">
-          <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What should I throw from my tackle box?'" />
-          <button class="btn btn-primary" style="width:auto;border-radius:10px;padding:10px 16px;" onclick="dispatchAiMessage()">Query</button>
+          <input type="text" id="ai-chat-message-input" placeholder="Ask: What should I throw today?"/>
+          <button class="btn btn-primary" style="width:auto;border-radius:10px;padding:10px 16px;" onclick="dispatchAiMessage()">Ask</button>
         </div>
       </div>
     </div>
-
     <div id="screen-map" class="screen" style="padding-top:0;padding-bottom:0;">
       <div class="map-weather-hud">
-        <div style="display:flex;flex-direction:column;">
-          <div style="font-size:10px;font-weight:800;color:var(--primary);letter-spacing:.5px;">WEATHER HUD MATRIX</div>
-          <div style="font-size:13px;font-weight:700;color:#fff;" id="map-hud-desc">Standby – No Telemetry</div>
+        <div>
+          <div style="font-size:10px;font-weight:800;color:var(--primary);letter-spacing:.5px;">WEATHER HUD</div>
+          <div style="font-size:13px;font-weight:700;color:#fff;" id="map-hud-desc">Standby</div>
         </div>
         <div style="font-size:20px;font-weight:900;color:var(--accent2);" id="map-hud-temp">--°</div>
       </div>
       <div id="full-map" style="position:absolute;inset:0;"></div>
     </div>
   </main>
-
   <nav id="bottom-nav">
-    <div class="nav-item active" onclick="switchScreen('dashboard')"><div class="nav-icon">📊</div><div class="nav-label">Home</div></div>
-    <div class="nav-item" onclick="switchScreen('map')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></div>
+    <div class="nav-item active" onclick="switchScreen('dashboard')"><div>📊</div><div class="nav-label">Home</div></div>
+    <div class="nav-item" onclick="switchScreen('map')"><div>🗺️</div><div class="nav-label">Map</div></div>
     <div class="nav-item fab-wrap" onclick="switchScreen('log')"><div class="fab">＋</div></div>
-    <div class="nav-item" onclick="switchScreen('friends')"><div class="nav-icon">👥</div><div class="nav-label">Friends</div></div>
-    <div class="nav-item" onclick="switchScreen('tackle')"><div class="nav-icon">🧰</div><div class="nav-label">Tackle</div></div>
-    <div class="nav-item" onclick="switchScreen('ai')"><div class="nav-icon">🤖</div><div class="nav-label">AI</div></div>
+    <div class="nav-item" onclick="switchScreen('friends')"><div>👥</div><div class="nav-label">Friends</div></div>
+    <div class="nav-item" onclick="switchScreen('tackle')"><div>🧰</div><div class="nav-label">Tackle</div></div>
+    <div class="nav-item" onclick="switchScreen('ai')"><div>🤖</div><div class="nav-label">AI</div></div>
   </nav>
 </div>
-
 <script>
 const lureCategories=['Crankbait','Swimbait','Jig','Spinnerbait','Topwater','Soft Plastic','Other'];
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
 let lures=JSON.parse(localStorage.getItem('n_lures'))||[
-  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Crankbait',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',notes:'Great for cloudy days',status:'active'},
-  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',notes:'Use in calm water',status:'active'}
+  {id:'l1',name:'Chromium Rattle Trap',cost:7.49,qty:2,conditionBias:'overcast',type:'image',category:'Crankbait',img:'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=120&q=80',notes:'Great for cloudy days',status:'active',bassProPrice:null,bassProUrl:null},
+  {id:'l2',name:'Neon Crawfish Popper',cost:5.49,qty:3,conditionBias:'clear',type:'image',category:'Topwater',img:'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&q=80',notes:'Use in calm water',status:'active',bassProPrice:null,bassProUrl:null}
 ];
 let friends=JSON.parse(localStorage.getItem('n_friends'))||[{id:'CL-81042',name:'BassMaster_Jim',totalWeight:14.82,score:150}];
 let myUniqueTacticalId=localStorage.getItem('my_unique_id')||('CL-'+Math.floor(10000+Math.random()*90000));
 localStorage.setItem('my_unique_id',myUniqueTacticalId);
 let tournaments=JSON.parse(localStorage.getItem('n_tourneys'))||[{id:'t_default',name:'Pro Angler Summer Open',leaderboard:[{name:'You',points:0},{name:'BassMaster_Jim',points:45}]}];
 let chatHistories={};
-let aiChatHistory=[{sender:'them',text:"Welcome to your AI Tactical Advisory Node. If you want a strategy setup recommendation, ask me: <b>'What should I throw from my tackle box?'</b>"}];
+let aiChatHistory=[{sender:'them',text:"Welcome! Ask me: <b>'What should I throw from my tackle box?'</b>"}];
 let selectedFriendId='CL-81042';
 let activeMediaStream=null;
 let opticalScanMode=null;
@@ -447,443 +452,314 @@ let map=null;
 let liveWaypointMarker=null;
 let currentTelemetryContext=null;
 let manualPhotoSuggestion=null;
+let zxingReader=null;
+let zxingScanActive=false;
+let pendingScannedLure=null;
 
-function showToast(m){ const t=document.getElementById('toast'); t.innerHTML=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
-function initAppCore(){ document.getElementById('auth-wrap').style.display='none'; showToast('Ecosystem Gateway Unlocked'); refreshAllEcosystemModules(); }
-function openSettingsModal(){ document.getElementById('settings-modal').classList.add('active'); }
-function closeSettingsModal(e){ document.getElementById('settings-modal').classList.remove('active'); }
+function showToast(m,isError=false){const t=document.getElementById('toast');t.innerHTML=m;t.classList.toggle('error',isError);t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function initAppCore(){document.getElementById('auth-wrap').style.display='none';showToast('Welcome to CatchLog Pro!');refreshAllEcosystemModules();}
+function openSettingsModal(){document.getElementById('settings-modal').classList.add('active');}
+function closeSettingsModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('settings-modal').classList.remove('active');}
 function switchScreen(screenId){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const target=document.getElementById('screen-'+screenId);
-  if(target) target.classList.add('active');
-  if(screenId==='dashboard') document.querySelectorAll('.nav-item')[0].classList.add('active');
-  if(screenId==='map') { document.querySelectorAll('.nav-item')[1].classList.add('active'); setTimeout(initMapSystem,200); }
-  if(screenId==='log') document.querySelectorAll('.nav-item')[2].classList.add('active');
-  if(screenId==='friends') document.querySelectorAll('.nav-item')[3].classList.add('active');
-  if(screenId==='tackle') document.querySelectorAll('.nav-item')[4].classList.add('active');
-  if(screenId==='ai'){ document.querySelectorAll('.nav-item')[5].classList.add('active'); renderAiMessages(); }
-}
-
-function normalizeCategory(category){
-  if(!category) return 'Other';
-  const normalized=category.toLowerCase();
-  if(normalized.includes('crank')) return 'Crankbait';
-  if(normalized.includes('swim')) return 'Swimbait';
-  if(normalized.includes('jig')) return 'Jig';
-  if(normalized.includes('spinner')) return 'Spinnerbait';
-  if(normalized.includes('top')) return 'Topwater';
-  if(normalized.includes('soft')) return 'Soft Plastic';
-  return 'Other';
-}
-
-function getDominantColorFromImage(url, sampleStep = 6, maxSize = 220) {
-  return new Promise((resolve) => {
-    if (!url) { resolve(null); return; }
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-      canvas.width = Math.max(12, Math.floor(img.width * scale));
-      canvas.height = Math.max(12, Math.floor(img.height * scale));
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
-      const palette = {
-        red: [220, 40, 40],
-        orange: [235, 130, 45],
-        yellow: [230, 205, 55],
-        green: [60, 160, 65],
-        teal: [35, 145, 145],
-        blue: [50, 110, 205],
-        purple: [145, 75, 185],
-        brown: [150, 95, 55],
-        gray: [125, 125, 125],
-        black: [25, 25, 25],
-        white: [245, 245, 245]
-      };
-
-      const counts = Object.fromEntries(Object.keys(palette).map((key) => [key, 0]));
-      let total = 0;
-
-      for (let y = 0; y < canvas.height; y += sampleStep) {
-        for (let x = 0; x < canvas.width; x += sampleStep) {
-          const idx = (y * canvas.width + x) * 4;
-          const alpha = data[idx + 3];
-          if (alpha < 120) continue;
-
-          const r = data[idx];
-          const g = data[idx + 1];
-          const b = data[idx + 2];
-
-          let bestName = null;
-          let bestDist = Infinity;
-          for (const [name, rgb] of Object.entries(palette)) {
-            const dr = r - rgb[0];
-            const dg = g - rgb[1];
-            const db = b - rgb[2];
-            const dist = dr * dr + dg * dg + db * db;
-            if (dist < bestDist) {
-              bestDist = dist;
-              bestName = name;
-            }
-          }
-
-          if (bestName) {
-            counts[bestName]++;
-            total++;
-          }
-        }
-      }
-
-      if (total === 0) { resolve(null); return; }
-
-      const sorted = Object.entries(counts)
-        .filter(([, count]) => count > 0)
-        .sort((a, b) => b[1] - a[1]);
-
-      const [topName, topCount] = sorted[0];
-      const second = sorted[1];
-      let color = topName;
-      if (second && second[1] / topCount >= 0.35 && topName !== second[0]) {
-        color = `${topName}/${second[0]}`;
-      }
-
-      const brightness = sorted.reduce((sum, [name, count]) => {
-        const rgb = palette[name];
-        const lum = (rgb[0] + rgb[1] + rgb[2]) / 3;
-        return sum + lum * count;
-      }, 0) / total;
-
-      resolve({ color, brightness, counts, total });
-    };
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
-
-async function scoreLureSuitabilityAsync(lure, context){
-  if(!lure || lure.status !== 'active' || lure.qty <= 0) return -1;
-  const category = normalizeCategory(lure.category);
-  const desc = (context.shortDesc || '').toLowerCase();
-  const temp = parseFloat(context.temp) || 70;
-  let score = 0;
-
-  if(desc.includes('overcast')){
-    if(category === 'Spinnerbait') score += 28;
-    if(category === 'Jig') score += 24;
-    if(category === 'Soft Plastic') score += 20;
-    if(category === 'Crankbait') score += 16;
-    if(category === 'Swimbait') score += 12;
-    if(category === 'Topwater') score += 10;
-  } else if(desc.includes('clear')){
-    if(category === 'Topwater') score += 28;
-    if(category === 'Crankbait') score += 24;
-    if(category === 'Swimbait') score += 20;
-    if(category === 'Soft Plastic') score += 16;
-    if(category === 'Spinnerbait') score += 12;
-    if(category === 'Jig') score += 10;
-  } else {
-    if(category === 'Crankbait') score += 22;
-    if(category === 'Soft Plastic') score += 18;
-    if(category === 'Jig') score += 16;
-    if(category === 'Spinnerbait') score += 14;
-    if(category === 'Swimbait') score += 12;
-    if(category === 'Topwater') score += 10;
-  }
-
-  if(temp <= 60){
-    if(category === 'Jig') score += 8;
-    if(category === 'Soft Plastic') score += 6;
-  }
-  if(temp >= 70){
-    if(category === 'Topwater') score += 8;
-    if(category === 'Swimbait') score += 6;
-  }
-
-  if((lure.conditionBias || '').toLowerCase().includes('overcast') && desc.includes('overcast')) score += 6;
-  score += Math.min(lure.qty, 3) * 2;
-
-  if(lure.img){
-    const colorInfo = await getDominantColorFromImage(lure.img);
-    if(colorInfo && colorInfo.color){
-      const c = colorInfo.color;
-      if(desc.includes('overcast')){
-        if(c.includes('white') || c.includes('chartreuse') || c.includes('orange') || c.includes('red')) score += 10;
-        if(c.includes('green') || c.includes('blue')) score += 4;
-      } else if(desc.includes('clear')){
-        if(c.includes('brown') || c.includes('green') || c.includes('blue')) score += 10;
-        if(c.includes('white') || c.includes('chartreuse')) score += 2;
-      } else {
-        if(c.includes('chartreuse') || c.includes('white') || c.includes('green')) score += 6;
-      }
-      if(colorInfo.brightness > 200 && desc.includes('overcast')) score += 3;
-      if(colorInfo.brightness < 80 && desc.includes('clear')) score += 3;
-    }
-  } else {
-    score -= 6;
-  }
-
-  return score;
-}
-
-async function recommendBestLureForConditions(){
-  if(!currentTelemetryContext) return null;
-  const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
-  if(inventory.length === 0){
-    return {
-      best: null,
-      explanation: "Add a few lures from your tackle box to get personalized recommendations. Start with general types like a moving bait, soft plastic, or topwater for today’s conditions.",
-      top3: []
-    };
-  }
-
-  const missingImgCount = inventory.reduce((acc,l)=>acc + (!l.img ? 1:0), 0);
-  if(missingImgCount>0){
-    return {
-      best: null,
-      explanation: `1 or more lures image is not being displayed. Please take a picture of the lure(s) so the AI can scan them.`,
-      missingCount: missingImgCount,
-      missingList: inventory.filter(l=>!l.img).map(l=>({id:l.id,name:l.name,category:l.category}))
-    };
-  }
-
-  const scoredPromises = inventory.map(async (lure)=>{
-    const score = await scoreLureSuitabilityAsync(lure, currentTelemetryContext);
-    return {lure,score};
-  });
-  const scored = (await Promise.all(scoredPromises)).sort((a,b)=>b.score - a.score || b.lure.qty - a.lure.qty);
-
-  const best = scored[0];
-  if(!best || best.score <= 0){
-    return {
-      best: null,
-      explanation: "You don’t currently have a good option for these conditions. Add a few more tackle types to your box and I'll recommend the best one you own.",
-      top3: scored.slice(0,3).map(item=>item.lure)
-    };
-  }
-
-  const top3 = scored.slice(0,3).map(item=>item.lure);
-  let explanation = `This is the strongest option from your current tackle box, based on ${currentTelemetryContext.temp}°F and ${currentTelemetryContext.shortDesc}.`;
-  if(top3.length>1) explanation += ` Nearby alternatives in your box are ${top3.slice(1).map(l=>l.name).join(', ')}.`;
-  const colorInfo = await getDominantColorFromImage(best.lure.img);
-  if(colorInfo && colorInfo.color){
-    explanation += ` The lure's visible color is ${colorInfo.color}, which matches today's conditions.`;
-  }
-
-  return {best: best.lure, explanation, top3};
-}
-
-async function dispatchAiMessage(){
-  const input=document.getElementById('ai-chat-message-input');
-  const queryText=input.value.trim();
-  if(!queryText) return;
-  aiChatHistory.push({sender:'me',text:queryText});
-  input.value='';
-  renderAiMessages();
-
-  setTimeout(async ()=>{
-    const lower = queryText.toLowerCase();
-    if(lower.includes('throw') || lower.includes('use') || lower.includes('recommend') || lower.includes('best')){
-      if(!currentTelemetryContext){
-        aiChatHistory.push({sender:'them',text:"⚠️ Inventory AI is ready, but weather/location sync is required. Sync your telemetry to get a recommendation from the lures you already own."});
-        renderAiMessages();
-        return;
-      }
-
-      const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
-      const missing = inventory.filter(l => !l.img);
-      if(missing.length > 0){
-        aiChatHistory.push({sender:'them',text:`📷 1 or more lures image is not being displayed. Please take a photo so I can scan them. (${missing.length} missing).`});
-        renderAiMessages();
-        const firstMissing = missing[0];
-        setTimeout(()=>{ bootOpticalSystem('inline-override', firstMissing.id); },350);
-        return;
-      }
-
-      const recommendation = await recommendBestLureForConditions();
-      if(!recommendation || !recommendation.best){
-        aiChatHistory.push({sender:'them',text:`📦 <b>Inventory-first advice:</b> ${recommendation ? recommendation.explanation : 'No recommendation available.'}`});
-      } else {
-        let message = `📦 <b>Best lure you own for today:</b> ${recommendation.best.name} (${recommendation.best.category}).<br/>Reason: ${recommendation.explanation}`;
-        if(recommendation.top3 && recommendation.top3.length > 1){
-          const extras = recommendation.top3.slice(1).map(l => `${l.name} (${l.category})`).join(', ');
-          message += `<br/><small style="color:var(--text2)">Also strong from your box: ${extras}.</small>`;
-        }
-        aiChatHistory.push({sender:'them',text:message});
-      }
-    } else {
-      aiChatHistory.push({sender:'them',text:"Ask the AI what you should throw from your tackle box today, and I’ll choose only from the gear you already own."});
-    }
-    renderAiMessages();
-  },300);
+  if(target)target.classList.add('active');
+  const navMap={dashboard:0,map:1,log:2,friends:3,tackle:4,ai:5};
+  if(navMap[screenId]!==undefined)document.querySelectorAll('.nav-item')[navMap[screenId]].classList.add('active');
+  if(screenId==='map')setTimeout(initMapSystem,200);
+  if(screenId==='ai')renderAiMessages();
 }
 
 async function bootOpticalSystem(mode,optionalLureId=null){
   opticalScanMode=mode;
   targetOverrideLureId=optionalLureId;
-  const viewfinder=document.getElementById('camera-viewfinder-overlay');
   const title=document.getElementById('viewfinder-title');
   const targetBox=document.getElementById('barcode-target-box-frame');
-  const laserLine=document.getElementById('laser-element');
   const hint=document.getElementById('viewfinder-instructions-hint');
-  const scanLabel=document.getElementById('viewfinder-scan-label');
+  const shutter=document.getElementById('shutter-action-trigger');
+  const resultPanel=document.getElementById('scan-result-panel');
+  const scanIndicator=document.getElementById('zxing-scanning-indicator');
+  resultPanel.style.display='none';
+  scanIndicator.classList.remove('visible');
   if(mode==='barcode'){
-    title.innerText="UPC + QR Scan Matrix";
-    hint.innerText="Align barcode or QR inside the red framing area.";
-    scanLabel.innerText="ALIGN SCAN TARGET";
+    title.innerText='📦 Barcode Scanner';
+    hint.innerText='Aim at barcode. Detection is automatic.';
     targetBox.style.display='block';
-    laserLine.style.display='block';
-    laserLine.classList.add('laser-active');
+    shutter.style.display='none';
   } else if(mode==='inline-override'){
-    title.innerText="Macro Framing Capture";
-    hint.innerText="Hold camera directly above the lure layout box. Photo will attach to the selected inventory slot.";
-    scanLabel.innerText="CENTER OBJECT";
+    title.innerText='📷 Lure Photo Capture';
+    hint.innerText='Hold camera above the lure. Tap button to capture.';
     targetBox.style.display='none';
-    laserLine.style.display='none';
-    laserLine.classList.remove('laser-active');
+    shutter.style.display='flex';
   } else {
-    title.innerText="AI Vision Scan";
-    hint.innerText="Take a photo of the lure to classify its type.";
-    scanLabel.innerText="PHOTO CLASSIFIER";
+    title.innerText='📷 AI Vision Scan';
+    hint.innerText='Photograph the lure to classify it.';
     targetBox.style.display='none';
-    laserLine.style.display='none';
-    laserLine.classList.remove('laser-active');
+    shutter.style.display='flex';
   }
-  viewfinder.style.display='flex';
+  document.getElementById('camera-viewfinder-overlay').style.display='flex';
   try{
     activeMediaStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
     const video=document.getElementById('viewfinder-video');
     video.srcObject=activeMediaStream;
+    if(mode==='barcode')startZxingDecode(video);
   }catch(err){
-    console.warn("Camera pipeline unavailable or permission rejected",err);
-    showToast("⚠️ Camera stream offline. Verify permissions.");
+    console.warn('Camera unavailable:',err);
+    showToast('⚠️ Camera unavailable. Check permissions.',true);
+    shutdownCameraStream();
   }
 }
 
-function shutdownCameraStream(){ if(activeMediaStream){ activeMediaStream.getTracks().forEach(track=>track.stop()); activeMediaStream=null; } document.getElementById('camera-viewfinder-overlay').style.display='none'; }
+function startZxingDecode(video){
+  if(!window.ZXing){showToast('⚠️ Barcode library not loaded.',true);return;}
+  try{
+    zxingReader=new ZXing.BrowserMultiFormatReader();
+    zxingScanActive=true;
+    document.getElementById('zxing-scanning-indicator').classList.add('visible');
+    zxingReader.decodeFromVideoElement(video,(result,err)=>{
+      if(!zxingScanActive)return;
+      if(result){
+        zxingScanActive=false;
+        document.getElementById('zxing-scanning-indicator').classList.remove('visible');
+        handleBarcodeDecoded(result.getText());
+      }
+    });
+  }catch(e){console.error('ZXing error:',e);showToast('Scanner error. Try again.',true);}
+}
+
+function stopZxing(){
+  zxingScanActive=false;
+  if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
+}
+
+function shutdownCameraStream(){
+  stopZxing();
+  if(activeMediaStream){activeMediaStream.getTracks().forEach(t=>t.stop());activeMediaStream=null;}
+  document.getElementById('camera-viewfinder-overlay').style.display='none';
+  document.getElementById('scan-result-panel').style.display='none';
+  document.getElementById('zxing-scanning-indicator').classList.remove('visible');
+}
+
+async function handleBarcodeDecoded(barcode){
+  showToast('✅ Barcode captured! Looking up product…');
+  document.getElementById('scan-result-panel').style.display='block';
+  document.getElementById('scan-name-display').innerText='Looking up product…';
+  document.getElementById('scan-barcode-display').innerText='UPC: '+barcode;
+  document.getElementById('scan-price-display').innerText='—';
+  document.getElementById('scan-price-badge').className='price-badge loading';
+  document.getElementById('scan-price-badge').innerText='⏳ Fetching…';
+  let productName=null;
+  try{
+    const upcUrl=`https://api.upcitemdb.com/prod/trial/lookup?upc=${encodeURIComponent(barcode)}`;
+    const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(upcUrl)}`;
+    const res=await fetch(proxyUrl);
+    const outer=await res.json();
+    const data=JSON.parse(outer.contents);
+    if(data&&data.items&&data.items.length>0){
+      productName=data.items[0].title||data.items[0].description||null;
+      document.getElementById('scan-name-display').innerText=productName||'Unknown Product';
+    } else {
+      document.getElementById('scan-name-display').innerText='Product not found in UPC database';
+    }
+  }catch(e){
+    console.warn('UPCitemdb failed:',e);
+    document.getElementById('scan-name-display').innerText='UPC lookup failed — trying Bass Pro…';
+  }
+  await fetchBassProPrice(productName||barcode,barcode,productName);
+}
+
+async function fetchBassProPrice(searchQuery,barcode,resolvedName){
+  try{
+    const bpSearchUrl=`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(searchQuery)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch&resultCatEntryType=2&showResultsPage=true&pageSize=10`;
+    const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(bpSearchUrl)}`;
+    const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
+    const outer=await res.json();
+    const html=outer.contents||'';
+    const priceMatch=html.match(/\$\s*([\d,]+\.\d{2})/);
+    const price=priceMatch?parseFloat(priceMatch[1].replace(',','')):null;
+    displayScanResult(barcode,resolvedName||searchQuery,price,searchQuery);
+  }catch(e){
+    console.warn('Bass Pro fetch failed:',e);
+    displayScanResult(barcode,resolvedName||searchQuery,null,searchQuery);
+  }
+}
+
+function displayScanResult(barcode,productName,price,searchQuery){
+  document.getElementById('scan-name-display').innerText=productName||'Unknown Product';
+  document.getElementById('scan-barcode-display').innerText='UPC: '+barcode;
+  if(price){
+    document.getElementById('scan-price-display').innerText='$'+price.toFixed(2);
+    document.getElementById('scan-store-display').innerText='Bass Pro Shops (live)';
+    document.getElementById('scan-price-badge').className='price-badge live';
+    document.getElementById('scan-price-badge').innerText='✅ Live Price';
+  } else {
+    document.getElementById('scan-price-display').innerText='Price unavailable';
+    document.getElementById('scan-store-display').innerText='Bass Pro Shops';
+    document.getElementById('scan-price-badge').className='price-badge error';
+    document.getElementById('scan-price-badge').innerText='⚠️ Not found';
+  }
+  pendingScannedLure={barcode,name:productName||('Scanned Lure – '+barcode),cost:price||6.99,purchaseUrl:`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(searchQuery)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch`};
+}
+
+function confirmScanAndSave(){
+  if(!pendingScannedLure)return;
+  const l=pendingScannedLure;
+  lures.unshift({id:'l_'+Date.now(),name:l.name,cost:l.cost,qty:1,conditionBias:'clear',type:'barcode',category:guessCategory(l.name),img:'',purchaseUrl:l.purchaseUrl,notes:'Scanned via barcode: '+l.barcode,status:'active',bassProPrice:l.cost,bassProUrl:l.purchaseUrl});
+  localStorage.setItem('n_lures',JSON.stringify(lures));
+  pendingScannedLure=null;
+  shutdownCameraStream();
+  refreshAllEcosystemModules();
+  showToast('✅ '+l.name+' added to tackle box!');
+  switchScreen('tackle');
+}
+
+function resetScannerForNextScan(){
+  document.getElementById('scan-result-panel').style.display='none';
+  pendingScannedLure=null;
+  zxingScanActive=true;
+  document.getElementById('zxing-scanning-indicator').classList.add('visible');
+  const video=document.getElementById('viewfinder-video');
+  if(video&&activeMediaStream)startZxingDecode(video);
+}
+
+async function checkPriceForLure(lureId){
+  const lure=lures.find(l=>l.id===lureId);
+  if(!lure)return;
+  showToast('🔍 Fetching Bass Pro price…');
+  const btn=document.querySelector(`[data-price-btn="${lureId}"]`);
+  const val=document.querySelector(`[data-price-val="${lureId}"]`);
+  if(btn)btn.innerText='⏳';
+  if(val)val.innerText='Loading…';
+  try{
+    const bpSearchUrl=`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(lure.name)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch&resultCatEntryType=2&showResultsPage=true&pageSize=5`;
+    const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(bpSearchUrl)}`;
+    const res=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
+    const outer=await res.json();
+    const html=outer.contents||'';
+    const priceMatch=html.match(/\$\s*([\d,]+\.\d{2})/);
+    if(priceMatch){
+      const price=parseFloat(priceMatch[1].replace(',',''));
+      lure.bassProPrice=price;
+      lure.cost=price;
+      lure.bassProUrl=`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(lure.name)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch`;
+      localStorage.setItem('n_lures',JSON.stringify(lures));
+      if(val)val.innerText='$'+price.toFixed(2);
+      if(btn){btn.innerText='🔗';btn.onclick=()=>window.open(lure.bassProUrl,'_blank');}
+      showToast('💰 Price updated: $'+price.toFixed(2));
+    } else {
+      if(val)val.innerText='Not found';
+      if(btn)btn.innerText='🔄';
+      showToast('⚠️ Price not found on Bass Pro',true);
+    }
+  }catch(e){
+    if(val)val.innerText='Error';
+    if(btn)btn.innerText='🔄';
+    showToast('⚠️ Price fetch failed',true);
+  }
+}
+
+function guessCategory(name){
+  if(!name)return 'Other';
+  const n=name.toLowerCase();
+  if(n.includes('crank')||n.includes('rattle')||n.includes('shad'))return 'Crankbait';
+  if(n.includes('swim'))return 'Swimbait';
+  if(n.includes('jig')||n.includes('football')||n.includes('blade'))return 'Jig';
+  if(n.includes('spinner')||n.includes('willow'))return 'Spinnerbait';
+  if(n.includes('topwater')||n.includes('popper')||n.includes('frog')||n.includes('buzzbait'))return 'Topwater';
+  if(n.includes('worm')||n.includes('creature')||n.includes('soft')||n.includes('grub')||n.includes('tube'))return 'Soft Plastic';
+  return 'Other';
+}
 
 function captureFrameFromVideo(video){
   const canvas=document.createElement('canvas');
   canvas.width=video.videoWidth||640;
   canvas.height=video.videoHeight||480;
-  const ctx=canvas.getContext('2d');
-  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
   return canvas.toDataURL('image/jpeg',0.85);
 }
 
 function executeManualCaptureSnapshot(){
-  showToast('💾 Capturing camera frame...');
+  const video=document.getElementById('viewfinder-video');
+  if(!video){showToast('No camera feed',true);shutdownCameraStream();return;}
+  showToast('📸 Capturing…');
   setTimeout(()=>{
-    const video=document.getElementById('viewfinder-video');
-    if(!video) { showToast('No camera feed'); shutdownCameraStream(); return; }
-    if(opticalScanMode==='inline-override' && targetOverrideLureId){
+    if(opticalScanMode==='inline-override'&&targetOverrideLureId){
       const snapshot=captureFrameFromVideo(video);
       const target=lures.find(l=>l.id===targetOverrideLureId);
-      if(target){
-        target.type='image';
-        target.img=snapshot;
-        localStorage.setItem('n_lures',JSON.stringify(lures));
-        showToast('Photo linked to your inventory slot.');
-        refreshAllEcosystemModules();
-      } else {
-        showToast('Target slot not found.');
-      }
-      shutdownCameraStream();
-      return;
+      if(target){target.type='image';target.img=snapshot;localStorage.setItem('n_lures',JSON.stringify(lures));showToast('📸 Photo saved!');refreshAllEcosystemModules();}
+      shutdownCameraStream();return;
     }
     if(opticalScanMode==='ai-photo'){
       const snapshot=captureFrameFromVideo(video);
       document.getElementById('manual-lure-photo-preview').style.backgroundImage=`url('${snapshot}')`;
       document.getElementById('manual-lure-photo-preview').innerText='';
-      manualPhotoSuggestion={label:'Detected Lure',category:'Other',match:'Auto-classified (manual review recommended)'};
-      document.getElementById('manual-lure-suggestion').innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>. ${manualPhotoSuggestion.match}`;
+      manualPhotoSuggestion={label:'Detected Lure',category:'Other',match:'Manual review recommended'};
+      document.getElementById('manual-lure-suggestion').innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>.`;
       document.getElementById('manual-lure-category').value='Other';
-      showToast('Photo captured for quick entry.');
+      showToast('Photo captured.');
       shutdownCameraStream();
-      return;
     }
-    const simulatedBarcode=''+Math.floor(100000000000+Math.random()*900000000000);
-    processBarcodeValue(simulatedBarcode);
-  },400);
+  },300);
 }
-
-function processBarcodeValue(barcodeRawString, scanFormat=''){
-  showToast('Storing barcode entry...');
-  const resolved={productName:'Scanned Tackle Lure',purchaseUrl:`https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(barcodeRawString)}`};
-  shutdownCameraStream();
-  lures.unshift({
-    id:'l_'+Date.now(),
-    name:resolved.productName || 'Scanned Tackle Lure',
-    cost:6.99,
-    qty:1,
-    conditionBias:'clear',
-    type:'barcode',
-    category:'Other',
-    img:'',
-    purchaseUrl:resolved.purchaseUrl,
-    notes:'Imported by barcode',
-    status:'active'
-  });
-  localStorage.setItem('n_lures',JSON.stringify(lures));
-  refreshAllEcosystemModules();
-  showToast('Barcode saved. You can still edit details manually.');
-}
-
-function modifyQuantity(lureId,change){ const t=lures.find(l=>l.id===lureId); if(t){ t.qty+=change; if(t.qty<0) t.qty=0; localStorage.setItem('n_lures',JSON.stringify(lures)); refreshAllEcosystemModules(); } }
-function openTrashModal(lureId){ pendingTrashLureId=lureId; const lure=lures.find(l=>l.id===lureId); const text=lure?`Would you like to remove "${lure.name}" from your tackle box or repurchase it at BassPro.com?`:'Would you like to remove this item?'; document.getElementById('trash-modal-text').innerText=text; document.getElementById('trash-modal').classList.add('active'); }
-function cancelTrashPrompt(e){ if(e && e.target !== e.currentTarget) return; pendingTrashLureId=null; document.getElementById('trash-modal').classList.remove('active'); }
-function confirmRemoveLure(){ if(!pendingTrashLureId) return; lures=lures.filter(l=>l.id!==pendingTrashLureId); pendingTrashLureId=null; localStorage.setItem('n_lures',JSON.stringify(lures)); document.getElementById('trash-modal').classList.remove('active'); showToast('Item removed from tackle box.'); refreshAllEcosystemModules(); }
-function repurchaseLure(){ if(!pendingTrashLureId) return; window.open('https://www.basspro.com', '_blank'); pendingTrashLureId=null; document.getElementById('trash-modal').classList.remove('active'); showToast('Opening BassPro home page.'); }
-
-function registerNewFriendById(){ const input=document.getElementById('new-friend-id'); const lookupId=input.value.trim().toUpperCase(); if(!lookupId) return; if(lookupId===myUniqueTacticalId) return showToast("Cannot link routing node to yourself."); if(friends.find(f=>f.id===lookupId)) return showToast("Mesh channel active."); const newPeer={id:lookupId,name:'Angler_'+Math.floor(10+Math.random()*89),totalWeight:8.5,score:40}; friends.push(newPeer); input.value=''; showToast('Linked Peer Node Successfully!'); selectedFriendId=lookupId; localStorage.setItem('n_friends',JSON.stringify(friends)); refreshAllEcosystemModules(); }
-function renderFriendsSystem(){ document.getElementById('my-unique-id-badge').innerText=myUniqueTacticalId; const container=document.getElementById('friends-list-container'); if(!container) return; container.innerHTML=friends.map(f=>`<div class="leader-row" style="cursor:pointer;border-color:${f.id===selectedFriendId?'var(--primary)': 'var(--border)'}" onclick="selectedFriendId='${f.id}'; renderFriendsSystem();"><div>🟢 <b>${f.name}</b> <span style="font-size:10px;color:var(--text3);">[${f.id}]</span></div><div style="font-size:11px;color:var(--primary);font-weight:600;">Chat</div></div>`).join(''); const activeF=friends.find(f=>f.id===selectedFriendId); if(activeF){ document.getElementById('active-chat-target-lbl').innerText=`Target Node: @${activeF.name}`; renderChatMessages(); } }
-function renderChatMessages(){ const box=document.getElementById('chat-stream-box'); const history=chatHistories[selectedFriendId]||[{sender:'them',text:'Telemetry linked.'}]; box.innerHTML=history.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight; }
-function dispatchMessage(){ const input=document.getElementById('chat-message-input'); if(!input.value.trim()) return; if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId]=[]; chatHistories[selectedFriendId].push({sender:'me',text:input.value}); input.value=''; renderChatMessages(); }
-
-function syncLocationAndWeather(){ showToast('Pinging tracking arrays...'); navigator.geolocation.getCurrentPosition(pos=>processLocationSuccess(pos.coords.latitude,pos.coords.longitude),()=>processLocationSuccess(38.6270,-90.1994)); }
-function processLocationSuccess(lat,lon){ const tempOpts=[58,68,74,82]; const descOpts=["Clear vector condition","Overcast tactical cover","Light breeze","High barometric pressure flare"]; const randomIdx=Math.floor(Math.random()*descOpts.length); currentTelemetryContext={lat:parseFloat(lat).toFixed(4),lon:parseFloat(lon).toFixed(4),temp:tempOpts[randomIdx],shortDesc:descOpts[randomIdx]}; document.getElementById('weather-badge').innerText='LIVE SYNCED'; document.getElementById('weather-badge').style.background='rgba(16,185,129,0.2)'; document.getElementById('weather-diagnostics').innerHTML=`📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: ${currentTelemetryContext.shortDesc}`; document.getElementById('map-hud-desc').innerText=currentTelemetryContext.shortDesc; document.getElementById('map-hud-temp').innerText=`${currentTelemetryContext.temp}°F`; aiChatHistory.push({sender:'them',text:`📡 <b>Ecosystem Matrix Sync:</b> Parameters aligned to coordinates with profile: <i>${currentTelemetryContext.shortDesc}</i>.`}); updateMapWaypointMarker(); showToast('Weather Array Handshake Complete!'); }
 
 function renderTackleMatrix(){
-  let val=lures.reduce((acc,l)=>acc+(l.cost*l.qty),0);
-  const gridEl=document.getElementById('fin-active-val'); if(gridEl) gridEl.innerText=`$${val.toFixed(2)}`;
-  const targetDiv=document.getElementById('tackle-grid'); if(!targetDiv) return;
+  const val=lures.reduce((acc,l)=>acc+(l.cost*l.qty),0);
+  const gridEl=document.getElementById('fin-active-val');
+  if(gridEl)gridEl.innerText='$'+val.toFixed(2);
+  const targetDiv=document.getElementById('tackle-grid');
+  if(!targetDiv)return;
   targetDiv.innerHTML=lures.map(l=>{
     let mediaHeader='';
-    if(l.type==='image'&&l.img){ mediaHeader=`<div class="tackle-img-frame" style="background-image:url('${l.img}');"></div>`; }
-    else{ mediaHeader=`<div class="tackle-white-box"><span style="font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#9ca3af;">No image</span><div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override','${l.id}')" title="Take Lure Picture">📷</div></div>`; }
-    const statusClass = l.status==='lost' ? 'status-lost' : l.status==='broken' ? 'status-broken' : 'status-active';
-    const noteText = l.notes ? `<div style="font-size:11px;color:var(--text3);margin-top:6px;">${l.notes}</div>` : '';
-    const imgMissingBadge = (!l.img && l.status==='active') ? `<div style="position:absolute;top:8px;left:8px;background:rgba(244,63,94,0.12);color:#f43f5e;padding:4px 8px;border-radius:12px;font-size:11px;font-weight:800;">Image missing</div>` : '';
-    return `<div class="tackle-box-card" style="position:relative;">${imgMissingBadge}${mediaHeader}<div class="tackle-card-body"><div><div style="font-size:9px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px;font-family:monospace;line-height:1.1;display:block;max-height:22px;overflow:hidden;" title="${l.category}">${l.category||'Unassigned'}</div><div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.name}">${l.name}</div><div class="status-pill ${statusClass}" style="margin-top:4px;">${l.status}</div>${noteText}</div><div class="tackle-tally-row"><span style="font-size:11px;color:var(--primary);font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span><div style="display:flex;gap:4px;"><button class="tally-btn" onclick="modifyQuantity('${l.id}',-1)">-</button><button class="tally-btn" onclick="modifyQuantity('${l.id}',1)">+</button><button class="tally-btn" onclick="openTrashModal('${l.id}')" title="Remove">🗑</button></div></div></div></div>`}).join('');
+    if(l.type==='image'&&l.img){mediaHeader=`<div class="tackle-img-frame" style="background-image:url('${l.img}');"></div>`;}
+    else{mediaHeader=`<div class="tackle-white-box"><span style="font-size:10px;font-weight:800;text-transform:uppercase;color:#9ca3af;">No image</span><div class="tackle-cam-overlay" onclick="bootOpticalSystem('inline-override','${l.id}')">📷</div></div>`;}
+    const statusClass=l.status==='lost'?'status-lost':l.status==='broken'?'status-broken':'status-active';
+    const noteText=l.notes?`<div style="font-size:10px;color:var(--text3);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.notes}</div>`:'';
+    const imgMissingBadge=(!l.img&&l.status==='active')?`<div style="position:absolute;top:8px;left:8px;background:rgba(244,63,94,0.12);color:#f43f5e;padding:3px 6px;border-radius:10px;font-size:10px;font-weight:800;">No image</div>`:'';
+    const priceDisplay=l.bassProPrice?`<span class="tackle-price-val" data-price-val="${l.id}">$${l.bassProPrice.toFixed(2)}</span>`:`<span class="tackle-price-val" data-price-val="${l.id}" style="color:var(--text3);font-size:10px;">No price</span>`;
+    const priceBtn=l.bassProUrl?`<button class="tackle-price-btn" data-price-btn="${l.id}" onclick="window.open('${l.bassProUrl}','_blank')">🔗 Buy</button>`:`<button class="tackle-price-btn" data-price-btn="${l.id}" onclick="checkPriceForLure('${l.id}')">🔍 Price</button>`;
+    return `<div class="tackle-box-card" style="position:relative;">${imgMissingBadge}${mediaHeader}<div class="tackle-card-body"><div><div style="font-size:9px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px;font-family:monospace;">${l.category||'Unassigned'}</div><div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.name}">${l.name}</div><div class="status-pill ${statusClass}" style="margin-top:4px;">${l.status}</div>${noteText}</div><div class="tackle-price-row">${priceDisplay}${priceBtn}</div><div class="tackle-tally-row"><span style="font-size:11px;color:var(--primary);font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span><div style="display:flex;gap:4px;"><button class="tally-btn" onclick="modifyQuantity('${l.id}',-1)">-</button><button class="tally-btn" onclick="modifyQuantity('${l.id}',1)">+</button><button class="tally-btn" onclick="openTrashModal('${l.id}')">🗑</button></div></div></div></div>`;
+  }).join('');
 }
 
-function renderAiMessages(){ const box=document.getElementById('ai-chat-stream-box'); if(box){ box.innerHTML=aiChatHistory.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight; } }
+function normalizeCategory(category){if(!category)return 'Other';const n=category.toLowerCase();if(n.includes('crank'))return 'Crankbait';if(n.includes('swim'))return 'Swimbait';if(n.includes('jig'))return 'Jig';if(n.includes('spinner'))return 'Spinnerbait';if(n.includes('top'))return 'Topwater';if(n.includes('soft'))return 'Soft Plastic';return 'Other';}
 
-function populateManualLureCategories(){ const select=document.getElementById('manual-lure-category'); if(!select) return; select.innerHTML=lureCategories.map(cat=>`<option value="${cat}">${cat}</option>`).join(''); }
-function openManualLureModal(){ populateManualLureCategories(); document.getElementById('manual-lure-name').value=''; document.getElementById('manual-lure-photo').value=''; document.getElementById('manual-lure-photo-preview').style.backgroundImage=''; document.getElementById('manual-lure-photo-preview').innerText='No photo selected'; document.getElementById('manual-lure-notes').value=''; document.getElementById('manual-lure-status').value='active'; document.getElementById('manual-lure-suggestion').innerText='Pick a category, then save quickly or add a photo for smarter suggestions.'; manualPhotoSuggestion=null; document.getElementById('manual-lure-modal').classList.add('active'); }
-function closeManualLureModal(e){ if(e&&e.target!==e.currentTarget) return; document.getElementById('manual-lure-modal').classList.remove('active'); }
-function onManualCategoryChange(){ const category=document.getElementById('manual-lure-category').value; const suggestionEl=document.getElementById('manual-lure-suggestion'); if(manualPhotoSuggestion){ suggestionEl.innerText=`Looks like a ${manualPhotoSuggestion.label}. Best fit category: ${manualPhotoSuggestion.category}.`; } else { suggestionEl.innerText=`Quick entry will use category ${category}. Save fast and your box becomes smarter for recommendations.`; } }
-function handleManualLurePhotoInput(event){ const file=event.target.files && event.target.files[0]; const preview=document.getElementById('manual-lure-photo-preview'); const suggestionEl=document.getElementById('manual-lure-suggestion'); if(!file){ preview.style.backgroundImage=''; preview.innerText='No photo selected'; manualPhotoSuggestion=null; onManualCategoryChange(); return; } const reader=new FileReader(); reader.onload=function(e){ const imageDataUrl=e.target.result; preview.style.backgroundImage=`url('${imageDataUrl}')`; preview.innerText=''; manualPhotoSuggestion={label:'Photo Lure',category:document.getElementById('manual-lure-category').value||'Other',match:'Auto-scan available'}; suggestionEl.innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>. ${manualPhotoSuggestion.match}`; }; reader.readAsDataURL(file); }
-function saveManualLure(){ const category=document.getElementById('manual-lure-category').value || 'Other'; const exactName=document.getElementById('manual-lure-name').value.trim(); const notes=document.getElementById('manual-lure-notes').value.trim(); const status=document.getElementById('manual-lure-status').value; const photoPreview=document.getElementById('manual-lure-photo-preview').style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''); const nameToSave = exactName || (manualPhotoSuggestion ? manualPhotoSuggestion.label : `${category} lure`); lures.unshift({ id:'l_'+Date.now(), name:nameToSave, cost:6.99, qty:1, conditionBias:'clear', type: photoPreview ? 'image' : 'manual', category, img: photoPreview || '', purchaseUrl:`https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(exactName || category)}`, notes, status }); localStorage.setItem('n_lures',JSON.stringify(lures)); closeManualLureModal(); refreshAllEcosystemModules(); showToast('Lure added quickly to your tackle box.'); }
+function getDominantColorFromImage(url,sampleStep=6,maxSize=220){return new Promise((resolve)=>{if(!url){resolve(null);return;}const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{const canvas=document.createElement('canvas');const scale=Math.min(1,maxSize/Math.max(img.width,img.height));canvas.width=Math.max(12,Math.floor(img.width*scale));canvas.height=Math.max(12,Math.floor(img.height*scale));const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;const palette={red:[220,40,40],orange:[235,130,45],yellow:[230,205,55],green:[60,160,65],teal:[35,145,145],blue:[50,110,205],purple:[145,75,185],brown:[150,95,55],gray:[125,125,125],black:[25,25,25],white:[245,245,245]};const counts=Object.fromEntries(Object.keys(palette).map(k=>[k,0]));let total=0;for(let y=0;y<canvas.height;y+=sampleStep){for(let x=0;x<canvas.width;x+=sampleStep){const idx=(y*canvas.width+x)*4;if(data[idx+3]<120)continue;const r=data[idx],g=data[idx+1],b=data[idx+2];let bestName=null,bestDist=Infinity;for(const[name,rgb]of Object.entries(palette)){const d=(r-rgb[0])**2+(g-rgb[1])**2+(b-rgb[2])**2;if(d<bestDist){bestDist=d;bestName=name;}}if(bestName){counts[bestName]++;total++;}}}if(total===0){resolve(null);return;}const sorted=Object.entries(counts).filter(([,c])=>c>0).sort((a,b)=>b[1]-a[1]);const[topName,topCount]=sorted[0];const second=sorted[1];let color=topName;if(second&&second[1]/topCount>=0.35&&topName!==second[0])color=`${topName}/${second[0]}`;const brightness=sorted.reduce((sum,[name,count])=>{const rgb=palette[name];return sum+((rgb[0]+rgb[1]+rgb[2])/3)*count;},0)/total;resolve({color,brightness,counts,total});};img.onerror=()=>resolve(null);img.src=url;});}
 
-function updateMapWaypointMarker(){ if(!map||!currentTelemetryContext) return; const coords=[currentTelemetryContext.lat,currentTelemetryContext.lon]; if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); } else { const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]}); liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map); } map.setView(coords,12); }
-function initMapSystem(){ if(map){ updateMapWaypointMarker(); return; } map=L.map('full-map',{zoomControl:false}).setView([38.6270,-90.1994],11); L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map); updateMapWaypointMarker(); }
+async function scoreLureSuitabilityAsync(lure,context){if(!lure||lure.status!=='active'||lure.qty<=0)return -1;const category=normalizeCategory(lure.category);const desc=(context.shortDesc||'').toLowerCase();const temp=parseFloat(context.temp)||70;let score=0;if(desc.includes('overcast')){if(category==='Spinnerbait')score+=28;if(category==='Jig')score+=24;if(category==='Soft Plastic')score+=20;if(category==='Crankbait')score+=16;if(category==='Swimbait')score+=12;if(category==='Topwater')score+=10;}else if(desc.includes('clear')){if(category==='Topwater')score+=28;if(category==='Crankbait')score+=24;if(category==='Swimbait')score+=20;if(category==='Soft Plastic')score+=16;if(category==='Spinnerbait')score+=12;if(category==='Jig')score+=10;}else{if(category==='Crankbait')score+=22;if(category==='Soft Plastic')score+=18;if(category==='Jig')score+=16;if(category==='Spinnerbait')score+=14;if(category==='Swimbait')score+=12;if(category==='Topwater')score+=10;}if(temp<=60){if(category==='Jig')score+=8;if(category==='Soft Plastic')score+=6;}if(temp>=70){if(category==='Topwater')score+=8;if(category==='Swimbait')score+=6;}if((lure.conditionBias||'').toLowerCase().includes('overcast')&&desc.includes('overcast'))score+=6;score+=Math.min(lure.qty,3)*2;if(lure.img){const colorInfo=await getDominantColorFromImage(lure.img);if(colorInfo&&colorInfo.color){const c=colorInfo.color;if(desc.includes('overcast')){if(c.includes('white')||c.includes('orange')||c.includes('red'))score+=10;if(c.includes('green')||c.includes('blue'))score+=4;}else if(desc.includes('clear')){if(c.includes('brown')||c.includes('green')||c.includes('blue'))score+=10;if(c.includes('white'))score+=2;}else{if(c.includes('white')||c.includes('green'))score+=6;}if(colorInfo.brightness>200&&desc.includes('overcast'))score+=3;if(colorInfo.brightness<80&&desc.includes('clear'))score+=3;}}else{score-=6;}return score;}
 
-function connectHardware(type){ showToast(`Bluetooth syncing ${type}...`); setTimeout(()=>{ const elId=type==='bobber'?'hw-bobber-status':'hw-fillet-status'; document.getElementById(elId).innerHTML='🟢 Connected & Mapped'; showToast('Hardware Sync Confirmed!'); },400); }
+async function recommendBestLureForConditions(){if(!currentTelemetryContext)return null;const inventory=lures.filter(l=>l.status==='active'&&l.qty>0);if(inventory.length===0)return{best:null,explanation:"Add lures to get recommendations.",top3:[]};const missing=inventory.filter(l=>!l.img);if(missing.length>0)return{best:null,explanation:`${missing.length} lure(s) missing photos. Please take pictures.`,missingCount:missing.length,missingList:missing.map(l=>({id:l.id,name:l.name,category:l.category}))};const scoredPromises=inventory.map(async lure=>{const score=await scoreLureSuitabilityAsync(lure,currentTelemetryContext);return{lure,score};});const scored=(await Promise.all(scoredPromises)).sort((a,b)=>b.score-a.score||b.lure.qty-a.lure.qty);const best=scored[0];if(!best||best.score<=0)return{best:null,explanation:"No strong option for these conditions. Add more tackle types.",top3:scored.slice(0,3).map(i=>i.lure)};const top3=scored.slice(0,3).map(i=>i.lure);let explanation=`Best pick for ${currentTelemetryContext.temp}°F and ${currentTelemetryContext.shortDesc}.`;if(top3.length>1)explanation+=` Alternatives: ${top3.slice(1).map(l=>l.name).join(', ')}.`;const colorInfo=await getDominantColorFromImage(best.lure.img);if(colorInfo&&colorInfo.color)explanation+=` Color (${colorInfo.color}) suits today's conditions.`;return{best:best.lure,explanation,top3};}
 
-function refreshAllEcosystemModules(){ renderGlobalLeaderboard(); renderTournaments(); renderCatchHistory(); renderTackleMatrix(); renderFriendsSystem(); const lureSelect=document.getElementById('form-lure-link'); if(lureSelect) lureSelect.innerHTML=lures.map(l=>`<option value="${l.id}">${l.name}</option>`).join(''); renderAiMessages(); }
+async function dispatchAiMessage(){const input=document.getElementById('ai-chat-message-input');const queryText=input.value.trim();if(!queryText)return;aiChatHistory.push({sender:'me',text:queryText});input.value='';renderAiMessages();setTimeout(async()=>{const lower=queryText.toLowerCase();if(lower.includes('throw')||lower.includes('use')||lower.includes('recommend')||lower.includes('best')){if(!currentTelemetryContext){aiChatHistory.push({sender:'them',text:"⚠️ Sync weather first (tap ⚙️)."});renderAiMessages();return;}const inventory=lures.filter(l=>l.status==='active'&&l.qty>0);const missing=inventory.filter(l=>!l.img);if(missing.length>0){aiChatHistory.push({sender:'them',text:`📷 ${missing.length} lure(s) missing photos.`});renderAiMessages();setTimeout(()=>{bootOpticalSystem('inline-override',missing[0].id);},350);return;}const recommendation=await recommendBestLureForConditions();if(!recommendation||!recommendation.best){aiChatHistory.push({sender:'them',text:`📦 <b>Advice:</b> ${recommendation?recommendation.explanation:'No recommendation available.'}`});}else{let message=`📦 <b>Best lure you own:</b> ${recommendation.best.name} (${recommendation.best.category}).<br/>${recommendation.explanation}`;if(recommendation.top3&&recommendation.top3.length>1)message+=`<br/><small style="color:var(--text2)">Also: ${recommendation.top3.slice(1).map(l=>l.name).join(', ')}.</small>`;if(recommendation.best.bassProPrice)message+=`<br/><small style="color:var(--accent2)">💰 Bass Pro: $${recommendation.best.bassProPrice.toFixed(2)}</small>`;aiChatHistory.push({sender:'them',text:message});}}else{aiChatHistory.push({sender:'them',text:"Ask me what you should throw today and I'll pick from your own gear."});}renderAiMessages();},300);}
 
-function renderGlobalLeaderboard(){ let myWeight=catches.reduce((acc,c)=>acc+parseFloat(c.weight||0),0); let boardList=[{name:'You (Node)',w:myWeight},...friends.map(f=>({name:f.name,w:f.totalWeight}))].sort((a,b)=>b.w-a.w); document.getElementById('global-leaderboard-deck').innerHTML=boardList.map((p,idx)=>`<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800;color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join(''); }
-function renderTournaments(){ document.getElementById('tournament-deck').innerHTML=tournaments.map(t=>`<div class="card" style="margin:0 0 10px 0;background:rgba(31,41,55,0.45)"><div style="font-size:13px;font-weight:800;color:#fff;">🏆 ${t.name}</div></div>`).join(''); }
-function createNewTournament(){ const name=document.getElementById('t-name-input').value.trim()||'Untitled Tournament'; tournaments.push({id:'t_'+Date.now(),name,leaderboard:[{name:'You',points:0}]}); localStorage.setItem('n_tourneys',JSON.stringify(tournaments)); showToast('Tournament created.'); refreshAllEcosystemModules(); switchScreen('dashboard'); }
-
-function commitCatchLog(e){ e.preventDefault(); const spec=document.getElementById('form-species').value; const w=parseFloat(document.getElementById('form-weight').value)||0; catches.unshift({species:spec,weight:w}); document.getElementById('catch-form').reset(); showToast('Entry Logged!'); localStorage.setItem('n_catches',JSON.stringify(catches)); refreshAllEcosystemModules(); switchScreen('dashboard'); }
-function renderCatchHistory(){ const el=document.getElementById('dashboard-catch-list'); if(!el) return; el.innerHTML=catches.map(c=>`<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div>${(c.weight||0).toFixed(2)} lbs</div></div>`).join(''); }
-
-window.onload=function(){ refreshAllEcosystemModules(); }
+function modifyQuantity(lureId,change){const t=lures.find(l=>l.id===lureId);if(t){t.qty+=change;if(t.qty<0)t.qty=0;localStorage.setItem('n_lures',JSON.stringify(lures));refreshAllEcosystemModules();}}
+function openTrashModal(lureId){pendingTrashLureId=lureId;const lure=lures.find(l=>l.id===lureId);document.getElementById('trash-modal-text').innerText=lure?`Remove "${lure.name}" or repurchase at BassPro.com?`:'Remove this item?';document.getElementById('trash-modal').classList.add('active');}
+function cancelTrashPrompt(e){if(e&&e.target!==e.currentTarget)return;pendingTrashLureId=null;document.getElementById('trash-modal').classList.remove('active');}
+function confirmRemoveLure(){if(!pendingTrashLureId)return;lures=lures.filter(l=>l.id!==pendingTrashLureId);pendingTrashLureId=null;localStorage.setItem('n_lures',JSON.stringify(lures));document.getElementById('trash-modal').classList.remove('active');showToast('Item removed.');refreshAllEcosystemModules();}
+function repurchaseLure(){if(!pendingTrashLureId)return;const l=lures.find(x=>x.id===pendingTrashLureId);window.open(l&&l.purchaseUrl?l.purchaseUrl:'https://www.basspro.com','_blank');pendingTrashLureId=null;document.getElementById('trash-modal').classList.remove('active');}
+function registerNewFriendById(){const input=document.getElementById('new-friend-id');const lookupId=input.value.trim().toUpperCase();if(!lookupId)return;if(lookupId===myUniqueTacticalId)return showToast("Cannot link to yourself.");if(friends.find(f=>f.id===lookupId))return showToast("Already linked.");const newPeer={id:lookupId,name:'Angler_'+Math.floor(10+Math.random()*89),totalWeight:8.5,score:40};friends.push(newPeer);input.value='';showToast('Friend added!');selectedFriendId=lookupId;localStorage.setItem('n_friends',JSON.stringify(friends));refreshAllEcosystemModules();}
+function renderFriendsSystem(){document.getElementById('my-unique-id-badge').innerText=myUniqueTacticalId;const container=document.getElementById('friends-list-container');if(!container)return;container.innerHTML=friends.map(f=>`<div class="leader-row" style="cursor:pointer;border-color:${f.id===selectedFriendId?'var(--primary)':'var(--border)'}" onclick="selectedFriendId='${f.id}';renderFriendsSystem();"><div>🟢 <b>${f.name}</b> <span style="font-size:10px;color:var(--text3);">[${f.id}]</span></div><div style="font-size:11px;color:var(--primary);font-weight:600;">Chat</div></div>`).join('');const activeF=friends.find(f=>f.id===selectedFriendId);if(activeF){document.getElementById('active-chat-target-lbl').innerText=`Chatting with: @${activeF.name}`;renderChatMessages();}}
+function renderChatMessages(){const box=document.getElementById('chat-stream-box');const history=chatHistories[selectedFriendId]||[{sender:'them',text:'Say hello!'}];box.innerHTML=history.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join('');box.scrollTop=box.scrollHeight;}
+function dispatchMessage(){const input=document.getElementById('chat-message-input');if(!input.value.trim())return;if(!chatHistories[selectedFriendId])chatHistories[selectedFriendId]=[];chatHistories[selectedFriendId].push({sender:'me',text:input.value});input.value='';renderChatMessages();}
+function syncLocationAndWeather(){showToast('Syncing location…');navigator.geolocation.getCurrentPosition(pos=>processLocationSuccess(pos.coords.latitude,pos.coords.longitude),()=>processLocationSuccess(38.6270,-90.1994));}
+function processLocationSuccess(lat,lon){const tempOpts=[58,68,74,82];const descOpts=["Clear vector condition","Overcast tactical cover","Light breeze","High barometric pressure flare"];const idx=Math.floor(Math.random()*descOpts.length);currentTelemetryContext={lat:parseFloat(lat).toFixed(4),lon:parseFloat(lon).toFixed(4),temp:tempOpts[idx],shortDesc:descOpts[idx]};document.getElementById('weather-badge').innerText='LIVE SYNCED';document.getElementById('weather-badge').style.background='rgba(16,185,129,0.2)';document.getElementById('weather-diagnostics').innerHTML=`📍 ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ ${currentTelemetryContext.shortDesc}`;document.getElementById('map-hud-desc').innerText=currentTelemetryContext.shortDesc;document.getElementById('map-hud-temp').innerText=`${currentTelemetryContext.temp}°F`;aiChatHistory.push({sender:'them',text:`📡 Synced: ${currentTelemetryContext.shortDesc}.`});updateMapWaypointMarker();showToast('Weather synced!');}
+function renderAiMessages(){const box=document.getElementById('ai-chat-stream-box');if(box){box.innerHTML=aiChatHistory.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join('');box.scrollTop=box.scrollHeight;}}
+function populateManualLureCategories(){const select=document.getElementById('manual-lure-category');if(!select)return;select.innerHTML=lureCategories.map(cat=>`<option value="${cat}">${cat}</option>`).join('');}
+function openManualLureModal(){populateManualLureCategories();document.getElementById('manual-lure-name').value='';document.getElementById('manual-lure-photo').value='';document.getElementById('manual-lure-photo-preview').style.backgroundImage='';document.getElementById('manual-lure-photo-preview').innerText='No photo selected';document.getElementById('manual-lure-notes').value='';document.getElementById('manual-lure-status').value='active';document.getElementById('manual-lure-suggestion').innerText='Pick a category and save.';manualPhotoSuggestion=null;document.getElementById('manual-lure-modal').classList.add('active');}
+function closeManualLureModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('manual-lure-modal').classList.remove('active');}
+function onManualCategoryChange(){const category=document.getElementById('manual-lure-category').value;document.getElementById('manual-lure-suggestion').innerText=manualPhotoSuggestion?`Looks like a ${manualPhotoSuggestion.label}.`:`Category: ${category}.`;}
+function handleManualLurePhotoInput(event){const file=event.target.files&&event.target.files[0];const preview=document.getElementById('manual-lure-photo-preview');if(!file){preview.style.backgroundImage='';preview.innerText='No photo selected';manualPhotoSuggestion=null;return;}const reader=new FileReader();reader.onload=function(e){preview.style.backgroundImage=`url('${e.target.result}')`;preview.innerText='';manualPhotoSuggestion={label:'Photo Lure',category:document.getElementById('manual-lure-category').value||'Other'};document.getElementById('manual-lure-suggestion').innerHTML=`Photo added!`;};reader.readAsDataURL(file);}
+function saveManualLure(){const category=document.getElementById('manual-lure-category').value||'Other';const exactName=document.getElementById('manual-lure-name').value.trim();const notes=document.getElementById('manual-lure-notes').value.trim();const status=document.getElementById('manual-lure-status').value;const photoPreview=document.getElementById('manual-lure-photo-preview').style.backgroundImage.replace(/^url\(["']?/,'').replace(/["']?\)$/,'');const nameToSave=exactName||(manualPhotoSuggestion?manualPhotoSuggestion.label:`${category} lure`);lures.unshift({id:'l_'+Date.now(),name:nameToSave,cost:6.99,qty:1,conditionBias:'clear',type:photoPreview?'image':'manual',category,img:photoPreview||'',purchaseUrl:`https://www.basspro.com/shop/SearchDisplay?searchTerm=${encodeURIComponent(exactName||category)}&storeId=10151&catalogId=10051&langId=-1&sType=SimpleSearch`,notes,status,bassProPrice:null,bassProUrl:null});localStorage.setItem('n_lures',JSON.stringify(lures));closeManualLureModal();refreshAllEcosystemModules();showToast('Lure added!');}
+function updateMapWaypointMarker(){if(!map||!currentTelemetryContext)return;const coords=[currentTelemetryContext.lat,currentTelemetryContext.lon];if(liveWaypointMarker){liveWaypointMarker.setLatLng(coords);}else{liveWaypointMarker=L.marker(coords,{icon:L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(map);}map.setView(coords,12);}
+function initMapSystem(){if(map){updateMapWaypointMarker();return;}map=L.map('full-map',{zoomControl:false}).setView([38.6270,-90.1994],11);L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);updateMapWaypointMarker();}
+function connectHardware(type){showToast(`Syncing ${type}…`);setTimeout(()=>{document.getElementById(type==='bobber'?'hw-bobber-status':'hw-fillet-status').innerHTML='🟢 Connected';showToast('Connected!');},400);}
+function refreshAllEcosystemModules(){renderGlobalLeaderboard();renderTournaments();renderCatchHistory();renderTackleMatrix();renderFriendsSystem();const lureSelect=document.getElementById('form-lure-link');if(lureSelect)lureSelect.innerHTML=lures.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');renderAiMessages();}
+function renderGlobalLeaderboard(){let myWeight=catches.reduce((acc,c)=>acc+parseFloat(c.weight||0),0);let boardList=[{name:'You',w:myWeight},...friends.map(f=>({name:f.name,w:f.totalWeight}))].sort((a,b)=>b.w-a.w);document.getElementById('global-leaderboard-deck').innerHTML=boardList.map((p,idx)=>`<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800;color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join('');}
+function renderTournaments(){document.getElementById('tournament-deck').innerHTML=tournaments.map(t=>`<div class="card" style="margin:0 0 10px 0;background:rgba(31,41,55,0.45)"><div style="font-size:13px;font-weight:800;color:#fff;">🏆 ${t.name}</div></div>`).join('');}
+function createNewTournament(){const name=document.getElementById('t-name-input').value.trim()||'Untitled Tournament';tournaments.push({id:'t_'+Date.now(),name,leaderboard:[{name:'You',points:0}]});localStorage.setItem('n_tourneys',JSON.stringify(tournaments));showToast('Tournament created!');refreshAllEcosystemModules();switchScreen('dashboard');}
+function commitCatchLog(e){e.preventDefault();const spec=document.getElementById('form-species').value;const w=parseFloat(document.getElementById('form-weight').value)||0;catches.unshift({species:spec,weight:w});document.getElementById('catch-form').reset();showToast('Catch logged!');localStorage.setItem('n_catches',JSON.stringify(catches));refreshAllEcosystemModules();switchScreen('dashboard');}
+function renderCatchHistory(){const el=document.getElementById('dashboard-catch-list');if(!el)return;el.innerHTML=catches.map(c=>`<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div>${(c.weight||0).toFixed(2)} lbs</div></div>`).join('');}
+window.onload=function(){refreshAllEcosystemModules();};
 </script>
 </body>
 </html>
