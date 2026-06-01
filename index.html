@@ -1,5 +1,4 @@
-````html
-<!-- ...existing code... -->
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-/* ...existing styles... (kept from original) */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --bg:#0a0f1d; --bg2:#111827; --bg3:#1f2937; --bg4:#374151; --border:rgba(255,255,255,0.08);
@@ -65,8 +63,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .chat-input-row{display:flex;border-top:1px solid var(--border);background:var(--bg2);z-index:30}
 .chat-input-row input{flex:1;background:transparent;border:none;padding:12px 16px;color:var(--text);font-size:13px;outline:none}
 .hw-item-card{display:flex;align-items:center;gap:14px;background:rgba(31,41,55,0.45);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;position:relative}
-.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;position:relative}
-.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 200px);margin:0 16px;padding-bottom: calc(var(--nav-h) + 12px);} /* ensure content not obscured by bottom nav */
+.hw-svg-thumb{width:56px;height:56px;border-radius:8px;background:#151e2e;border:1px solid rgba(255,255,255,0.1);padding:4px;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;background-color:#090f18;position:relative}
+.ai-chat-window{display:flex;flex-direction:column;height:calc(100dvh - var(--hdr-h) - var(--nav-h) - 200px);margin:0 16px;padding-bottom: calc(var(--nav-h) + 12px);}
 .split-species-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .scan-actions-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
 .btn-scan{background:rgba(6,182,212,0.15);border:1px dashed var(--primary);color:#fff;font-size:11px;padding:10px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;transition:background .2s}
@@ -100,23 +98,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 .status-active{background:rgba(16,185,129,0.18);color:#10b981}
 .status-lost{background:rgba(244,63,94,0.18);color:#f43f5e}
 .status-broken{background:rgba(248,113,113,0.18);color:#f87171}
-
-/* ADDED: ensure AI message stream never slides under the input row */
-#ai-chat-stream-box{
-  padding-bottom: calc(var(--nav-h) + 110px); /* safe space for sticky input + nav */
-}
-/* ensure the input sits above the stream and is visually separate */
-#ai-chat-input-row{
-  position:sticky;
-  bottom:calc(var(--nav-h) + 8px);
-  z-index:120;
-  background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));
-  border-top:1px solid var(--border);
-  padding:8px 12px;
-  gap:8px;
-  display:flex;
-  align-items:center;
-}
+#ai-chat-stream-box{padding-bottom: calc(var(--nav-h) + 110px);}
+#ai-chat-input-row{position:sticky;bottom:calc(var(--nav-h) + 8px);z-index:120;background:linear-gradient(180deg, rgba(17,24,39,0.98), rgba(17,24,39,0.98));border-top:1px solid var(--border);padding:8px 12px;gap:8px;display:flex;align-items:center}
 #ai-chat-input-row input{flex:1;padding:10px 12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);outline:none;font-size:13px}
 #ai-chat-input-row button{padding:10px 14px;border-radius:10px}
 </style>
@@ -141,7 +124,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   </div>
 </div>
 
-<!-- Settings / modals (unchanged) -->
 <div id="settings-modal" class="modal-overlay" onclick="closeSettingsModal(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
     <h3 style="margin-bottom:12px;font-weight:800;display:flex;align-items:center;gap:8px;">⚙️ System Calibration</h3>
@@ -239,7 +221,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
   </header>
 
   <main style="flex:1;position:relative;">
-    <!-- Dashboard / other screens (unchanged) -->
     <div id="screen-dashboard" class="screen active">
       <div class="section-label" style="margin-top:8px;">🏆 Global Daily Leaderboard</div>
       <div style="padding:0 16px;" id="global-leaderboard-deck"></div>
@@ -386,24 +367,18 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
       <div class="section-label">🤖 AI Inventory Advisor</div>
       <div class="card" style="margin-bottom:10px;">
-        <div style="font-size:12px;color:var(--text2);line-height:1.5;">Inventory is the source of truth. The AI only recommends from lures you already own, and will tell you when your current box doesn't have a strong option.</div>
-      </div>
-      <div class="card" style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div style="font-size:13px;font-weight:800;color:#fff;">📡 Environmental Sensors Telemetry</div>
           <span id="weather-badge" style="font-size:10px;font-weight:800;background:rgba(245,158,11,0.2);color:var(--accent3);padding:2px 8px;border-radius:10px;">STANDBY</span>
         </div>
-        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.4;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
+        <p id="weather-diagnostics" style="font-size:12px;color:var(--text2);line-height:1.5;">Ecosystem missing coordinates. Click the header ⚙️ gear icon to synchronize live arrays.</p>
       </div>
 
-      <!-- AI chat panel -->
       <div class="ai-chat-window card" id="ai-chat-card">
-        <!-- chat window is scrollable area only -->
         <div class="chat-window" style="height:100%; display:flex; flex-direction:column;">
           <div class="chat-stream" id="ai-chat-stream-box"></div>
         </div>
 
-        <!-- input moved OUTSIDE the scrollable stream so messages always remain above it -->
         <div class="chat-input-row" id="ai-chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchAiMessage();}">
           <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What should I throw from my tackle box?'" />
           <button class="btn btn-primary" style="width:auto;border-radius:10px;padding:10px 16px;" onclick="dispatchAiMessage()">Query</button>
@@ -434,8 +409,6 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 </div>
 
 <script>
-/* ...existing code... */
-/* Core state (mostly unchanged) */
 const lureCategories=['Crankbait','Swimbait','Jig','Spinnerbait','Topwater','Soft Plastic','Other'];
 let catches=JSON.parse(localStorage.getItem('n_catches'))||[];
 let lures=JSON.parse(localStorage.getItem('n_lures'))||[
@@ -458,7 +431,6 @@ let liveWaypointMarker=null;
 let currentTelemetryContext=null;
 let manualPhotoSuggestion=null;
 
-/* Helpers */
 function showToast(m){ const t=document.getElementById('toast'); t.innerHTML=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 function initAppCore(){ document.getElementById('auth-wrap').style.display='none'; showToast('Ecosystem Gateway Unlocked'); refreshAllEcosystemModules(); }
 function openSettingsModal(){ document.getElementById('settings-modal').classList.add('active'); }
@@ -476,7 +448,6 @@ function switchScreen(screenId){
   if(screenId==='ai'){ document.querySelectorAll('.nav-item')[5].classList.add('active'); renderAiMessages(); }
 }
 
-/* Category normalization (unchanged) */
 function normalizeCategory(category){
   if(!category) return 'Other';
   const normalized=category.toLowerCase();
@@ -489,56 +460,93 @@ function normalizeCategory(category){
   return 'Other';
 }
 
-/* Simple image color analysis: load image, sample pixels, compute average RGB then map to color name */
-function getDominantColorFromImage(url, sampleStep=8, maxSize=240){
-  return new Promise((resolve)=>{
-    if(!url){ resolve(null); return; }
-    const img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const scale=Math.min(1, maxSize / Math.max(img.width, img.height));
-      canvas.width=Math.max(10, Math.floor(img.width*scale));
-      canvas.height=Math.max(10, Math.floor(img.height*scale));
-      const ctx=canvas.getContext('2d');
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-      let r=0,g=0,b=0,count=0;
-      for(let y=0;y<canvas.height;y+=sampleStep){
-        for(let x=0;x<canvas.width;x+=sampleStep){
-          const idx=((y*canvas.width)+x)*4;
-          const alpha=data[idx+3];
-          if(alpha<125) continue;
-          r+=data[idx]; g+=data[idx+1]; b+=data[idx+2]; count++;
+function getDominantColorFromImage(url, sampleStep = 6, maxSize = 220) {
+  return new Promise((resolve) => {
+    if (!url) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      canvas.width = Math.max(12, Math.floor(img.width * scale));
+      canvas.height = Math.max(12, Math.floor(img.height * scale));
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      const palette = {
+        red: [220, 40, 40],
+        orange: [235, 130, 45],
+        yellow: [230, 205, 55],
+        green: [60, 160, 65],
+        teal: [35, 145, 145],
+        blue: [50, 110, 205],
+        purple: [145, 75, 185],
+        brown: [150, 95, 55],
+        gray: [125, 125, 125],
+        black: [25, 25, 25],
+        white: [245, 245, 245]
+      };
+
+      const counts = Object.fromEntries(Object.keys(palette).map((key) => [key, 0]));
+      let total = 0;
+
+      for (let y = 0; y < canvas.height; y += sampleStep) {
+        for (let x = 0; x < canvas.width; x += sampleStep) {
+          const idx = (y * canvas.width + x) * 4;
+          const alpha = data[idx + 3];
+          if (alpha < 120) continue;
+
+          const r = data[idx];
+          const g = data[idx + 1];
+          const b = data[idx + 2];
+
+          let bestName = null;
+          let bestDist = Infinity;
+          for (const [name, rgb] of Object.entries(palette)) {
+            const dr = r - rgb[0];
+            const dg = g - rgb[1];
+            const db = b - rgb[2];
+            const dist = dr * dr + dg * dg + db * db;
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestName = name;
+            }
+          }
+
+          if (bestName) {
+            counts[bestName]++;
+            total++;
+          }
         }
       }
-      if(count===0){ resolve(null); return; }
-      r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count);
-      const max=Math.max(r,g,b), min=Math.min(r,g,b);
-      const chroma=max-min;
-      const brightness=(r+g+b)/3;
-      let color='neutral';
-      if(chroma<20){
-        if(brightness>200) color='white';
-        else if(brightness<60) color='black';
-        else color='gray';
-      } else {
-        if(r>g && r>b){
-          if(g> b) color='orange'; else color='red';
-        } else if(g>r && g>b){
-          if(r> b) color='chartreuse'; else color='green';
-        } else if(b>r && b>g){
-          color='blue';
-        } else color='brown';
+
+      if (total === 0) { resolve(null); return; }
+
+      const sorted = Object.entries(counts)
+        .filter(([, count]) => count > 0)
+        .sort((a, b) => b[1] - a[1]);
+
+      const [topName, topCount] = sorted[0];
+      const second = sorted[1];
+      let color = topName;
+      if (second && second[1] / topCount >= 0.35 && topName !== second[0]) {
+        color = `${topName}/${second[0]}`;
       }
-      resolve({r,g,b,color,brightness});
+
+      const brightness = sorted.reduce((sum, [name, count]) => {
+        const rgb = palette[name];
+        const lum = (rgb[0] + rgb[1] + rgb[2]) / 3;
+        return sum + lum * count;
+      }, 0) / total;
+
+      resolve({ color, brightness, counts, total });
     };
-    img.onerror=()=>resolve(null);
-    img.src=url;
+    img.onerror = () => resolve(null);
+    img.src = url;
   });
 }
 
-/* Enhanced async scoring uses image color analysis + telemetry */
 async function scoreLureSuitabilityAsync(lure, context){
   if(!lure || lure.status !== 'active' || lure.qty <= 0) return -1;
   const category = normalizeCategory(lure.category);
@@ -579,7 +587,6 @@ async function scoreLureSuitabilityAsync(lure, context){
   }
 
   if((lure.conditionBias || '').toLowerCase().includes('overcast') && desc.includes('overcast')) score += 6;
-
   score += Math.min(lure.qty, 3) * 2;
 
   if(lure.img){
@@ -587,13 +594,13 @@ async function scoreLureSuitabilityAsync(lure, context){
     if(colorInfo && colorInfo.color){
       const c = colorInfo.color;
       if(desc.includes('overcast')){
-        if(c==='white' || c==='chartreuse' || c==='orange' || c==='red') score += 10;
-        if(c==='green' || c==='blue') score += 4;
+        if(c.includes('white')||c.includes('chartreuse')||c.includes('orange')||c.includes('red')) score += 10;
+        if(c.includes('green')||c.includes('blue')) score += 4;
       } else if(desc.includes('clear')){
-        if(c==='brown' || c==='green' || c==='blue') score += 10;
-        if(c==='white' || c==='chartreuse') score += 2;
+        if(c.includes('brown')||c.includes('green')||c.includes('blue')) score += 10;
+        if(c.includes('white')||c.includes('chartreuse')) score += 2;
       } else {
-        if(c==='chartreuse' || c==='white' || c==='green') score += 6;
+        if(c.includes('chartreuse')||c.includes('white')||c.includes('green')) score += 6;
       }
       if(colorInfo.brightness > 200 && desc.includes('overcast')) score += 3;
       if(colorInfo.brightness < 80 && desc.includes('clear')) score += 3;
@@ -605,7 +612,6 @@ async function scoreLureSuitabilityAsync(lure, context){
   return score;
 }
 
-/* Recommender now async, inventory-first, image-checks, and explicit messages when images missing */
 async function recommendBestLureForConditions(){
   if(!currentTelemetryContext) return null;
   const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
@@ -653,18 +659,17 @@ async function recommendBestLureForConditions(){
   return {best: best.lure, explanation, top3};
 }
 
-/* Dispatch AI message: now async, checks images and will prompt to capture missing images */
 async function dispatchAiMessage(){
-  const input = document.getElementById('ai-chat-message-input');
-  const queryText = input.value.trim();
+  const input=document.getElementById('ai-chat-message-input');
+  const queryText=input.value.trim();
   if(!queryText) return;
   aiChatHistory.push({sender:'me',text:queryText});
   input.value='';
   renderAiMessages();
 
   setTimeout(async ()=>{
-    const lower = queryText.toLowerCase();
-    if(lower.includes('throw') || lower.includes('use') || lower.includes('recommend') || lower.includes('best')){
+    const lower=queryText.toLowerCase();
+    if(lower.includes('throw')||lower.includes('use')||lower.includes('recommend')||lower.includes('best')){
       if(!currentTelemetryContext){
         aiChatHistory.push({sender:'them',text:"⚠️ Inventory AI is ready, but weather/location sync is required. Sync your telemetry to get a recommendation from the lures you already own."});
         renderAiMessages();
@@ -682,12 +687,12 @@ async function dispatchAiMessage(){
       }
 
       const recommendation = await recommendBestLureForConditions();
-      if(!recommendation || !recommendation.best){
+      if(!recommendation||!recommendation.best){
         aiChatHistory.push({sender:'them',text:`📦 <b>Inventory-first advice:</b> ${recommendation ? recommendation.explanation : 'No recommendation available.'}`});
       } else {
         let message = `📦 <b>Best lure you own for today:</b> ${recommendation.best.name} (${recommendation.best.category}).<br/>Reason: ${recommendation.explanation}`;
-        if(recommendation.top3 && recommendation.top3.length > 1){
-          const extras = recommendation.top3.slice(1).map(l => `${l.name} (${l.category})`).join(', ');
+        if(recommendation.top3&&recommendation.top3.length>1){
+          const extras = recommendation.top3.slice(1).map(l=>`${l.name} (${l.category})`).join(', ');
           message += `<br/><small style="color:var(--text2)">Also strong from your box: ${extras}.</small>`;
         }
         aiChatHistory.push({sender:'them',text:message});
@@ -699,7 +704,6 @@ async function dispatchAiMessage(){
   },300);
 }
 
-/* Camera + inline-override behavior (unchanged but used to attach photos to missing lures) */
 async function bootOpticalSystem(mode,optionalLureId=null){
   opticalScanMode=mode;
   targetOverrideLureId=optionalLureId;
@@ -789,7 +793,6 @@ function executeManualCaptureSnapshot(){
   },400);
 }
 
-/* Barcode processing (unchanged) */
 function processBarcodeValue(barcodeRawString, scanFormat=''){
   showToast('Storing barcode entry...');
   const resolved={productName:'Scanned Tackle Lure',purchaseUrl:`https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(barcodeRawString)}`};
@@ -812,24 +815,20 @@ function processBarcodeValue(barcodeRawString, scanFormat=''){
   showToast('Barcode saved. You can still edit details manually.');
 }
 
-/* Inventory management (unchanged) */
 function modifyQuantity(lureId,change){ const t=lures.find(l=>l.id===lureId); if(t){ t.qty+=change; if(t.qty<0) t.qty=0; localStorage.setItem('n_lures',JSON.stringify(lures)); refreshAllEcosystemModules(); } }
 function openTrashModal(lureId){ pendingTrashLureId=lureId; const lure=lures.find(l=>l.id===lureId); const text=lure?`Would you like to remove "${lure.name}" from your tackle box or repurchase it at BassPro.com?`:'Would you like to remove this item?'; document.getElementById('trash-modal-text').innerText=text; document.getElementById('trash-modal').classList.add('active'); }
 function cancelTrashPrompt(e){ if(e && e.target !== e.currentTarget) return; pendingTrashLureId=null; document.getElementById('trash-modal').classList.remove('active'); }
 function confirmRemoveLure(){ if(!pendingTrashLureId) return; lures=lures.filter(l=>l.id!==pendingTrashLureId); pendingTrashLureId=null; localStorage.setItem('n_lures',JSON.stringify(lures)); document.getElementById('trash-modal').classList.remove('active'); showToast('Item removed from tackle box.'); refreshAllEcosystemModules(); }
 function repurchaseLure(){ if(!pendingTrashLureId) return; window.open('https://www.basspro.com', '_blank'); pendingTrashLureId=null; document.getElementById('trash-modal').classList.remove('active'); showToast('Opening BassPro home page.'); }
 
-/* Friends / chat (unchanged) */
 function registerNewFriendById(){ const input=document.getElementById('new-friend-id'); const lookupId=input.value.trim().toUpperCase(); if(!lookupId) return; if(lookupId===myUniqueTacticalId) return showToast("Cannot link routing node to yourself."); if(friends.find(f=>f.id===lookupId)) return showToast("Mesh channel active."); const newPeer={id:lookupId,name:'Angler_'+Math.floor(10+Math.random()*89),totalWeight:8.5,score:40}; friends.push(newPeer); input.value=''; showToast('Linked Peer Node Successfully!'); selectedFriendId=lookupId; localStorage.setItem('n_friends',JSON.stringify(friends)); refreshAllEcosystemModules(); }
 function renderFriendsSystem(){ document.getElementById('my-unique-id-badge').innerText=myUniqueTacticalId; const container=document.getElementById('friends-list-container'); if(!container) return; container.innerHTML=friends.map(f=>`<div class="leader-row" style="cursor:pointer;border-color:${f.id===selectedFriendId?'var(--primary)': 'var(--border)'}" onclick="selectedFriendId='${f.id}'; renderFriendsSystem();"><div>🟢 <b>${f.name}</b> <span style="font-size:10px;color:var(--text3);">[${f.id}]</span></div><div style="font-size:11px;color:var(--primary);font-weight:600;">Chat</div></div>`).join(''); const activeF=friends.find(f=>f.id===selectedFriendId); if(activeF){ document.getElementById('active-chat-target-lbl').innerText=`Target Node: @${activeF.name}`; renderChatMessages(); } }
 function renderChatMessages(){ const box=document.getElementById('chat-stream-box'); const history=chatHistories[selectedFriendId]||[{sender:'them',text:'Telemetry linked.'}]; box.innerHTML=history.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight; }
 function dispatchMessage(){ const input=document.getElementById('chat-message-input'); if(!input.value.trim()) return; if(!chatHistories[selectedFriendId]) chatHistories[selectedFriendId]=[]; chatHistories[selectedFriendId].push({sender:'me',text:input.value}); input.value=''; renderChatMessages(); }
 
-/* Weather/location sync (unchanged) */
 function syncLocationAndWeather(){ showToast('Pinging tracking arrays...'); navigator.geolocation.getCurrentPosition(pos=>processLocationSuccess(pos.coords.latitude,pos.coords.longitude),()=>processLocationSuccess(38.6270,-90.1994)); }
 function processLocationSuccess(lat,lon){ const tempOpts=[58,68,74,82]; const descOpts=["Clear vector condition","Overcast tactical cover","Light breeze","High barometric pressure flare"]; const randomIdx=Math.floor(Math.random()*descOpts.length); currentTelemetryContext={lat:parseFloat(lat).toFixed(4),lon:parseFloat(lon).toFixed(4),temp:tempOpts[randomIdx],shortDesc:descOpts[randomIdx]}; document.getElementById('weather-badge').innerText='LIVE SYNCED'; document.getElementById('weather-badge').style.background='rgba(16,185,129,0.2)'; document.getElementById('weather-diagnostics').innerHTML=`📍 Coordinates: ${currentTelemetryContext.lat}°N, ${currentTelemetryContext.lon}°W<br/>🌤️ Telemetry Status: ${currentTelemetryContext.shortDesc}`; document.getElementById('map-hud-desc').innerText=currentTelemetryContext.shortDesc; document.getElementById('map-hud-temp').innerText=`${currentTelemetryContext.temp}°F`; aiChatHistory.push({sender:'them',text:`📡 <b>Ecosystem Matrix Sync:</b> Parameters aligned to coordinates with profile: <i>${currentTelemetryContext.shortDesc}</i>.`}); updateMapWaypointMarker(); showToast('Weather Array Handshake Complete!'); }
 
-/* Rendering functions (tackle rendering updated to show missing-image badge) */
 function renderTackleMatrix(){
   let val=lures.reduce((acc,l)=>acc+(l.cost*l.qty),0);
   const gridEl=document.getElementById('fin-active-val'); if(gridEl) gridEl.innerText=`$${val.toFixed(2)}`;
@@ -844,10 +843,8 @@ function renderTackleMatrix(){
     return `<div class="tackle-box-card" style="position:relative;">${imgMissingBadge}${mediaHeader}<div class="tackle-card-body"><div><div style="font-size:9px;font-weight:800;color:var(--primary);text-transform:uppercase;margin-bottom:2px;font-family:monospace;line-height:1.1;display:block;max-height:22px;overflow:hidden;" title="${l.category}">${l.category||'Unassigned'}</div><div style="font-size:12px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${l.name}">${l.name}</div><div class="status-pill ${statusClass}" style="margin-top:4px;">${l.status}</div>${noteText}</div><div class="tackle-tally-row"><span style="font-size:11px;color:var(--primary);font-weight:600;">Qty: <b style="color:#fff;">${l.qty}</b></span><div style="display:flex;gap:4px;"><button class="tally-btn" onclick="modifyQuantity('${l.id}',-1)">-</button><button class="tally-btn" onclick="modifyQuantity('${l.id}',1)">+</button><button class="tally-btn" onclick="openTrashModal('${l.id}')" title="Remove">🗑</button></div></div></div></div>`}).join('');
 }
 
-/* AI message rendering */
 function renderAiMessages(){ const box=document.getElementById('ai-chat-stream-box'); if(box){ box.innerHTML=aiChatHistory.map(m=>`<div class="msg-b ${m.sender}">${m.text}</div>`).join(''); box.scrollTop=box.scrollHeight; } }
 
-/* Manual lure quick-add (unchanged logic) */
 function populateManualLureCategories(){ const select=document.getElementById('manual-lure-category'); if(!select) return; select.innerHTML=lureCategories.map(cat=>`<option value="${cat}">${cat}</option>`).join(''); }
 function openManualLureModal(){ populateManualLureCategories(); document.getElementById('manual-lure-name').value=''; document.getElementById('manual-lure-photo').value=''; document.getElementById('manual-lure-photo-preview').style.backgroundImage=''; document.getElementById('manual-lure-photo-preview').innerText='No photo selected'; document.getElementById('manual-lure-notes').value=''; document.getElementById('manual-lure-status').value='active'; document.getElementById('manual-lure-suggestion').innerText='Pick a category, then save quickly or add a photo for smarter suggestions.'; manualPhotoSuggestion=null; document.getElementById('manual-lure-modal').classList.add('active'); }
 function closeManualLureModal(e){ if(e&&e.target!==e.currentTarget) return; document.getElementById('manual-lure-modal').classList.remove('active'); }
@@ -855,29 +852,22 @@ function onManualCategoryChange(){ const category=document.getElementById('manua
 function handleManualLurePhotoInput(event){ const file=event.target.files && event.target.files[0]; const preview=document.getElementById('manual-lure-photo-preview'); const suggestionEl=document.getElementById('manual-lure-suggestion'); if(!file){ preview.style.backgroundImage=''; preview.innerText='No photo selected'; manualPhotoSuggestion=null; onManualCategoryChange(); return; } const reader=new FileReader(); reader.onload=function(e){ const imageDataUrl=e.target.result; preview.style.backgroundImage=`url('${imageDataUrl}')`; preview.innerText=''; manualPhotoSuggestion={label:'Photo Lure',category:document.getElementById('manual-lure-category').value||'Other',match:'Auto-scan available'}; suggestionEl.innerHTML=`Looks like a <b>${manualPhotoSuggestion.label}</b>. ${manualPhotoSuggestion.match}`; }; reader.readAsDataURL(file); }
 function saveManualLure(){ const category=document.getElementById('manual-lure-category').value || 'Other'; const exactName=document.getElementById('manual-lure-name').value.trim(); const notes=document.getElementById('manual-lure-notes').value.trim(); const status=document.getElementById('manual-lure-status').value; const photoPreview=document.getElementById('manual-lure-photo-preview').style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, ''); const nameToSave = exactName || (manualPhotoSuggestion ? manualPhotoSuggestion.label : `${category} lure`); lures.unshift({ id:'l_'+Date.now(), name:nameToSave, cost:6.99, qty:1, conditionBias:'clear', type: photoPreview ? 'image' : 'manual', category, img: photoPreview || '', purchaseUrl:`https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(exactName || category)}`, notes, status }); localStorage.setItem('n_lures',JSON.stringify(lures)); closeManualLureModal(); refreshAllEcosystemModules(); showToast('Lure added quickly to your tackle box.'); }
 
-/* Map system (unchanged) */
 function updateMapWaypointMarker(){ if(!map||!currentTelemetryContext) return; const coords=[currentTelemetryContext.lat,currentTelemetryContext.lon]; if(liveWaypointMarker){ liveWaypointMarker.setLatLng(coords); } else { const pulsingIcon=L.divIcon({className:'cyan-pulse-marker',iconSize:[16,16],iconAnchor:[8,8]}); liveWaypointMarker=L.marker(coords,{icon: pulsingIcon}).addTo(map); } map.setView(coords,12); }
 function initMapSystem(){ if(map){ updateMapWaypointMarker(); return; } map=L.map('full-map',{zoomControl:false}).setView([38.6270,-90.1994],11); L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map); updateMapWaypointMarker(); }
 
-/* Hardware connect (unchanged) */
 function connectHardware(type){ showToast(`Bluetooth syncing ${type}...`); setTimeout(()=>{ const elId=type==='bobber'?'hw-bobber-status':'hw-fillet-status'; document.getElementById(elId).innerHTML='🟢 Connected & Mapped'; showToast('Hardware Sync Confirmed!'); },400); }
 
-/* Refresh all modules */
 function refreshAllEcosystemModules(){ renderGlobalLeaderboard(); renderTournaments(); renderCatchHistory(); renderTackleMatrix(); renderFriendsSystem(); const lureSelect=document.getElementById('form-lure-link'); if(lureSelect) lureSelect.innerHTML=lures.map(l=>`<option value="${l.id}">${l.name}</option>`).join(''); renderAiMessages(); }
 
-/* Leaderboard and tournaments (unchanged) */
 function renderGlobalLeaderboard(){ let myWeight=catches.reduce((acc,c)=>acc+parseFloat(c.weight||0),0); let boardList=[{name:'You (Node)',w:myWeight},...friends.map(f=>({name:f.name,w:f.totalWeight}))].sort((a,b)=>b.w-a.w); document.getElementById('global-leaderboard-deck').innerHTML=boardList.map((p,idx)=>`<div class="leader-row"><div>🎯 ${idx+1}. <b>${p.name}</b></div><div style="font-weight:800;color:var(--primary);">${p.w.toFixed(2)} lbs</div></div>`).join(''); }
 function renderTournaments(){ document.getElementById('tournament-deck').innerHTML=tournaments.map(t=>`<div class="card" style="margin:0 0 10px 0;background:rgba(31,41,55,0.45)"><div style="font-size:13px;font-weight:800;color:#fff;">🏆 ${t.name}</div></div>`).join(''); }
 function createNewTournament(){ const name=document.getElementById('t-name-input').value.trim()||'Untitled Tournament'; tournaments.push({id:'t_'+Date.now(),name,leaderboard:[{name:'You',points:0}]}); localStorage.setItem('n_tourneys',JSON.stringify(tournaments)); showToast('Tournament created.'); refreshAllEcosystemModules(); switchScreen('dashboard'); }
 
-/* Catch log (unchanged) */
 function commitCatchLog(e){ e.preventDefault(); const spec=document.getElementById('form-species').value; const w=parseFloat(document.getElementById('form-weight').value)||0; catches.unshift({species:spec,weight:w}); document.getElementById('catch-form').reset(); showToast('Entry Logged!'); localStorage.setItem('n_catches',JSON.stringify(catches)); refreshAllEcosystemModules(); switchScreen('dashboard'); }
 function renderCatchHistory(){ const el=document.getElementById('dashboard-catch-list'); if(!el) return; el.innerHTML=catches.map(c=>`<div class="leader-row"><div>🐟 <b>${c.species}</b></div><div>${(c.weight||0).toFixed(2)} lbs</div></div>`).join(''); }
 
-/* Initial load */
 window.onload=function(){ refreshAllEcosystemModules(); }
 </script>
 </body>
 </html>
-...existing code...
-````
+```
