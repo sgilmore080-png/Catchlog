@@ -630,11 +630,11 @@ function repurchaseLure(){
   const lure=lures.find(l=>l.id===pendingTrashLureId);
   if(!lure) return;
   const searchTerm = lure.category || lure.name;
-  const url = getBassProSearchUrl(searchTerm);
+  const url = `https://www.basspro.com/search/results.html?searchInput=${encodeURIComponent(searchTerm)}`;
   window.open(url,'_blank');
   pendingTrashLureId=null;
   document.getElementById('trash-modal').classList.remove('active');
-  showToast('Opening BassPro.com for repurchase.');
+  showToast('Opening BassPro.com with the lure category pre-filled.');
 }
 
 function registerNewFriendById(){
