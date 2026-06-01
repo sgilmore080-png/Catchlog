@@ -292,7 +292,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 
     <div id="screen-friends" class="screen">
       <div class="card" style="background:linear-gradient(135deg,rgba(6,182,212,0.1),transparent);text-align:center;">
-        <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Your Unique Tactical ID</div>
+        <div style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your Unique Tactical ID</div>
         <div id="my-unique-id-badge" style="font-size:22px;font-weight:900;color:var(--primary);letter-spacing:1px;margin:4px 0 2px;">CL-XXXXX</div>
       </div>
       <div class="section-label">Link Angler ID Token</div>
@@ -364,7 +364,10 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
     </div>
 
     <div id="screen-ai" class="screen" style="display:flex;flex-direction:column;padding-top:0;">
-      <div class="section-label">🤖 AI Core Weather Matrix Console</div>
+      <div class="section-label">🤖 AI Inventory Advisor</div>
+      <div class="card" style="margin-bottom:10px;">
+        <div style="font-size:12px;color:var(--text2);line-height:1.5;">Inventory is the source of truth. The AI only recommends from lures you already own, and will tell you when your current box doesn't have a strong option.</div>
+      </div>
       <div class="card" style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div style="font-size:13px;font-weight:800;color:#fff;">📡 Environmental Sensors Telemetry</div>
@@ -376,7 +379,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
         <div class="chat-window" style="height:100%;">
           <div class="chat-stream" id="ai-chat-stream-box"></div>
           <div class="chat-input-row" onkeydown="if(event.key==='Enter'){event.preventDefault();dispatchAiMessage();}">
-            <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What lure should I use?'..."/>
+            <input type="text" id="ai-chat-message-input" placeholder="Ask AI: 'What should I throw from my tackle box?'" />
             <button class="btn btn-primary" style="width:auto;border-radius:0;padding:0 20px;" onclick="dispatchAiMessage()">Query</button>
           </div>
         </div>
@@ -426,7 +429,7 @@ let myUniqueTacticalId=localStorage.getItem('my_unique_id')||('CL-'+Math.floor(1
 localStorage.setItem('my_unique_id',myUniqueTacticalId);
 let tournaments=JSON.parse(localStorage.getItem('n_tourneys'))||[{id:'t_default',name:'Pro Angler Summer Open',leaderboard:[{name:'You',points:0},{name:'BassMaster_Jim',points:45}]}];
 let chatHistories={};
-let aiChatHistory=[{sender:'them',text:"Welcome to your AI Tactical Advisory Node. If you want a strategy setup recommendation, ask me: <b>'What lure should I use?'</b>"}];
+let aiChatHistory=[{sender:'them',text:"Welcome to your AI Tactical Advisory Node. If you want a strategy setup recommendation, ask me: <b>'What should I throw from my tackle box?'</b>"}];
 let selectedFriendId='CL-81042';
 let activeMediaStream=null;
 let opticalScanMode=null;
@@ -494,7 +497,7 @@ function onManualCategoryChange(){
   if(manualPhotoSuggestion){
     suggestionEl.innerText=`Looks like a ${manualPhotoSuggestion.label}. Best fit category: ${manualPhotoSuggestion.category}.`;
   } else {
-    suggestionEl.innerText=`Quick entry will use category ${category}. Photo helps confirm if you want.`;
+    suggestionEl.innerText=`Quick entry will use category ${category}. Save fast and your box becomes smarter for recommendations.`;
   }
 }
 
@@ -656,7 +659,7 @@ function executeManualCaptureSnapshot(){
       document.getElementById('manual-lure-photo-preview').style.backgroundImage=`url('${snapshot}')`;
       document.getElementById('manual-lure-photo-preview').innerText='';
       manualPhotoSuggestion={label:classification.name, category:classification.category, match:`Possible match: ${classification.name}`};
-      document.getElementById('manual-lure-suggestion').innerHTML=`Looks like a <b>${classifications.name}</b>. ${manualPhotoSuggestion.match}`;
+      document.getElementById('manual-lure-suggestion').innerHTML=`Looks like a <b>${classification.name}</b>. ${manualPhotoSuggestion.match}`;
       document.getElementById('manual-lure-category').value=classification.category;
       showToast(`Detected ${classification.name}`);
     } else if(opticalScanMode==='inline-override'){
@@ -773,34 +776,81 @@ function processLocationSuccess(lat,lon){
   showToast('Weather Array Handshake Complete!');
 }
 
+function scoreLureSuitability(lure, context){
+  if(!lure || lure.status !== 'active' || lure.qty <= 0) return -1;
+  const category = normalizeCategory(lure.category);
+  const desc = (context.shortDesc || '').toLowerCase();
+  const temp = parseFloat(context.temp) || 70;
+  let score = 0;
+
+  if(desc.includes('overcast')){
+    if(category === 'Spinnerbait') score += 28;
+    if(category === 'Jig') score += 24;
+    if(category === 'Soft Plastic') score += 20;
+    if(category === 'Crankbait') score += 16;
+    if(category === 'Swimbait') score += 12;
+    if(category === 'Topwater') score += 10;
+  } else if(desc.includes('clear')){
+    if(category === 'Topwater') score += 28;
+    if(category === 'Crankbait') score += 24;
+    if(category === 'Swimbait') score += 20;
+    if(category === 'Soft Plastic') score += 16;
+    if(category === 'Spinnerbait') score += 12;
+    if(category === 'Jig') score += 10;
+  } else {
+    if(category === 'Crankbait') score += 22;
+    if(category === 'Soft Plastic') score += 18;
+    if(category === 'Jig') score += 16;
+    if(category === 'Spinnerbait') score += 14;
+    if(category === 'Swimbait') score += 12;
+    if(category === 'Topwater') score += 10;
+  }
+
+  if(temp <= 60){
+    if(category === 'Jig') score += 8;
+    if(category === 'Soft Plastic') score += 6;
+  }
+  if(temp >= 70){
+    if(category === 'Topwater') score += 8;
+    if(category === 'Swimbait') score += 6;
+  }
+
+  if((lure.conditionBias || '').toLowerCase().includes('overcast') && desc.includes('overcast')) score += 6;
+  score += Math.min(lure.qty, 3) * 2;
+  return score;
+}
+
 function recommendBestLureForConditions(){
-  if(!currentTelemetryContext || lures.length===0) return null;
-  const weather=currentTelemetryContext.shortDesc.toLowerCase();
-  const preferredOrder = weather.includes('overcast') ? ['Spinnerbait','Jig','Soft Plastic','Crankbait','Swimbait','Topwater'] : ['Topwater','Crankbait','Swimbait','Soft Plastic','Spinnerbait','Jig'];
-  const available=lures.filter(l=>l.status==='active' && l.qty>0);
-  if(available.length===0) return null;
-  available.sort((a,b)=>{
-    const idxA=preferredOrder.indexOf(normalizeCategory(a.category));
-    const idxB=preferredOrder.indexOf(normalizeCategory(b.category));
-    if(idxA!==idxB) return idxA-idxB;
-    return b.qty - a.qty;
-  });
-  const best=available[0];
-  const similar=available.filter(l=>normalizeCategory(l.category)===normalizeCategory(best.category) && l.id!==best.id);
-  let explanation=`Your current conditions are ${currentTelemetryContext.temp}°F with ${currentTelemetryContext.shortDesc}. `;
-  if(normalizeCategory(best.category)==='Topwater'){
-    explanation += `Surface action is strong, so a topwater lure is ideal for quick reaction strikes. `;
-  } else if(normalizeCategory(best.category)==='Crankbait'){
-    explanation += `Crankbaits work well when fish are active in mid-water, especially in ${currentTelemetryContext.shortDesc}. `;
-  } else {
-    explanation += `This category blends well with the current weather and gives you reliable coverage. `;
+  if(!currentTelemetryContext) return null;
+  const inventory = lures.filter(l => l.status === 'active' && l.qty > 0);
+  if(inventory.length === 0){
+    return {
+      best: null,
+      explanation: "Add a few lures from your tackle box to get personalized recommendations. Start with general types like a moving bait, soft plastic, or topwater for today’s conditions.",
+      top3: []
+    };
   }
-  if(similar.length>0){
-    explanation += `You also own ${similar.length} similar lure(s); this one is favored because it has the highest available quantity and likely gives the best chance on the first cast.`;
-  } else {
-    explanation += `It is the best available tackle from your current inventory.`;
+
+  const scored = inventory
+    .map(lure => ({ lure, score: scoreLureSuitability(lure, currentTelemetryContext) }))
+    .sort((a, b) => b.score - a.score || b.lure.qty - a.lure.qty);
+
+  const best = scored[0];
+  if(!best || best.score <= 0){
+    return {
+      best: null,
+      explanation: "You don’t currently have a good option for these conditions. Add a few more tackle types to your box and I'll recommend the best one you own.",
+      top3: scored.slice(0, 3).map(item => item.lure)
+    };
   }
-  return {lure:best, explanation};
+
+  const top3 = scored.slice(0, 3).map(item => item.lure);
+  let explanation = `This is the strongest option from your current tackle box, based on ${currentTelemetryContext.temp}°F and ${currentTelemetryContext.shortDesc}.`;
+  if(top3.length > 1){
+    explanation += ` Nearby alternatives in your box are ${top3.slice(1).map(l => l.name).join(', ')}.`;
+  }
+
+  return { best: best.lure, explanation, top3 };
 }
 
 function dispatchAiMessage(){
@@ -812,17 +862,24 @@ function dispatchAiMessage(){
   renderAiMessages();
   setTimeout(()=>{
     const lower=queryText.toLowerCase();
-    if(lower.includes('lure')||lower.includes('use')||lower.includes('recommend')||lower.includes('best')){
-      const recommendation=recommendBestLureForConditions();
+    if(lower.includes('throw') || lower.includes('use') || lower.includes('recommend') || lower.includes('best')){
       if(!currentTelemetryContext){
-        aiChatHistory.push({sender:'them',text:"⚠️ <b>Telemetry Offline:</b> Sync your weather and location data before asking for a targeted lure recommendation."});
-      } else if(!recommendation){
-        aiChatHistory.push({sender:'them',text:"🧰 <b>Inventory too light:</b> Add at least one active lure to your tackle box so I can recommend the right tool."});
+        aiChatHistory.push({sender:'them',text:"⚠️ Inventory AI is ready, but weather/location sync is required. Sync your telemetry to get a recommendation from the lures you already own."});
       } else {
-        aiChatHistory.push({sender:'them',text:`🤖 <b>Recommendation:</b> Use <b>${recommendation.lure.name}</b> (${recommendation.lure.category}) because ${recommendation.explanation}`});
+        const recommendation=recommendBestLureForConditions();
+        if(!recommendation.best){
+          aiChatHistory.push({sender:'them',text:`📦 <b>Inventory-first advice:</b> ${recommendation.explanation}`});
+        } else {
+          let message=`📦 <b>Best lure you own for today:</b> ${recommendation.best.name} (${recommendation.best.category}).<br/>Reason: ${recommendation.explanation}`;
+          if(recommendation.top3.length > 1){
+            const extras=recommendation.top3.slice(1).map(l => `${l.name} (${l.category})`).join(', ');
+            message += `<br/><small style="color:var(--text2)">Also strong from your box: ${extras}.</small>`;
+          }
+          aiChatHistory.push({sender:'them',text:message});
+        }
       }
     } else {
-      aiChatHistory.push({sender:'them',text:"Ask me what lure to use for current weather and location, and I'll recommend one from your own inventory."});
+      aiChatHistory.push({sender:'them',text:"Ask the AI what you should throw from your tackle box today, and I’ll choose only from the gear you already own."});
     }
     renderAiMessages();
   },300);
